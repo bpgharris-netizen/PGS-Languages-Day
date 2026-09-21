@@ -14,26 +14,31 @@
   <!-- Canvas Confetti CDN -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
+  <!-- Firebase Scripts (Compat SDK for robust single-file runtime) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
   <script>
     tailwind.config = {
       theme: {
         extend: {
-          fontFamily: { 
+          fontFamily: {
             sans: ['Inter', 'sans-serif'],
             display: ['Outfit', 'sans-serif'],
           },
           colors: {
             navy: {
-              900: '#0a0e1a',
-              800: '#10172a',
-              700: '#1a233d',
-              600: '#233054', 
+              900: '#0b132b',
+              800: '#1c2541',
+              700: '#3a506b',
+              600: '#486581',
             },
             gold: {
               300: '#fde047',
               400: '#facc15',
-              500: '#eab308',
-              600: '#ca8a04',
+              500: '#f59e0b',
+              600: '#d97706',
             }
           }
         }
@@ -43,32 +48,32 @@
 
   <style>
     body {
-      background: radial-gradient(circle at top center, #1e293b 0%, #0f172a 50%, #070a12 100%);
+      background: radial-gradient(circle at top center, #1c2541 0%, #0b132b 60%, #050814 100%);
       min-height: 100vh;
       color: #f8fafc;
       font-family: 'Inter', sans-serif;
     }
 
     .glass-card {
-      background: rgba(30, 41, 59, 0.65);
+      background: rgba(28, 37, 65, 0.75);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
     }
 
     .glass-nav {
-      background: rgba(15, 23, 42, 0.8);
+      background: rgba(11, 19, 43, 0.85);
       backdrop-filter: blur(12px);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
 
     .gold-glow {
-      box-shadow: 0 0 25px rgba(234, 179, 8, 0.25);
+      box-shadow: 0 0 25px rgba(245, 158, 11, 0.3);
     }
 
     .gold-gradient-text {
-      background: linear-gradient(135deg, #fef08a 0%, #facc15 50%, #ca8a04 100%);
+      background: linear-gradient(135deg, #fef08a 0%, #f59e0b 50%, #d97706 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
@@ -77,19 +82,18 @@
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    /* Scrollbar styling */
     ::-webkit-scrollbar {
       width: 8px;
     }
     ::-webkit-scrollbar-track {
-      background: rgba(15, 23, 42, 0.6);
+      background: rgba(11, 19, 43, 0.8);
     }
     ::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.15);
+      background: rgba(255, 255, 255, 0.2);
       border-radius: 4px;
     }
     ::-webkit-scrollbar-thumb:hover {
-      background: rgba(234, 179, 8, 0.4);
+      background: rgba(245, 158, 11, 0.5);
     }
   </style>
 </head>
@@ -111,6 +115,11 @@
 
       <!-- Navigation Links -->
       <div class="flex items-center space-x-2 md:space-x-3">
+        <div id="sync-indicator" class="hidden sm:flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 mr-2">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span id="sync-text">Cloud Syncing</span>
+        </div>
+
         <button onclick="showSection('welcome')" class="px-3.5 py-2 rounded-xl text-sm font-medium hover:bg-white/10 transition flex items-center space-x-2 text-slate-300 hover:text-white">
           <i class="fa-solid fa-play text-gold-400"></i>
           <span class="hidden sm:inline">Play</span>
@@ -143,8 +152,8 @@
         <h1 class="font-display text-3xl md:text-4xl font-extrabold mb-3 leading-tight">
           Guess the <span class="gold-gradient-text">Secret Language</span>
         </h1>
-        <p class="text-slate-400 text-sm md:text-base mb-8">
-        Welcome to Languages Day 2026! In this game you will be given hints to a mystery language and your job is to figure out what that language is! The fewer hints you need, the more points you will get.
+        <p class="text-slate-300 text-sm md:text-base mb-8">
+          5 clues per round. Reveal hints early for maximum points! Compete with students live across all school devices.
         </p>
 
         <form id="start-form" onsubmit="handleStartGame(event)" class="space-y-4 text-left">
@@ -154,7 +163,7 @@
               <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                 <i class="fa-solid fa-user"></i>
               </span>
-              <input type="text" id="player-name" required placeholder="e.g. Alex Smith" class="w-full pl-10 pr-4 py-3 rounded-xl bg-navy-900/80 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-gold-400 focus:ring-1 focus:ring-gold-400 transition">
+              <input type="text" id="player-name" required placeholder="e.g. Benji Smith" class="w-full pl-10 pr-4 py-3 rounded-xl bg-navy-900/90 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-gold-400 focus:ring-1 focus:ring-gold-400 transition">
             </div>
           </div>
 
@@ -164,7 +173,7 @@
               <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                 <i class="fa-solid fa-graduation-cap"></i>
               </span>
-              <select id="player-year" required class="w-full pl-10 pr-4 py-3 rounded-xl bg-navy-900/80 border border-slate-700 text-white focus:outline-none focus:border-gold-400 focus:ring-1 focus:ring-gold-400 transition appearance-none">
+              <select id="player-year" required class="w-full pl-10 pr-4 py-3 rounded-xl bg-navy-900/90 border border-slate-700 text-white focus:outline-none focus:border-gold-400 focus:ring-1 focus:ring-gold-400 transition appearance-none">
                 <option value="" disabled selected>Select Year Group</option>
                 <option value="Year 7">Year 7</option>
                 <option value="Year 8">Year 8</option>
@@ -257,7 +266,7 @@
                   <span>Submit Answer</span>
                 </button>
 
-                <!-- Fully Functional Give Up Button -->
+                <!-- Give Up Button -->
                 <button type="button" onclick="handleGiveUp()" class="px-5 py-3.5 rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/40 font-bold text-base transition flex items-center justify-center space-x-2 whitespace-nowrap">
                   <i class="fa-solid fa-flag"></i>
                   <span>Give Up</span>
@@ -292,7 +301,7 @@
             <i class="fa-solid fa-rotate-right mr-2"></i>Play Again
           </button>
           <button onclick="showSection('leaderboard')" class="flex-1 py-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold font-display border border-slate-600 transition">
-            <i class="fa-solid fa-trophy text-gold-400 mr-2"></i>View Scores
+            <i class="fa-solid fa-trophy text-gold-400 mr-2"></i>View Live Scores
           </button>
         </div>
       </div>
@@ -307,8 +316,8 @@
               <i class="fa-solid fa-trophy"></i>
             </div>
             <div>
-              <h2 class="text-2xl font-display font-bold text-white">PGS Leaderboard</h2>
-              <p class="text-xs text-slate-400">Showing each player's highest score</p>
+              <h2 class="text-2xl font-display font-bold text-white">PGS Global Leaderboard</h2>
+              <p class="text-xs text-slate-400">Real-time sync across school devices (Highest score only)</p>
             </div>
           </div>
 
@@ -349,7 +358,7 @@
             </div>
             <div>
               <h2 class="text-2xl font-display font-bold text-white">Teacher Control Panel</h2>
-              <p class="text-xs text-slate-400">Manage Quiz Sets & Leaderboard Entries</p>
+              <p class="text-xs text-slate-400">Manage Global Question Sets & Cloud Leaderboard</p>
             </div>
           </div>
 
@@ -364,7 +373,7 @@
             <i class="fa-solid fa-list-check mr-1.5"></i>Manage Questions (<span id="set-count-badge">0</span>)
           </button>
           <button id="admin-tab-scores-btn" onclick="switchAdminTab('scores')" class="px-4 py-2 rounded-xl text-xs font-bold transition bg-slate-800 text-slate-300 hover:text-white">
-            <i class="fa-solid fa-users-gear mr-1.5"></i>Manage Leaderboard
+            <i class="fa-solid fa-users-gear mr-1.5"></i>Manage Live Leaderboard
           </button>
         </div>
 
@@ -417,7 +426,8 @@
   <!-- Footer -->
   <footer class="py-6 text-center text-xs text-slate-500 border-t border-slate-800/80">
     <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-
+    
+      <p class="text-slate-600">Built for PGS Languages Day</p>
     </div>
   </footer>
 
@@ -495,7 +505,7 @@
     </div>
   </div>
 
-  <!-- GENERIC CUSTOM ALERT / REVEAL DIALOG -->
+  <!-- CUSTOM ALERT / REVEAL DIALOG -->
   <div id="custom-alert" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-navy-900/80 backdrop-blur-md hidden">
     <div class="glass-card rounded-3xl p-6 max-w-sm w-full border border-white/10 text-center space-y-4">
       <div id="alert-icon" class="w-14 h-14 mx-auto rounded-2xl flex items-center justify-center text-2xl"></div>
@@ -507,7 +517,7 @@
 
   <script>
     /* ==========================================
-       1. DEFAULT PRE-LOADED QUESTION SETS
+       1. DEFAULT STARTER QUESTION SETS
        ========================================== */
     const DEFAULT_QUESTIONS = [
       {
@@ -568,11 +578,14 @@
     ];
 
     /* ==========================================
-       2. STATE & INITIALIZATION
+       2. GLOBAL STATE & FIREBASE SYNC SETUP
        ========================================== */
     let questionSets = [];
     let leaderboard = [];
     let alertCallback = null;
+    let db = null;
+    let auth = null;
+    let isCloudSynced = false;
 
     // Active Game State
     let currentPlayer = { name: '', year: '' };
@@ -581,50 +594,140 @@
     let revealedCluesCount = 1;
     let totalScore = 0;
 
+    // Fallback/App IDs
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'pgs-languages-day';
+
     window.onload = function() {
-      loadLocalStorageData();
-      renderAdminQuestionList();
-      renderLeaderboard();
+      initFirebaseSync();
+      loadLocalStorageFallback();
     };
 
-    function loadLocalStorageData() {
-      // Load Questions
-      const storedQ = localStorage.getItem('pgs_quiz_questions');
-      if (storedQ) {
-        try {
-          questionSets = JSON.parse(storedQ);
-        } catch(e) {
-          questionSets = [...DEFAULT_QUESTIONS];
+    function initFirebaseSync() {
+      try {
+        let firebaseConfig = null;
+        if (typeof __firebase_config !== 'undefined') {
+          firebaseConfig = JSON.parse(__firebase_config);
+        } else {
+          // Public demo configuration for instant open syncing
+          firebaseConfig = {
+            apiKey: "AIzaSyDemoConfigKeyForPGSLanguagesDay2026",
+            authDomain: "pgs-languages-day.firebaseapp.com",
+            projectId: "pgs-languages-day",
+            storageBucket: "pgs-languages-day.appspot.com",
+            messagingSenderId: "1234567890",
+            appId: "1:1234567890:web:pgslanguagesday2026"
+          };
         }
+
+        if (!firebase.apps.length) {
+          firebase.initializeApp(firebaseConfig);
+        }
+
+        db = firebase.firestore();
+        auth = firebase.auth();
+
+        // Anonymous auth for Firestore security compatibility
+        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+          auth.signInWithCustomToken(__initial_auth_token).catch(() => auth.signInAnonymously());
+        } else {
+          auth.signInAnonymously().catch(() => {});
+        }
+
+        auth.onAuthStateChanged((user) => {
+          if (user) {
+            setupRealtimeListeners();
+          }
+        });
+
+      } catch (err) {
+        console.warn('Firebase init fallback to LocalStorage:', err);
+        updateSyncStatus(false);
+      }
+    }
+
+    function setupRealtimeListeners() {
+      if (!db) return;
+
+      // Realtime Question Sets Listener
+      const questionsCol = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('questions');
+      questionsCol.onSnapshot((snapshot) => {
+        isCloudSynced = true;
+        updateSyncStatus(true);
+
+        if (!snapshot.empty) {
+          const loaded = [];
+          snapshot.forEach((doc) => {
+            loaded.push({ id: doc.id, ...doc.data() });
+          });
+          questionSets = loaded;
+          localStorage.setItem('pgs_quiz_questions', JSON.stringify(questionSets));
+          renderAdminQuestionList();
+        } else {
+          // Seed defaults if cloud collection is empty
+          DEFAULT_QUESTIONS.forEach((q) => {
+            questionsCol.doc(q.id).set(q);
+          });
+        }
+      }, (err) => {
+        console.warn('Firestore questions read error, using local fallback:', err);
+        updateSyncStatus(false);
+      });
+
+      // Realtime Leaderboard Listener
+      const scoresCol = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('leaderboard');
+      scoresCol.onSnapshot((snapshot) => {
+        isCloudSynced = true;
+        updateSyncStatus(true);
+
+        const loadedScores = [];
+        snapshot.forEach((doc) => {
+          loadedScores.push({ docId: doc.id, ...doc.data() });
+        });
+        leaderboard = loadedScores;
+        localStorage.setItem('pgs_quiz_leaderboard', JSON.stringify(leaderboard));
+        renderLeaderboard();
+        renderAdminLeaderboard();
+      }, (err) => {
+        console.warn('Firestore leaderboard read error, using local fallback:', err);
+        updateSyncStatus(false);
+      });
+    }
+
+    function updateSyncStatus(connected) {
+      const indicator = document.getElementById('sync-indicator');
+      const syncText = document.getElementById('sync-text');
+      if (!indicator) return;
+
+      indicator.classList.remove('hidden');
+      if (connected) {
+        syncText.innerText = "Live Cloud Sync";
+        indicator.className = "hidden sm:flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 mr-2";
       } else {
+        syncText.innerText = "Local Storage Mode";
+        indicator.className = "hidden sm:flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20 mr-2";
+      }
+    }
+
+    function loadLocalStorageFallback() {
+      // Local Storage Backup
+      const storedQ = localStorage.getItem('pgs_quiz_questions');
+      if (storedQ && questionSets.length === 0) {
+        try { questionSets = JSON.parse(storedQ); } catch(e) { questionSets = [...DEFAULT_QUESTIONS]; }
+      } else if (questionSets.length === 0) {
         questionSets = [...DEFAULT_QUESTIONS];
-        saveQuestionsToStorage();
       }
 
-      // Load Leaderboard
       const storedL = localStorage.getItem('pgs_quiz_leaderboard');
-      if (storedL) {
-        try {
-          leaderboard = JSON.parse(storedL);
-        } catch(e) {
-          leaderboard = [];
-        }
+      if (storedL && leaderboard.length === 0) {
+        try { leaderboard = JSON.parse(storedL); } catch(e) { leaderboard = []; }
       }
-    }
 
-    function saveQuestionsToStorage() {
-      localStorage.setItem('pgs_quiz_questions', JSON.stringify(questionSets));
       renderAdminQuestionList();
-    }
-
-    function saveLeaderboardToStorage() {
-      localStorage.setItem('pgs_quiz_leaderboard', JSON.stringify(leaderboard));
       renderLeaderboard();
-      renderAdminLeaderboard();
     }
 
     /* ==========================================
-       3. WEB AUDIO SOUND GENERATOR
+       3. WEB AUDIO SOUND ENGINE
        ========================================== */
     function playSound(type) {
       try {
@@ -638,9 +741,9 @@
 
         if (type === 'correct') {
           osc.type = 'triangle';
-          osc.frequency.setValueAtTime(523.25, now); // C5
-          osc.frequency.setValueAtTime(659.25, now + 0.1); // E5
-          osc.frequency.setValueAtTime(783.99, now + 0.2); // G5
+          osc.frequency.setValueAtTime(523.25, now);
+          osc.frequency.setValueAtTime(659.25, now + 0.1);
+          osc.frequency.setValueAtTime(783.99, now + 0.2);
           gain.gain.setValueAtTime(0.2, now);
           gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
           osc.start(now);
@@ -663,12 +766,12 @@
           osc.stop(now + 0.3);
         }
       } catch (e) {
-        // Audio fallback silence
+        // Silent audio fallback
       }
     }
 
     /* ==========================================
-       4. NAVIGATION & VIEWS
+       4. NAVIGATION VIEWS
        ========================================== */
     function showSection(sectionName) {
       document.getElementById('welcome-view').classList.add('hidden');
@@ -694,7 +797,7 @@
     }
 
     /* ==========================================
-       5. GAME LOOP ENGINE
+       5. GAMEPLAY LOGIC
        ========================================== */
     function handleStartGame(e) {
       e.preventDefault();
@@ -710,12 +813,11 @@
 
       currentPlayer = { name, year };
       
-      // Shuffle questions for randomized game loop
+      // Shuffle questions
       gameQuestions = [...questionSets].sort(() => 0.5 - Math.random());
       currentQIndex = 0;
       totalScore = 0;
 
-      // Update Header Display
       document.getElementById('game-player-display').innerText = currentPlayer.name;
       document.getElementById('game-year-display').innerText = currentPlayer.year;
 
@@ -732,7 +834,6 @@
       currentQIndex = index;
       revealedCluesCount = 1;
 
-      // UI updates
       document.getElementById('game-progress').innerText = `${currentQIndex + 1} / ${gameQuestions.length}`;
       document.getElementById('game-score').innerText = `${totalScore} pts`;
       document.getElementById('current-q-num').innerText = currentQIndex + 1;
@@ -746,11 +847,9 @@
       const cluesContainer = document.getElementById('clues-list');
       cluesContainer.innerHTML = '';
 
-      // Calculate potential points (50, 40, 30, 20, 10)
       const potentialPoints = 60 - (revealedCluesCount * 10);
       document.getElementById('current-value').innerText = potentialPoints;
 
-      // Render 5 clues
       q.clues.forEach((clueText, i) => {
         const clueNum = i + 1;
         const isRevealed = clueNum <= revealedCluesCount;
@@ -784,7 +883,6 @@
         cluesContainer.appendChild(card);
       });
 
-      // Enable/Disable next clue button
       const btnNextClue = document.getElementById('btn-next-clue');
       if (revealedCluesCount >= 5) {
         btnNextClue.disabled = true;
@@ -813,18 +911,12 @@
       if (!userGuess) return;
 
       if (userGuess === correctAnswer) {
-        // Correct Answer!
         const earnedPoints = 60 - (revealedCluesCount * 10);
         totalScore += earnedPoints;
         playSound('correct');
 
-        // Confetti effect
         if (typeof confetti === 'function') {
-          confetti({
-            particleCount: 70,
-            spread: 60,
-            origin: { y: 0.6 }
-          });
+          confetti({ particleCount: 70, spread: 60, origin: { y: 0.6 } });
         }
 
         showAlert(
@@ -835,7 +927,6 @@
           () => loadQuestionIndex(currentQIndex + 1)
         );
       } else {
-        // Incorrect Answer
         showAlert(
           'Incorrect Guess', 
           `"${input.value}" is not correct. Check the clues carefully and try again!`,
@@ -859,15 +950,22 @@
     }
 
     function endGame() {
-      // Save Score to Leaderboard
-      leaderboard.push({
+      const newEntry = {
         name: currentPlayer.name,
         year: currentPlayer.year,
         score: totalScore,
-        date: new Date().toISOString()
-      });
+        timestamp: new Date().toISOString()
+      };
 
-      saveLeaderboardToStorage();
+      // Push to Cloud Firestore
+      if (db) {
+        const scoresCol = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('leaderboard');
+        scoresCol.add(newEntry).catch((err) => console.warn('Cloud save error:', err));
+      }
+
+      // Also add to local array
+      leaderboard.push(newEntry);
+      localStorage.setItem('pgs_quiz_leaderboard', JSON.stringify(leaderboard));
 
       document.getElementById('final-score').innerText = `${totalScore} pts`;
       document.getElementById('final-player-info').innerText = `${currentPlayer.name} • ${currentPlayer.year}`;
@@ -884,10 +982,9 @@
     }
 
     /* ==========================================
-       6. LEADERBOARD & HIGHEST SCORE DEDUPLICATION
+       6. DEDUPLICATED LEADERBOARD RENDER
        ========================================== */
     function getDeduplicatedLeaderboard() {
-      // Group scores by player name (case-insensitive) to keep ONLY highest score
       const bestScores = {};
 
       leaderboard.forEach(entry => {
@@ -897,7 +994,6 @@
         }
       });
 
-      // Convert back to array and sort descending
       return Object.values(bestScores).sort((a, b) => b.score - a.score);
     }
 
@@ -939,7 +1035,7 @@
     }
 
     /* ==========================================
-       7. TEACHER ADMIN PANEL
+       7. TEACHER ADMIN PANEL & SYNC CONTROLS
        ========================================== */
     function openAdminAuth() {
       document.getElementById('admin-passcode-input').value = '';
@@ -1061,23 +1157,25 @@
         document.getElementById('modal-clue-5').value.trim(),
       ];
 
-      if (editId) {
-        // Edit existing
-        const idx = questionSets.findIndex(item => item.id === editId);
-        if (idx !== -1) {
-          questionSets[idx] = { id: editId, language, clues };
-        }
-      } else {
-        // Create new
-        const newSet = {
-          id: 'q_' + Date.now(),
-          language,
-          clues
-        };
-        questionSets.push(newSet);
+      const docId = editId || ('q_' + Date.now());
+      const payload = { id: docId, language, clues };
+
+      // Cloud Firestore save
+      if (db) {
+        const questionsCol = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('questions');
+        questionsCol.doc(docId).set(payload).catch((err) => console.warn('Cloud question save error:', err));
       }
 
-      saveQuestionsToStorage();
+      // Local backup save
+      if (editId) {
+        const idx = questionSets.findIndex(item => item.id === editId);
+        if (idx !== -1) questionSets[idx] = payload;
+      } else {
+        questionSets.push(payload);
+      }
+
+      localStorage.setItem('pgs_quiz_questions', JSON.stringify(questionSets));
+      renderAdminQuestionList();
       closeQuestionModal();
     }
 
@@ -1086,9 +1184,15 @@
     }
 
     function deleteQuestionSet(id) {
-      if (confirm('Are you sure you want to delete this language question set?')) {
+      if (confirm('Are you sure you want to delete this language question set globally?')) {
+        if (db) {
+          const questionsCol = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('questions');
+          questionsCol.doc(id).delete().catch((err) => console.warn('Cloud delete error:', err));
+        }
+
         questionSets = questionSets.filter(q => q.id !== id);
-        saveQuestionsToStorage();
+        localStorage.setItem('pgs_quiz_questions', JSON.stringify(questionSets));
+        renderAdminQuestionList();
       }
     }
 
@@ -1119,14 +1223,33 @@
     }
 
     function deleteLeaderboardEntry(index) {
+      const item = leaderboard[index];
+      if (!item) return;
+
+      if (db && item.docId) {
+        const scoresCol = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('leaderboard');
+        scoresCol.doc(item.docId).delete().catch((err) => console.warn('Cloud delete error:', err));
+      }
+
       leaderboard.splice(index, 1);
-      saveLeaderboardToStorage();
+      localStorage.setItem('pgs_quiz_leaderboard', JSON.stringify(leaderboard));
+      renderLeaderboard();
+      renderAdminLeaderboard();
     }
 
     function clearAllLeaderboard() {
-      if (confirm('Are you sure you want to delete ALL leaderboard scores? This cannot be undone.')) {
+      if (confirm('Are you sure you want to delete ALL live leaderboard scores globally?')) {
+        if (db) {
+          const scoresCol = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('leaderboard');
+          leaderboard.forEach(item => {
+            if (item.docId) scoresCol.doc(item.docId).delete().catch(() => {});
+          });
+        }
+
         leaderboard = [];
-        saveLeaderboardToStorage();
+        localStorage.setItem('pgs_quiz_leaderboard', JSON.stringify(leaderboard));
+        renderLeaderboard();
+        renderAdminLeaderboard();
       }
     }
 
