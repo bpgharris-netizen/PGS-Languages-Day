@@ -1,1399 +1,913 @@
 <!DOCTYPE html>
-<html lang="en">   
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PGS Languages Day</title>
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- FontAwesome Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <!-- Canvas Confetti -->
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['Plus Jakarta Sans', 'sans-serif'],
-          },
-          colors: {
-            pgs: {
-              navy: '#0b132b',
-              blue: '#1c2541',
-              accent: '#3a506b',
-              gold: '#f59e0b',
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PGS Languages Day 2026</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Font: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        navy: {
+                            900: '#0B0F19',
+                            800: '#111827',
+                            700: '#1F2937',
+                            card: 'rgba(17, 24, 39, 0.75)',
+                            input: '#161F33'
+                        },
+                        brand: {
+                            gold: '#F59E0B',
+                            goldHover: '#D97706',
+                            goldLight: '#FBBF24',
+                            badge: '#F59E0B22'
+                        }
+                    }
+                }
             }
-          }
         }
-      }
-    }
-  </script>
-
-  <style>
-    body {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      background: linear-gradient(135deg, #0b132b 0%, #1c2541 50%, #2a1b4e 100%);
-      min-height: 100vh;
-      color: #f8fafc;
-    }
-    .glass-card {
-      background: rgba(28, 37, 65, 0.75);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-    }
-    .glass-card-light {
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-    }
-    .gradient-text {
-      background: linear-gradient(135deg, #fbbf24, #f59e0b, #38bdf8);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    @keyframes bounceShort {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-4px); }
-    }
-    .animate-bounce-short {
-      animation: bounceShort 0.4s ease-in-out 1;
-    }
-  </style>
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at 50% 20%, #1a233a 0%, #0b0f19 75%);
+            min-height: 100vh;
+            color: #f3f4f6;
+        }
+        .glass-card {
+            background: rgba(17, 24, 39, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        }
+        .custom-select {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%9ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.75rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            appearance: none;
+        }
+    </style>
 </head>
-<body class="flex flex-col min-h-screen text-slate-100 selection:bg-amber-500 selection:text-slate-950">
+<body class="flex flex-col min-h-screen">
 
-  <header class="w-full glass-card sticky top-0 z-40 px-4 py-3.5 border-b border-white/10 shadow-xl">
-    <div class="max-w-6xl mx-auto flex items-center justify-between">
-      <!-- Title Logo -->
-      <div class="flex items-center gap-3 cursor-pointer" onclick="app.showTab('game')">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 via-amber-400 to-indigo-500 flex items-center justify-center text-slate-950 font-black text-xl shadow-lg">
-          <i class="fa-solid fa-earth-americas"></i>
-        </div>
-        <div>
-          <h1 class="font-extrabold text-xl tracking-tight gradient-text">PGS Languages Day</h1>
-          <p class="text-[11px] text-slate-400 font-semibold tracking-wider uppercase"></p>
-        </div>
-      </div>
-
-      <!-- Navigation Bar -->
-      <nav class="flex items-center bg-slate-900/80 p-1 rounded-xl border border-white/10 gap-1">
-        <button id="nav-game" onclick="app.showTab('game')" class="px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition-all flex items-center gap-2 bg-amber-500 text-slate-950 shadow">
-          <i class="fa-solid fa-gamepad"></i> <span class="hidden sm:inline">Play</span>
-        </button>
-        <button id="nav-leaderboard" onclick="app.showTab('leaderboard')" class="px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold text-slate-300 hover:text-white hover:bg-white/5 transition-all flex items-center gap-2">
-          <i class="fa-solid fa-trophy text-amber-400"></i> <span class="hidden sm:inline">Leaderboard</span>
-        </button>
-        <button id="nav-admin" onclick="app.requestAdminAccess()" class="px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold text-slate-400 hover:text-amber-300 hover:bg-white/5 transition-all flex items-center gap-2">
-          <i class="fa-solid fa-lock text-slate-400" id="admin-lock-icon"></i> <span class="hidden sm:inline">Admin Access</span>
-        </button>
-      </nav>
-    </div>
-  </header>
-
-  <main class="flex-grow max-w-5xl w-full mx-auto p-4 sm:p-6 flex flex-col justify-center">
-
-    <!-- SCREEN 1: WELCOME / REGISTRATION -->
-    <div id="screen-welcome" class="glass-card rounded-3xl p-6 sm:p-10 text-center max-w-lg mx-auto w-full shadow-2xl border border-white/10">
-      <div class="inline-flex p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 mb-4 text-amber-400 text-4xl shadow-inner">
-        <i class="fa-solid fa-school"></i>
-      </div>
-      <h2 class="text-3xl sm:text-4xl font-black tracking-tight mb-2">PGS Languages Day</h2>
-      <p class="text-slate-300 text-sm sm:text-base mb-6 leading-relaxed">
-        Welcome to Languages Day 2026. In this game, you will be given hints to a mystery languge, your job is to figure out what language it is! The less hints you need, the more points you will get. Good Luck!
-      </p>
-
-      <!-- Scoring Breakdown -->
-      <div class="grid grid-cols-5 gap-1.5 text-xs mb-6 text-slate-200 bg-slate-900/80 p-3.5 rounded-2xl border border-white/10 shadow-inner">
-        <div class="flex flex-col items-center">
-          <span class="font-extrabold text-emerald-400 text-sm">50</span>
-          <span class="text-[10px] text-slate-400">Clue 1</span>
-        </div>
-        <div class="flex flex-col items-center">
-          <span class="font-extrabold text-sky-400 text-sm">40</span>
-          <span class="text-[10px] text-slate-400">Clue 2</span>
-        </div>
-        <div class="flex flex-col items-center">
-          <span class="font-extrabold text-amber-400 text-sm">30</span>
-          <span class="text-[10px] text-slate-400">Clue 3</span>
-        </div>
-        <div class="flex flex-col items-center">
-          <span class="font-extrabold text-orange-400 text-sm">20</span>
-          <span class="text-[10px] text-slate-400">Clue 4</span>
-        </div>
-        <div class="flex flex-col items-center">
-          <span class="font-extrabold text-rose-400 text-sm">10</span>
-          <span class="text-[10px] text-slate-400">Clue 5</span>
-        </div>
-      </div>
-
-      <!-- Player Registration Form -->
-      <form id="start-form" onsubmit="app.startGame(event)" class="space-y-4 text-left">
-        <div>
-          <label for="player-name" class="block text-xs font-extrabold uppercase tracking-wider text-slate-300 mb-1.5">Full Name *</label>
-          <input type="text" id="player-name" required placeholder="" maxlength="28" class="w-full bg-slate-900/90 border border-slate-700 focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20 rounded-xl px-4 py-3 text-white placeholder-slate-500 font-semibold outline-none transition-all">
+    <!-- Top Navigation Bar -->
+    <header class="w-full px-6 py-4 flex items-center justify-between border-b border-gray-800/60 bg-navy-900/50 backdrop-blur-md sticky top-0 z-50">
+        <div class="flex items-center space-x-3 cursor-pointer" onclick="showView('welcomeView')">
+            <div class="w-9 h-9 rounded-xl bg-amber-500 flex items-center justify-center text-navy-900 shadow-lg shadow-amber-500/20">
+                <i class="fa-solid font-bold text-xl fa-globe"></i>
+            </div>
+            <div class="text-xl font-black tracking-tight text-white">
+                <span class="text-amber-400">PGS</span> Languages <span class="text-gray-300 font-normal">Day</span>
+            </div>
         </div>
 
-        <div>
-          <label for="player-year" class="block text-xs font-extrabold uppercase tracking-wider text-slate-300 mb-1.5">Year Group / Role *</label>
-          <select id="player-year" required class="w-full bg-slate-900/90 border border-slate-700 focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20 rounded-xl px-4 py-3 text-white font-semibold outline-none transition-all">
-            <option value="" disabled selected>Select Your Year Group / Role...</option>
-            <option value="Year 7">Year 7</option>
-            <option value="Year 8">Year 8</option>
-            <option value="Year 9">Year 9</option>
-            <option value="Year 10">Year 10</option>
-            <option value="Year 11">Year 11</option>
-            <option value="Year 12">Year 12</option>
-            <option value="Year 13">Year 13</option>
-            <option value="Teacher">Teacher</option>
-          </select>
-        </div>
+        <nav class="flex items-center space-x-2 sm:space-x-3">
+            <button id="navPlayBtn" onclick="showView('welcomeView')" class="px-4 py-2 rounded-full text-xs sm:text-sm font-semibold flex items-center space-x-2 bg-amber-500 text-navy-900 hover:bg-amber-400 transition-all shadow-md">
+                <i class="fa-solid fa-gamepad"></i>
+                <span>Play</span>
+            </button>
+            <button id="navLeaderboardBtn" onclick="showView('leaderboardView')" class="px-4 py-2 rounded-full text-xs sm:text-sm font-semibold flex items-center space-x-2 bg-gray-800/80 text-gray-300 hover:bg-gray-700 hover:text-white transition-all border border-gray-700/50">
+                <i class="fa-solid fa-trophy text-amber-400"></i>
+                <span>Leaderboard</span>
+            </button>
+            <button id="navAdminBtn" onclick="showView('adminLoginView')" class="px-4 py-2 rounded-full text-xs sm:text-sm font-semibold flex items-center space-x-2 bg-gray-800/80 text-gray-300 hover:bg-gray-700 hover:text-white transition-all border border-gray-700/50">
+                <i class="fa-solid fa-lock text-gray-400"></i>
+                <span>Teacher Admin</span>
+            </button>
+        </nav>
+    </header>
 
-        <button type="submit" class="w-full bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black py-4 px-6 rounded-xl shadow-xl hover:shadow-amber-500/20 transition-all transform active:scale-95 flex items-center justify-center gap-2 text-base mt-2">
-          <span>Start Languages Challenge</span>
-          <i class="fa-solid fa-play"></i>
-        </button>
-      </form>
-    </div>
-
-    <!-- SCREEN 2: GAMEPLAY SCREEN -->
-    <div id="screen-game" class="hidden space-y-5">
-      
-      <!-- Top Stats Bar -->
-      <div class="glass-card rounded-2xl p-4 flex items-center justify-between shadow-lg">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-400 font-black border border-amber-500/30 text-lg" id="user-avatar">
-            P
-          </div>
-          <div>
-            <div id="display-player-year" class="text-[11px] font-extrabold uppercase tracking-wider text-amber-400">Year 7</div>
-            <div id="display-player-name" class="font-bold text-white text-base truncate max-w-[140px] sm:max-w-[220px]">Student</div>
-          </div>
-        </div>
-
-        <div class="text-center">
-          <span class="text-[11px] text-slate-400 font-bold uppercase tracking-wider block">Round</span>
-          <span id="display-round-progress" class="font-black text-xl text-indigo-300">1 / 8</span>
-        </div>
-
-        <div class="text-right">
-          <span class="text-[11px] text-slate-400 font-bold uppercase tracking-wider block">Score</span>
-          <span id="display-total-score" class="font-black text-2xl text-emerald-400">0</span>
-        </div>
-      </div>
-
-      <!-- Game Board -->
-      <div class="glass-card rounded-3xl p-5 sm:p-8 space-y-6 shadow-2xl border border-white/10 relative">
+    <main class="flex-grow flex items-center justify-center p-4 sm:p-6">
         
-        <!-- Points Header -->
-        <div class="flex items-center justify-between border-b border-white/10 pb-4">
-          <div class="flex items-center gap-2">
-            <span class="px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 flex items-center gap-1.5">
-              <i class="fa-solid fa-magnifying-glass"></i>
-              <span>Language Clues</span>
-            </span>
-          </div>
-
-          <div class="flex items-center gap-2">
-            <span class="text-xs text-slate-400 font-semibold hidden sm:inline">Current Worth:</span>
-            <span id="potential-points-tag" class="px-3.5 py-1 rounded-full font-black text-sm bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
-              50 pts
-            </span>
-          </div>
-        </div>
-
-        <!-- Clue Stack -->
-        <div id="clues-container" class="space-y-3">
-          <!-- Rendered dynamically -->
-        </div>
-
-        <!-- Interaction & Guess Input Area -->
-        <div id="interaction-area" class="space-y-4 pt-2">
-          
-          <form id="guess-form" onsubmit="app.submitGuess(event)" class="flex flex-col sm:flex-row gap-2">
-            <div class="relative flex-grow">
-              <i class="fa-solid fa-earth-americas absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"></i>
-              <input type="text" id="guess-input" placeholder="Type language name (e.g. Swahili, French)..." autocomplete="off" class="w-full bg-slate-900/90 border border-slate-700 focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20 rounded-xl pl-11 pr-4 py-3.5 text-white placeholder-slate-500 font-semibold outline-none transition-all">
+        <!-- WELCOME VIEW (Exact match to screenshot image_2e43bf.jpg) -->
+        <div id="welcomeView" class="w-full max-w-lg glass-card rounded-2xl p-6 sm:p-8 flex flex-col items-center text-center transition-all">
+            <!-- Glowing Gold Badge Icon -->
+            <div class="w-16 h-16 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 mb-6 shadow-inner">
+                <i class="fa-solid fa-school text-2xl"></i>
             </div>
 
-            <button type="submit" id="submit-guess-btn" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-7 py-3.5 rounded-xl transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2 whitespace-nowrap">
-              <i class="fa-solid fa-paper-plane"></i>
-              <span>Submit Guess</span>
-            </button>
-          </form>
-
-          <div class="flex items-center justify-between pt-1">
-            <button type="button" id="next-clue-btn" onclick="app.revealNextClue()" class="text-slate-300 hover:text-white bg-slate-900/90 hover:bg-slate-800 border border-white/10 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 active:scale-95">
-              <i class="fa-solid fa-eye"></i>
-              <span>Reveal Next Clue (-10 pts)</span>
-            </button>
-
-            <button type="button" onclick="app.giveUp()" class="text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 px-3 py-2 rounded-xl text-xs font-semibold transition-all">
-              <i class="fa-solid fa-flag"></i> Give Up Round
-            </button>
-          </div>
-
-          <!-- Feedback Box -->
-          <div id="feedback-message" class="hidden p-4 rounded-2xl text-sm font-bold flex items-center gap-3 transition-all">
-            <!-- Rendered via JS -->
-          </div>
-        </div>
-
-        <!-- Next Round Button -->
-        <div id="round-complete-actions" class="hidden text-center pt-2">
-          <button onclick="app.nextRound()" class="w-full sm:w-auto bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black px-8 py-4 rounded-xl shadow-xl transition-all transform hover:scale-105 active:scale-95 flex items-center justify-center gap-3 mx-auto text-base">
-            <span>Next Language Round</span>
-            <i class="fa-solid fa-circle-arrow-right"></i>
-          </button>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- SCREEN 3: SUMMARY SCREEN -->
-    <div id="screen-summary" class="hidden glass-card rounded-3xl p-6 sm:p-10 text-center max-w-lg mx-auto w-full shadow-2xl border border-white/10 space-y-6">
-      <div class="inline-flex p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 text-5xl">
-        <i class="fa-solid fa-award"></i>
-      </div>
-      
-      <div>
-        <h2 class="text-3xl font-black mb-1">Challenge Complete!</h2>
-        <p class="text-slate-300 text-sm">Your score is saved to the PGS Live Leaderboard!</p>
-      </div>
-
-      <div class="bg-slate-900/80 p-6 rounded-2xl border border-white/10 space-y-4">
-        <div>
-          <span class="text-xs uppercase tracking-wider font-extrabold text-slate-400">Total Score</span>
-          <div id="summary-final-score" class="text-5xl font-black text-amber-400 mt-1">0</div>
-        </div>
-
-        <div class="grid grid-cols-2 gap-4 pt-4 border-t border-white/10">
-          <div>
-            <span class="text-xs text-slate-400 font-semibold block">Languages Guessed</span>
-            <span id="summary-correct-count" class="text-xl font-bold text-white">0 / 0</span>
-          </div>
-          <div>
-            <span class="text-xs text-slate-400 font-semibold block">Accuracy</span>
-            <span id="summary-accuracy" class="text-xl font-bold text-indigo-300">0%</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="flex flex-col sm:flex-row gap-3">
-        <button onclick="app.showTab('leaderboard')" class="flex-1 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black py-3.5 px-6 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2">
-          <i class="fa-solid fa-trophy"></i>
-          <span>View Leaderboard</span>
-        </button>
-        <button onclick="app.resetToWelcome()" class="flex-1 bg-slate-800 hover:bg-slate-700 border border-white/10 text-white font-bold py-3.5 px-6 rounded-xl transition-all flex items-center justify-center gap-2">
-          <i class="fa-solid fa-rotate-right"></i>
-          <span>Play Again</span>
-        </button>
-      </div>
-    </div>
-
-    <!-- SCREEN 4: SCHOOL LEADERBOARD -->
-    <div id="screen-leaderboard" class="hidden space-y-6">
-      <div class="glass-card rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl border border-white/10">
-        
-        <div class="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-4">
-          <div>
-            <h2 class="text-2xl font-black flex items-center gap-3">
-              <i class="fa-solid fa-trophy text-amber-400"></i>
-              <span>PGS School Leaderboard</span>
-             
-               
-              </span>
-            </h2>
-            <p class="text-xs text-slate-400 mt-0.5">Real-time scores for PGS Languages Day</p>
-          </div>
-
-          <button onclick="leaderboard.exportCSV()" class="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 border border-white/10 rounded-xl text-xs font-bold text-slate-300 transition-colors flex items-center gap-2">
-            <i class="fa-solid fa-download"></i> Export CSV
-          </button>
-        </div>
-
-        <!-- Leaderboard Filters -->
-        <div class="flex items-center gap-3 text-xs">
-          <span class="text-slate-400 font-extrabold uppercase">Filter Year Group / Role:</span>
-          <select id="leaderboard-year-filter" onchange="leaderboard.render()" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-white font-semibold outline-none focus:border-amber-400">
-            <option value="ALL">All Year Groups & Roles</option>
-            <option value="Year 7">Year 7</option>
-            <option value="Year 8">Year 8</option>
-            <option value="Year 9">Year 9</option>
-            <option value="Year 10">Year 10</option>
-            <option value="Year 11">Year 11</option>
-            <option value="Year 12">Year 12</option>
-            <option value="Year 13">Year 13</option>
-            <option value="Teacher">Teacher</option>
-          </select>
-        </div>
-
-        <!-- Score Table -->
-        <div class="overflow-x-auto">
-          <table class="w-full text-left border-collapse">
-            <thead>
-              <tr class="border-b border-white/10 text-xs text-slate-400 uppercase font-extrabold tracking-wider">
-                <th class="py-3.5 px-4">Rank</th>
-                <th class="py-3.5 px-4">Name</th>
-                <th class="py-3.5 px-4">Year Group / Role</th>
-                <th class="py-3.5 px-4">Score</th>
-                <th class="py-3.5 px-4">Correct</th>
-                <th class="py-3.5 px-4">Date</th>
-              </tr>
-            </thead>
-            <tbody id="leaderboard-rows" class="divide-y divide-white/5 text-sm font-semibold">
-              <!-- Rendered via JS -->
-            </tbody>
-          </table>
-        </div>
-
-        <div id="leaderboard-empty" class="hidden text-center py-12 text-slate-400 space-y-2">
-          <i class="fa-solid fa-ghost text-4xl mb-2 opacity-50"></i>
-          <p>No scores submitted yet! Be the first to claim the top spot!</p>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- SCREEN 5: TEACHER ADMIN PANEL (PASSCODE PROTECTED) -->
-    <div id="screen-admin" class="hidden space-y-6">
-      <div class="glass-card rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl border border-white/10">
-        
-        <div class="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-4">
-          <div>
-            <h2 class="text-2xl font-black flex items-center gap-3">
-              <i class="fa-solid fa-lock text-amber-400"></i>
-              <span>Teacher Question Panel</span>
-            </h2>
-            <p class="text-xs text-slate-400 mt-0.5">Write and manage the official language questions for PGS Languages Day.</p>
-          </div>
-
-          <div class="flex items-center gap-2">
-            <button onclick="adminPanel.exportDeckJSON()" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-500 rounded-xl text-xs font-bold text-white transition-all shadow flex items-center gap-2">
-              <i class="fa-solid fa-file-export"></i> Export Questions (.json)
-            </button>
-            <label class="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 border border-white/10 rounded-xl text-xs font-bold text-slate-300 transition-all cursor-pointer flex items-center gap-2">
-              <i class="fa-solid fa-file-import"></i> Import (.json)
-              <input type="file" accept=".json" onchange="adminPanel.importDeckJSON(event)" class="hidden">
-            </label>
-            <button onclick="adminPanel.lockAdmin()" class="px-3.5 py-2 bg-rose-600/80 hover:bg-rose-500 rounded-xl text-xs font-bold text-white transition-all">
-              <i class="fa-solid fa-lock mr-1"></i> Lock
-            </button>
-          </div>
-        </div>
-
-        <!-- Add Language Question Form -->
-        <form id="admin-lang-form" onsubmit="adminPanel.saveLanguage(event)" class="bg-slate-900/80 p-5 rounded-2xl border border-white/10 space-y-4">
-          <h3 class="text-sm font-extrabold uppercase tracking-wider text-amber-400 flex items-center gap-2">
-            <i class="fa-solid fa-plus-circle"></i> Add New Language Question
-          </h3>
-
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-xs font-bold text-slate-300 mb-1">Language Name *</label>
-              <input type="text" id="edit-lang-name" required placeholder="e.g. Swahili" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white outline-none focus:border-amber-400 font-semibold">
-            </div>
-            <div>
-              <label class="block text-xs font-bold text-slate-300 mb-1">Accepted Alternate Spellings (Comma separated)</label>
-              <input type="text" id="edit-lang-aliases" placeholder="e.g. Kiswahili" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white outline-none focus:border-amber-400 font-semibold">
-            </div>
-          </div>
-
-          <!-- 5 Clues -->
-          <div class="space-y-3 pt-2">
-            <div>
-              <label class="block text-xs font-bold text-emerald-400 mb-1">Clue 1 (Hardest - 50 pts) *</label>
-              <input type="text" id="edit-clue-1" required placeholder="Subtle geographical or historical clue..." class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white outline-none focus:border-amber-400">
-            </div>
-            <div>
-              <label class="block text-xs font-bold text-sky-400 mb-1">Clue 2 (Hard - 40 pts) *</label>
-              <input type="text" id="edit-clue-2" required placeholder="Linguistic branch or grammar clue..." class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white outline-none focus:border-amber-400">
-            </div>
-            <div>
-              <label class="block text-xs font-bold text-amber-400 mb-1">Clue 3 (Medium - 30 pts) *</label>
-              <input type="text" id="edit-clue-3" required placeholder="Cultural or regional clue..." class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white outline-none focus:border-amber-400">
-            </div>
-            <div>
-              <label class="block text-xs font-bold text-orange-400 mb-1">Clue 4 (Easy - 20 pts) *</label>
-              <input type="text" id="edit-clue-4" required placeholder="Famous landmarks or phrase context..." class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white outline-none focus:border-amber-400">
-            </div>
-            <div>
-              <label class="block text-xs font-bold text-rose-400 mb-1">Clue 5 (Very Easy - 10 pts) *</label>
-              <input type="text" id="edit-clue-5" required placeholder="Very obvious phrase or word (e.g. 'Hakuna Matata')..." class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white outline-none focus:border-amber-400">
-            </div>
-          </div>
-
-          <div class="flex justify-end gap-2 pt-2">
-            <button type="button" onclick="adminPanel.clearForm()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-xl text-xs font-bold text-slate-300">
-              Clear
-            </button>
-            <button type="submit" class="px-6 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-black shadow">
-              <i class="fa-solid fa-plus mr-1"></i> Add Language Question
-            </button>
-          </div>
-        </form>
-
-        <!-- Current Active Questions -->
-        <div class="space-y-3">
-          <h3 class="text-sm font-extrabold uppercase tracking-wider text-slate-300 flex items-center justify-between">
-            <span>Official PGS Questions List (<span id="admin-questions-count">0</span>)</span>
-            <button onclick="adminPanel.resetToDefault()" class="text-xs text-amber-400 hover:underline">Reset to Default Preset Questions</button>
-          </h3>
-
-          <div id="admin-questions-list" class="space-y-2 max-h-80 overflow-y-auto pr-1">
-            <!-- Rendered dynamically -->
-          </div>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- ADMIN PASSCODE MODAL (Clean - No passcode exposed) -->
-    <div id="admin-passcode-modal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
-      <div class="glass-card rounded-3xl p-6 sm:p-8 max-w-sm w-full text-center space-y-4 shadow-2xl border border-white/20 animate-bounce-short">
-        <div class="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-2xl mx-auto border border-amber-500/30">
-          <i class="fa-solid fa-key"></i>
-        </div>
-        <h3 class="text-xl font-black">Admin Access</h3>
-        <p class="text-xs text-slate-300 leading-relaxed">Enter the teacher passcode to edit questions for PGS Languages Day.</p>
-
-        <form onsubmit="app.verifyAdminPasscode(event)" class="space-y-3">
-          <input type="password" id="admin-passcode-input" placeholder="Enter Teacher Passcode..." required class="w-full bg-slate-900 border border-slate-700 focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20 rounded-xl px-4 py-3 text-center font-bold text-white outline-none">
-          
-          <div id="admin-passcode-error" class="hidden text-xs text-rose-400 font-bold">Incorrect passcode. Please try again!</div>
-
-          <div class="flex gap-2">
-            <button type="button" onclick="app.closeAdminModal()" class="flex-1 bg-slate-800 hover:bg-slate-700 py-2.5 rounded-xl text-xs font-bold text-slate-300">
-              Cancel
-            </button>
-            <button type="submit" class="flex-1 bg-amber-500 hover:bg-amber-400 py-2.5 rounded-xl text-xs font-black text-slate-950">
-              Unlock
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-
-  </main>
-
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-    const appId = typeof __app_id !== 'undefined' ? __app_id : 'pgs-languages-day-app';
-    const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
-    const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-
-    let db = null;
-    let auth = null;
-    let currentUser = null;
-
-    if (firebaseConfig) {
-      const firebaseApp = initializeApp(firebaseConfig);
-      db = getFirestore(firebaseApp);
-      auth = getAuth(firebaseApp);
-
-      if (initialAuthToken) {
-        signInWithCustomToken(auth, initialAuthToken).catch(() => signInAnonymously(auth));
-      } else {
-        signInAnonymously(auth);
-      }
-
-      onAuthStateChanged(auth, (user) => {
-        currentUser = user;
-        if (user) {
-          leaderboard.initCloudListener();
-        }
-      });
-    }
-
-    window.cloudDB = {
-      isAvailable: () => !!db && !!currentUser,
-      
-      saveScore: async (scoreData) => {
-        if (!db || !currentUser) return false;
-        try {
-          const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'pgs_scores');
-          await addDoc(colRef, {
-            ...scoreData,
-            timestamp: Date.now()
-          });
-          return true;
-        } catch (err) {
-          console.error("Cloud Save Error:", err);
-          return false;
-        }
-      },
-
-      listenScores: (callback) => {
-        if (!db) return;
-        const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'pgs_scores');
-        onSnapshot(colRef, (snapshot) => {
-          const scores = [];
-          snapshot.forEach(doc => {
-            scores.push({ id: doc.id, ...doc.data() });
-          });
-          callback(scores);
-        }, (err) => {
-          console.error("Cloud Snapshot Error:", err);
-        });
-      }
-    };
-  </script>
-
-  <script>
-    // Default Preset Questions for PGS Languages Day
-    const PGS_DEFAULT_QUESTIONS = [
-      {
-        id: 'pgs_1',
-        name: 'Basque',
-        aliases: ['Euskara'],
-        clues: [
-          'It is a language isolate with no known linguistic connection to any other existing language family.',
-          'It is spoken in a region straddling the Western Pyrenees between northern Spain and southwestern France.',
-          'It uses an ergative-absolutive grammatical alignment structure.',
-          'It is known locally by its native name "Euskara".',
-          'A famous greeting in this language is "Kaixo" and thank you is "Eskerrik asko".'
-        ]
-      },
-      {
-        id: 'pgs_2',
-        name: 'Swahili',
-        aliases: ['Kiswahili'],
-        clues: [
-          'It serves as a major lingua franca across East Africa and the African Great Lakes region.',
-          'It belongs to the Bantu language branch but contains extensive Arabic loanwords due to trade history.',
-          'It is an official language of the African Union, Kenya, Tanzania, and Uganda.',
-          'The phrase "Hakuna Matata" (meaning "no worries") originates from this language.',
-          'Common words include "Jambo" (Hello), "Habari" (How are you), and "Asante" (Thank you).'
-        ]
-      },
-      {
-        id: 'pgs_3',
-        name: 'Japanese',
-        aliases: ['Nihongo'],
-        clues: [
-          'It uses three distinct writing systems simultaneously: two syllabaries and one logographic character system.',
-          'Honorific speech forms (Keigo) are built directly into its grammar to express social politeness.',
-          'It is spoken by over 125 million people, almost entirely within a single East Asian island nation.',
-          'Its writing system includes Hiragana, Katakana, and Kanji.',
-          'Famous words include "Konnichiwa" (Hello), "Arigato" (Thank you), and "Sayonara" (Goodbye).'
-        ]
-      },
-      {
-        id: 'pgs_4',
-        name: 'Gaelic',
-        aliases: ['Irish', 'Irish Gaelic', 'Gaeilge', 'Scottish Gaelic'],
-        clues: [
-          'It is part of the Goidelic branch of the Insular Celtic languages.',
-          'Its sentence structure follows a strict Verb-Subject-Object (VSO) order.',
-          'It is an official national language of Ireland and an official regional language in Scotland.',
-          'Road signs and official documents in Dublin feature this language alongside English.',
-          'Common phrases include "Sláinte" (Cheers!) and "Dia dhuit" (Hello).'
-        ]
-      },
-      {
-        id: 'pgs_5',
-        name: 'Hindi',
-        aliases: ['Hindustani'],
-        clues: [
-          'It is written from left to right in the Devanagari script with a distinctive horizontal top line.',
-          'It belongs to the Indo-Aryan branch of the Indo-European language family.',
-          'It is one of the official languages of India and one of the most spoken languages in the world.',
-          'It shares a mutually intelligible spoken foundation with Urdu.',
-          'Common greetings include "Namaste" and "Dhanyavaad" (Thank you).'
-        ]
-      },
-      {
-        id: 'pgs_6',
-        name: 'Turkish',
-        aliases: ['Türkçe'],
-        clues: [
-          'It is an agglutinative language where prefixes and suffixes are appended to root words.',
-          'It shifted from the Arabic script to a modified Latin alphabet in 1928 under modernizing reforms.',
-          'It exhibits vowel harmony, where vowels in a word must belong to the same phonetic class.',
-          'It is the main language spoken in Istanbul, the city spanning Europe and Asia.',
-          'Common greetings include "Merhaba" (Hello) and "Teşekkür ederim" (Thank you).'
-        ]
-      },
-      {
-        id: 'pgs_7',
-        name: 'Icelandic',
-        aliases: ['Íslenska'],
-        clues: [
-          'It has changed so little since the 9th century that modern speakers can easily read ancient Viking sagas.',
-          'A government language committee actively creates original native words for modern concepts instead of taking foreign loanwords.',
-          'It is spoken by around 370,000 people on a North Atlantic island nation.',
-          'It contains unique characters like Thorn (Þ/þ) and Eth (Ð/ð).',
-          'Common phrases include "Hæ" (Hi) and "Takk" (Thank you).'
-        ]
-      },
-      {
-        id: 'pgs_8',
-        name: 'Arabic',
-        aliases: ['Arabiyya'],
-        clues: [
-          'It is written from right to left in a cursive script where letters change shape depending on position.',
-          'It uses a root-and-pattern system where most words derive from a 3-consonant root.',
-          'It is an official language across 22 countries in the Middle East and North Africa.',
-          'It is the liturgical language of Islam.',
-          'Common phrases include "Salam Alaikum" (Peace be upon you) and "Shukran" (Thank you).'
-        ]
-      }
-    ];
-
-    // Web Audio Synthesizer
-    class SoundEffects {
-      constructor() {
-        this.ctx = null;
-      }
-
-      init() {
-        if (!this.ctx) {
-          const AudioContext = window.AudioContext || window.webkitAudioContext;
-          if (AudioContext) this.ctx = new AudioContext();
-        }
-      }
-
-      playCorrect() {
-        this.init();
-        if (!this.ctx) return;
-
-        const now = this.ctx.currentTime;
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(523.25, now);
-        osc.frequency.exponentialRampToValueAtTime(659.25, now + 0.1);
-        osc.frequency.exponentialRampToValueAtTime(783.99, now + 0.2);
-        osc.frequency.exponentialRampToValueAtTime(1046.50, now + 0.3);
-
-        gain.gain.setValueAtTime(0.15, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
-
-        osc.connect(gain);
-        gain.connect(this.ctx.destination);
-
-        osc.start(now);
-        osc.stop(now + 0.5);
-      }
-
-      playWrong() {
-        this.init();
-        if (!this.ctx) return;
-
-        const now = this.ctx.currentTime;
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(180, now);
-        osc.frequency.linearRampToValueAtTime(110, now + 0.25);
-
-        gain.gain.setValueAtTime(0.12, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
-
-        osc.connect(gain);
-        gain.connect(this.ctx.destination);
-
-        osc.start(now);
-        osc.stop(now + 0.3);
-      }
-
-      playClue() {
-        this.init();
-        if (!this.ctx) return;
-
-        const now = this.ctx.currentTime;
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(440, now);
-        osc.frequency.exponentialRampToValueAtTime(880, now + 0.1);
-
-        gain.gain.setValueAtTime(0.1, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
-
-        osc.connect(gain);
-        gain.connect(this.ctx.destination);
-
-        osc.start(now);
-        osc.stop(now + 0.15);
-      }
-    }
-
-    const soundFX = new SoundEffects();
-
-    class LeaderboardManager {
-      constructor() {
-        this.scores = [];
-        this.localStorageKey = 'pgs_languages_scores_v1';
-      }
-
-      initCloudListener() {
-        if (window.cloudDB && window.cloudDB.isAvailable()) {
-          window.cloudDB.listenScores((cloudScores) => {
-            this.scores = cloudScores;
-            this.render();
-          });
-        } else {
-          this.loadLocalScores();
-        }
-      }
-
-      loadLocalScores() {
-        try {
-          const raw = localStorage.getItem(this.localStorageKey);
-          this.scores = raw ? JSON.parse(raw) : [];
-          this.render();
-        } catch(e) {
-          this.scores = [];
-        }
-      }
-
-      async addScore(player, playerYear, score, correctCount, totalRounds) {
-        const entry = {
-          player: player || 'Anonymous Student',
-          playerYear: playerYear || 'Year 7',
-          score: score,
-          correctCount: correctCount,
-          totalRounds: totalRounds,
-          accuracy: Math.round((correctCount / (totalRounds || 1)) * 100),
-          date: new Date().toLocaleDateString()
-        };
-
-        let savedCloud = false;
-        if (window.cloudDB && window.cloudDB.isAvailable()) {
-          savedCloud = await window.cloudDB.saveScore(entry);
-        }
-
-        if (!savedCloud) {
-          const local = this.getLocalStorage();
-          local.push(entry);
-          localStorage.setItem(this.localStorageKey, JSON.stringify(local));
-          this.scores = local;
-          this.render();
-        }
-      }
-
-      getLocalStorage() {
-        try {
-          const raw = localStorage.getItem(this.localStorageKey);
-          return raw ? JSON.parse(raw) : [];
-        } catch(e) {
-          return [];
-        }
-      }
-
-      exportCSV() {
-        if (this.scores.length === 0) {
-          alert("No scores recorded yet to export.");
-          return;
-        }
-
-        let csv = "Rank,Student,Year Group / Role,Score,Correct,Total Rounds,Accuracy,Date\n";
-        const sorted = [...this.scores].sort((a, b) => b.score - a.score || b.accuracy - a.accuracy);
-        
-        sorted.forEach((s, i) => {
-          csv += `${i + 1},"${s.player}","${s.playerYear}",${s.score},${s.correctCount},${s.totalRounds},${s.accuracy}%,"${s.date}"\n`;
-        });
-
-        const blob = new Blob([csv], { type: 'text/csv' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `PGS_Languages_Day_Leaderboard_${new Date().toISOString().slice(0,10)}.csv`;
-        a.click();
-      }
-
-      render() {
-        const rowsContainer = document.getElementById('leaderboard-rows');
-        const emptyMsg = document.getElementById('leaderboard-empty');
-        const yearFilter = document.getElementById('leaderboard-year-filter')?.value || 'ALL';
-
-        rowsContainer.innerHTML = '';
-
-        let list = [...this.scores];
-        if (yearFilter !== 'ALL') {
-          list = list.filter(s => s.playerYear === yearFilter);
-        }
-
-        list.sort((a, b) => b.score - a.score || b.accuracy - a.accuracy);
-
-        if (list.length === 0) {
-          emptyMsg.classList.remove('hidden');
-          return;
-        }
-
-        emptyMsg.classList.add('hidden');
-
-        list.forEach((s, idx) => {
-          const tr = document.createElement('tr');
-          tr.className = "hover:bg-white/5 transition-colors";
-          
-          let rankBadge = `<span class="font-extrabold text-slate-400">${idx + 1}</span>`;
-          if (idx === 0) rankBadge = `<span class="w-7 h-7 rounded-full bg-amber-400/20 text-amber-400 border border-amber-400/40 inline-flex items-center justify-center font-black text-xs shadow-md"><i class="fa-solid fa-crown"></i></span>`;
-          if (idx === 1) rankBadge = `<span class="w-7 h-7 rounded-full bg-slate-300/20 text-slate-300 border border-slate-300/40 inline-flex items-center justify-center font-black text-xs">2</span>`;
-          if (idx === 2) rankBadge = `<span class="w-7 h-7 rounded-full bg-amber-700/20 text-amber-600 border border-amber-700/40 inline-flex items-center justify-center font-black text-xs">3</span>`;
-
-          tr.innerHTML = `
-            <td class="py-3.5 px-4">${rankBadge}</td>
-            <td class="py-3.5 px-4 font-bold text-white flex items-center gap-2">
-              <i class="fa-solid fa-user-graduate text-amber-400 text-xs"></i>
-              <span>${this.escapeHTML(s.player)}</span>
-            </td>
-            <td class="py-3.5 px-4 font-semibold text-slate-300">${this.escapeHTML(s.playerYear || 'Year 7')}</td>
-            <td class="py-3.5 px-4 font-black text-amber-400 text-base">${s.score} pts</td>
-            <td class="py-3.5 px-4 font-semibold text-indigo-300">${s.correctCount} / ${s.totalRounds} (${s.accuracy}%)</td>
-            <td class="py-3.5 px-4 text-xs text-slate-500">${s.date || 'Today'}</td>
-          `;
-          rowsContainer.appendChild(tr);
-        });
-      }
-
-      escapeHTML(str) {
-        return (str || '').replace(/[&<>'"]/g, 
-          tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
-        );
-      }
-    }
-
-    const leaderboard = new LeaderboardManager();
-
-    class AdminPanelManager {
-      constructor() {
-        this.storageKey = 'pgs_languages_questions_v1';
-        this.passcode = 'PGS2026';
-        this.isAdminUnlocked = false;
-        this.questions = this.loadQuestions();
-      }
-
-      loadQuestions() {
-        try {
-          const raw = localStorage.getItem(this.storageKey);
-          return raw ? JSON.parse(raw) : [...PGS_DEFAULT_QUESTIONS];
-        } catch(e) {
-          return [...PGS_DEFAULT_QUESTIONS];
-        }
-      }
-
-      saveQuestionsToStorage() {
-        localStorage.setItem(this.storageKey, JSON.stringify(this.questions));
-        this.renderQuestionsList();
-      }
-
-      lockAdmin() {
-        this.isAdminUnlocked = false;
-        document.getElementById('admin-lock-icon').className = 'fa-solid fa-lock text-slate-400';
-        app.showTab('game');
-      }
-
-      saveLanguage(e) {
-        e.preventDefault();
-        const name = document.getElementById('edit-lang-name').value.trim();
-        const aliasesRaw = document.getElementById('edit-lang-aliases').value.trim();
-        const c1 = document.getElementById('edit-clue-1').value.trim();
-        const c2 = document.getElementById('edit-clue-2').value.trim();
-        const c3 = document.getElementById('edit-clue-3').value.trim();
-        const c4 = document.getElementById('edit-clue-4').value.trim();
-        const c5 = document.getElementById('edit-clue-5').value.trim();
-
-        if (!name || !c1 || !c2 || !c3 || !c4 || !c5) {
-          alert("Please fill in language name and all 5 clues.");
-          return;
-        }
-
-        const aliases = aliasesRaw ? aliasesRaw.split(',').map(a => a.trim()).filter(Boolean) : [];
-
-        const newLang = {
-          id: 'pgs_q_' + Date.now(),
-          name: name,
-          aliases: aliases,
-          clues: [c1, c2, c3, c4, c5]
-        };
-
-        this.questions.push(newLang);
-        this.saveQuestionsToStorage();
-        this.clearForm();
-        alert(`Language "${name}" added to PGS Questions!`);
-      }
-
-      deleteQuestion(id) {
-        if (confirm("Delete this language question?")) {
-          this.questions = this.questions.filter(q => q.id !== id);
-          this.saveQuestionsToStorage();
-        }
-      }
-
-      clearForm() {
-        document.getElementById('admin-lang-form').reset();
-      }
-
-      resetToDefault() {
-        if (confirm("Reset questions back to default PGS question set? Custom additions will be reset.")) {
-          this.questions = [...PGS_DEFAULT_QUESTIONS];
-          this.saveQuestionsToStorage();
-        }
-      }
-
-      exportDeckJSON() {
-        const blob = new Blob([JSON.stringify(this.questions, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `PGS_Languages_Day_Questions_${new Date().toISOString().slice(0,10)}.json`;
-        a.click();
-      }
-
-      importDeckJSON(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          try {
-            const imported = JSON.parse(e.target.result);
-            if (Array.isArray(imported) && imported.length > 0 && imported[0].clues) {
-              this.questions = imported;
-              this.saveQuestionsToStorage();
-              alert(`Successfully imported ${imported.length} language questions!`);
-            } else {
-              alert("Invalid question format. Expected array of language objects with clues.");
-            }
-          } catch(err) {
-            alert("Error parsing JSON question file.");
-          }
-        };
-        reader.readAsText(file);
-      }
-
-      renderQuestionsList() {
-        const container = document.getElementById('admin-questions-list');
-        const countSpan = document.getElementById('admin-questions-count');
-        
-        countSpan.textContent = this.questions.length;
-        container.innerHTML = '';
-
-        if (this.questions.length === 0) {
-          container.innerHTML = `<div class="text-xs text-slate-500 py-4 text-center">No questions in set. Add one above!</div>`;
-          return;
-        }
-
-        this.questions.forEach((q, idx) => {
-          const item = document.createElement('div');
-          item.className = "bg-slate-900/90 p-3 rounded-xl border border-white/5 flex items-center justify-between gap-3 text-xs";
-          item.innerHTML = `
-            <div class="truncate">
-              <span class="font-black text-white text-sm">${idx + 1}. ${this.escapeHTML(q.name)}</span>
-              ${q.aliases.length > 0 ? `<span class="text-slate-400 text-[11px] ml-2">(${q.aliases.join(', ')})</span>` : ''}
-              <div class="text-slate-400 text-[11px] truncate mt-0.5">Clue 1: ${this.escapeHTML(q.clues[0])}</div>
-            </div>
-            <button onclick="adminPanel.deleteQuestion('${q.id}')" class="text-rose-400 hover:text-rose-300 p-2 hover:bg-rose-500/10 rounded-lg transition-colors flex-shrink-0">
-              <i class="fa-solid fa-trash-can"></i>
-            </button>
-          `;
-          container.appendChild(item);
-        });
-      }
-
-      escapeHTML(str) {
-        return (str || '').replace(/[&<>'"]/g, 
-          tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
-        );
-      }
-    }
-
-    const adminPanel = new AdminPanelManager();
-
-    class AppEngine {
-      constructor() {
-        this.playerName = '';
-        this.playerYear = '';
-        this.questions = [];
-        this.currentRoundIdx = 0;
-        this.revealedCluesCount = 1;
-        this.score = 0;
-        this.correctCount = 0;
-        this.roundCompleted = false;
-        this.pointValues = [50, 40, 30, 20, 10];
-      }
-
-      init() {
-        leaderboard.initCloudListener();
-        adminPanel.renderQuestionsList();
-      }
-
-      requestAdminAccess() {
-        if (adminPanel.isAdminUnlocked) {
-          this.showTab('admin');
-        } else {
-          document.getElementById('admin-passcode-error').classList.add('hidden');
-          document.getElementById('admin-passcode-input').value = '';
-          document.getElementById('admin-passcode-modal').classList.remove('hidden');
-        }
-      }
-
-      closeAdminModal() {
-        document.getElementById('admin-passcode-modal').classList.add('hidden');
-      }
-
-      verifyAdminPasscode(e) {
-        e.preventDefault();
-        const entered = document.getElementById('admin-passcode-input').value.trim();
-        if (entered === adminPanel.passcode) {
-          adminPanel.isAdminUnlocked = true;
-          document.getElementById('admin-lock-icon').className = 'fa-solid fa-lock-open text-amber-400';
-          this.closeAdminModal();
-          this.showTab('admin');
-        } else {
-          document.getElementById('admin-passcode-error').classList.remove('hidden');
-        }
-      }
-
-      showTab(tabName) {
-        const screens = ['welcome', 'game', 'summary', 'leaderboard', 'admin'];
-        screens.forEach(s => {
-          const el = document.getElementById(`screen-${s}`);
-          if (el) el.classList.add('hidden');
-        });
-
-        ['game', 'leaderboard', 'admin'].forEach(nav => {
-          const btn = document.getElementById(`nav-${nav}`);
-          if (btn) {
-            if (nav === tabName || (tabName === 'welcome' && nav === 'game') || (tabName === 'summary' && nav === 'game')) {
-              btn.className = "px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition-all flex items-center gap-2 bg-amber-500 text-slate-950 shadow";
-            } else {
-              btn.className = "px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold text-slate-300 hover:text-white hover:bg-white/5 transition-all flex items-center gap-2";
-            }
-          }
-        });
-
-        if (tabName === 'game' && !this.playerName) {
-          document.getElementById('screen-welcome').classList.remove('hidden');
-        } else {
-          const target = document.getElementById(`screen-${tabName}`);
-          if (target) target.classList.remove('hidden');
-        }
-      }
-
-      startGame(e) {
-        e.preventDefault();
-        const nameInput = document.getElementById('player-name').value.trim();
-        const yearInput = document.getElementById('player-year').value;
-
-        if (!nameInput || !yearInput) return;
-
-        this.playerName = nameInput;
-        this.playerYear = yearInput;
-        this.score = 0;
-        this.correctCount = 0;
-        this.currentRoundIdx = 0;
-
-        this.questions = [...adminPanel.questions];
-        this.questions.sort(() => Math.random() - 0.5);
-
-        document.getElementById('display-player-name').textContent = this.playerName;
-        document.getElementById('display-player-year').textContent = this.playerYear;
-        document.getElementById('user-avatar').textContent = this.playerName.charAt(0).toUpperCase();
-        document.getElementById('display-total-score').textContent = '0';
-
-        this.showTab('game');
-        this.startRound();
-      }
-
-      startRound() {
-        this.roundCompleted = false;
-        this.revealedCluesCount = 1;
-        
-        document.getElementById('display-round-progress').textContent = `${this.currentRoundIdx + 1} / ${this.questions.length}`;
-        
-        document.getElementById('guess-input').value = '';
-        document.getElementById('guess-input').disabled = false;
-        document.getElementById('submit-guess-btn').disabled = false;
-        document.getElementById('next-clue-btn').disabled = false;
-        document.getElementById('next-clue-btn').classList.remove('opacity-50', 'cursor-not-allowed');
-        
-        const feedback = document.getElementById('feedback-message');
-        feedback.className = 'hidden';
-
-        document.getElementById('interaction-area').classList.remove('hidden');
-        document.getElementById('round-complete-actions').classList.add('hidden');
-
-        this.renderClues();
-        this.updatePotentialPointsUI();
-      }
-
-      updatePotentialPointsUI() {
-        const pts = this.pointValues[this.revealedCluesCount - 1] || 10;
-        const tag = document.getElementById('potential-points-tag');
-        tag.textContent = `${pts} pts`;
-
-        const nextBtn = document.getElementById('next-clue-btn');
-        if (this.revealedCluesCount >= 5) {
-          nextBtn.disabled = true;
-          nextBtn.classList.add('opacity-50', 'cursor-not-allowed');
-          nextBtn.querySelector('span').textContent = 'All 5 Clues Revealed';
-        } else {
-          nextBtn.querySelector('span').textContent = `Reveal Next Clue (-10 pts)`;
-        }
-      }
-
-      renderClues() {
-        const container = document.getElementById('clues-container');
-        const currentLang = this.questions[this.currentRoundIdx];
-        container.innerHTML = '';
-
-        for (let i = 0; i < 5; i++) {
-          const isRevealed = i < this.revealedCluesCount;
-          const ptsVal = this.pointValues[i];
-
-          const clueCard = document.createElement('div');
-          
-          if (isRevealed) {
-            clueCard.className = "glass-card-light p-4 rounded-2xl border border-amber-500/30 flex items-start gap-3.5 transition-all animate-bounce-short";
-            clueCard.innerHTML = `
-              <div class="w-7 h-7 rounded-lg bg-amber-500/20 text-amber-400 border border-amber-500/40 flex items-center justify-center font-black text-xs flex-shrink-0 mt-0.5">
-                ${i + 1}
-              </div>
-              <div class="flex-grow">
-                <div class="flex items-center justify-between gap-2 mb-1">
-                  <span class="text-[11px] font-extrabold uppercase tracking-wider text-amber-300">Clue Tier ${i + 1}</span>
-                  <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-900 text-slate-300">${ptsVal} pts</span>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight mb-3">PGS Languages Day</h1>
+            <p class="text-sm text-gray-300 leading-relaxed max-w-md mb-6">
+                Welcome to Languages Day 2026. In this game, you will be given hints to a mystery language, your job is to figure out what language it is! The less hints you need, the more points you will get. Good Luck!
+            </p>
+
+            <!-- Clue Score Breakdown Bar -->
+            <div class="w-full bg-navy-900/80 border border-gray-800 rounded-xl p-3 mb-6 grid grid-cols-5 gap-1 text-center">
+                <div>
+                    <div class="text-emerald-400 font-extrabold text-sm sm:text-base">50</div>
+                    <div class="text-[10px] text-gray-400">Clue 1</div>
                 </div>
-                <p class="text-sm sm:text-base font-semibold text-slate-100 leading-relaxed">${this.escapeHTML(currentLang.clues[i])}</p>
-              </div>
-            `;
-          } else {
-            clueCard.className = "bg-slate-900/40 p-3.5 rounded-2xl border border-white/5 flex items-center justify-between gap-3 opacity-60";
-            clueCard.innerHTML = `
-              <div class="flex items-center gap-3">
-                <div class="w-7 h-7 rounded-lg bg-slate-800 text-slate-500 flex items-center justify-center font-bold text-xs flex-shrink-0">
-                  <i class="fa-solid fa-lock text-[10px]"></i>
+                <div>
+                    <div class="text-sky-400 font-extrabold text-sm sm:text-base">40</div>
+                    <div class="text-[10px] text-gray-400">Clue 2</div>
                 </div>
-                <span class="text-xs font-semibold text-slate-400">Clue ${i + 1} Locked</span>
-              </div>
-              <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-500">${ptsVal} pts</span>
-            `;
-          }
+                <div>
+                    <div class="text-amber-400 font-extrabold text-sm sm:text-base">30</div>
+                    <div class="text-[10px] text-gray-400">Clue 3</div>
+                </div>
+                <div>
+                    <div class="text-orange-400 font-extrabold text-sm sm:text-base">20</div>
+                    <div class="text-[10px] text-gray-400">Clue 4</div>
+                </div>
+                <div>
+                    <div class="text-rose-400 font-extrabold text-sm sm:text-base">10</div>
+                    <div class="text-[10px] text-gray-400">Clue 5</div>
+                </div>
+            </div>
 
-          container.appendChild(clueCard);
-        }
-      }
+            <!-- Start Registration Form -->
+            <form id="startForm" onsubmit="handleStartGame(event)" class="w-full space-y-4 text-left">
+                <div>
+                    <label class="block text-[11px] font-bold tracking-wider text-gray-400 uppercase mb-1">FULL NAME *</label>
+                    <input type="text" id="studentName" required placeholder="Enter your full name..." class="w-full bg-navy-900/90 border border-gray-700/80 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-amber-500 transition-colors">
+                </div>
 
-      revealNextClue() {
-        if (this.revealedCluesCount < 5 && !this.roundCompleted) {
-          this.revealedCluesCount++;
-          soundFX.playClue();
-          this.renderClues();
-          this.updatePotentialPointsUI();
-        }
-      }
+                <div>
+                    <label class="block text-[11px] font-bold tracking-wider text-gray-400 uppercase mb-1">YEAR GROUP / ROLE *</label>
+                    <select id="studentYearGroup" required class="w-full bg-navy-900/90 border border-gray-700/80 rounded-xl px-4 py-3 text-white custom-select focus:outline-none focus:border-amber-500 transition-colors">
+                        <option value="Year 7">Year 7</option>
+                        <option value="Year 8">Year 8</option>
+                        <option value="Year 9">Year 9</option>
+                        <option value="Year 10" selected>Year 10</option>
+                        <option value="Year 11">Year 11</option>
+                        <option value="Sixth Form">Sixth Form</option>
+                        <option value="Staff">Staff</option>
+                    </select>
+                </div>
 
-      submitGuess(e) {
-        e.preventDefault();
-        if (this.roundCompleted) return;
+                <button type="submit" class="w-full py-3.5 bg-amber-500 hover:bg-amber-400 text-navy-900 font-extrabold rounded-xl transition-all duration-200 shadow-lg shadow-amber-500/20 flex items-center justify-center space-x-2 text-base mt-2">
+                    <span>Start Languages Challenge</span>
+                    <i class="fa-solid fa-play text-xs"></i>
+                </button>
+            </form>
+        </div>
 
-        const inputEl = document.getElementById('guess-input');
-        const userGuess = inputEl.value.trim();
+        <!-- GAMEPLAY VIEW -->
+        <div id="gameplayView" class="w-full max-w-xl glass-card rounded-2xl p-6 sm:p-8 hidden flex-col transition-all">
+            <!-- Progress Header -->
+            <div class="flex items-center justify-between pb-4 border-b border-gray-800 mb-6">
+                <div>
+                    <span id="gamePlayerTag" class="text-xs font-semibold text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-full px-3 py-1">Player</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="text-right">
+                        <span class="text-[10px] uppercase font-bold text-gray-400 block">Question</span>
+                        <span id="questionCounter" class="text-sm font-extrabold text-white">1 / 5</span>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-[10px] uppercase font-bold text-gray-400 block">Total Points</span>
+                        <span id="totalPointsDisplay" class="text-sm font-extrabold text-amber-400">0</span>
+                    </div>
+                </div>
+            </div>
 
-        if (!userGuess) return;
+            <!-- Hint Box -->
+            <div class="mb-6">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-xs font-extrabold text-gray-400 uppercase tracking-wider flex items-center">
+                        <i class="fa-solid fa-lightbulb text-amber-400 mr-2"></i> Reveal Hints
+                    </h3>
+                    <span id="currentPointsValue" class="text-xs font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-full">
+                        Worth 50 Points
+                    </span>
+                </div>
 
-        const currentLang = this.questions[this.currentRoundIdx];
-        const isCorrect = this.checkMatch(userGuess, currentLang.name, currentLang.aliases);
+                <div id="cluesContainer" class="space-y-2.5">
+                    <!-- Clues populated dynamically -->
+                </div>
 
-        if (isCorrect) {
-          this.handleCorrectGuess();
-        } else {
-          this.handleWrongGuess();
-        }
-      }
+                <button id="nextClueBtn" onclick="revealNextClue()" class="mt-3 w-full py-2 bg-gray-800 hover:bg-gray-700 text-amber-400 font-semibold rounded-lg text-xs border border-gray-700 transition-colors flex items-center justify-center">
+                    <i class="fa-solid fa-plus-circle mr-1.5"></i> Reveal Next Hint (-10 Points)
+                </button>
+            </div>
 
-      checkMatch(guess, actualName, aliases = []) {
-        const clean = (str) => str.toLowerCase().replace(/[^a-z0-9]/g, '');
-        const targetList = [actualName, ...aliases].map(clean);
-        const userTarget = clean(guess);
+            <!-- Answer Input Form -->
+            <form onsubmit="handleGuessSubmit(event)" class="space-y-3">
+                <label class="block text-xs font-bold text-gray-300">WHICH LANGUAGE IS THIS?</label>
+                <div class="flex space-x-2">
+                    <input type="text" id="languageGuessInput" required placeholder="Type language name..." class="flex-grow bg-navy-900 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-amber-500">
+                    <button type="submit" class="bg-amber-500 hover:bg-amber-400 text-navy-900 font-extrabold px-6 rounded-xl transition-all flex items-center">
+                        Submit
+                    </button>
+                </div>
+            </form>
 
-        if (targetList.includes(userTarget)) return true;
-        return targetList.some(target => this.levenshteinDistance(userTarget, target) <= 1 && target.length > 3);
-      }
+            <!-- Feedback Message -->
+            <div id="feedbackBox" class="mt-4 p-3 rounded-xl text-center text-sm font-bold hidden"></div>
+        </div>
 
-      levenshteinDistance(a, b) {
-        if (a.length === 0) return b.length;
-        if (b.length === 0) return a.length;
-        const matrix = [];
-        for (let i = 0; i <= b.length; i++) matrix[i] = [i];
-        for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
+        <!-- FINAL SUMMARY VIEW -->
+        <div id="summaryView" class="w-full max-w-lg glass-card rounded-2xl p-6 sm:p-8 hidden text-center flex-col items-center">
+            <div class="w-16 h-16 rounded-full bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 mb-4 shadow-lg shadow-amber-500/10">
+                <i class="fa-solid fa-trophy text-3xl"></i>
+            </div>
+            <h2 class="text-2xl font-black text-white mb-1">Challenge Completed!</h2>
+            <p class="text-sm text-gray-400 mb-6">Great effort! Here is your final score summary.</p>
 
-        for (let i = 1; i <= b.length; i++) {
-          for (let j = 1; j <= a.length; j++) {
-            if (b.charAt(i - 1) === a.charAt(j - 1)) {
-              matrix[i][j] = matrix[i - 1][j - 1];
-            } else {
-              matrix[i][j] = Math.min(
-                matrix[i - 1][j - 1] + 1,
-                matrix[i][j - 1] + 1,
-                matrix[i - 1][j] + 1
-              );
+            <div class="w-full bg-navy-900/90 border border-gray-800 rounded-xl p-5 mb-6 text-center">
+                <span class="text-xs font-bold text-gray-400 uppercase tracking-widest block mb-1">FINAL SCORE</span>
+                <span id="finalScoreDisplay" class="text-4xl font-black text-amber-400">0</span>
+                <span class="text-xs text-gray-400 block mt-1">out of 250 points</span>
+            </div>
+
+            <div class="w-full flex space-x-3">
+                <button onclick="showView('leaderboardView')" class="flex-1 py-3 bg-amber-500 hover:bg-amber-400 text-navy-900 font-bold rounded-xl transition-all shadow-md">
+                    View Leaderboard
+                </button>
+                <button onclick="resetGameToHome()" class="flex-1 py-3 bg-gray-800 hover:bg-gray-700 text-white font-bold rounded-xl border border-gray-700 transition-all">
+                    Play Again
+                </button>
+            </div>
+        </div>
+
+        <!-- LEADERBOARD VIEW -->
+        <div id="leaderboardView" class="w-full max-w-2xl glass-card rounded-2xl p-6 sm:p-8 hidden flex-col">
+            <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-800">
+                <div>
+                    <h2 class="text-2xl font-black text-white flex items-center">
+                        <i class="fa-solid fa-trophy text-amber-400 mr-2.5"></i> High Scores
+                    </h2>
+                    <p class="text-xs text-gray-400 mt-0.5">Deduplicated leaderboard displaying best scores per participant.</p>
+                </div>
+                <button onclick="showView('welcomeView')" class="px-3 py-1.5 rounded-full bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs font-semibold border border-gray-700">
+                    <i class="fa-solid fa-arrow-left mr-1"></i> Back
+                </button>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="text-[11px] font-extrabold text-gray-400 uppercase border-b border-gray-800/80">
+                            <th class="pb-3 px-2">Rank</th>
+                            <th class="pb-3 px-2">Name</th>
+                            <th class="pb-3 px-2">Year / Role</th>
+                            <th class="pb-3 px-2 text-right">Score</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboardTableBody" class="divide-y divide-gray-800/50 text-sm">
+                        <!-- Populated dynamically with deduplicated live scores -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ADMIN LOGIN VIEW -->
+        <div id="adminLoginView" class="w-full max-w-md glass-card rounded-2xl p-6 sm:p-8 hidden flex-col items-center text-center">
+            <div class="w-14 h-14 rounded-2xl bg-gray-800 border border-gray-700 flex items-center justify-center text-amber-400 mb-4">
+                <i class="fa-solid fa-user-shield text-2xl"></i>
+            </div>
+            <h2 class="text-xl font-bold text-white mb-2">Teacher Admin Access</h2>
+            <p class="text-xs text-gray-400 mb-6">Enter passcode to manage questions and student scores.</p>
+
+            <form onsubmit="handleAdminLogin(event)" class="w-full space-y-4">
+                <input type="password" id="adminPasscode" required placeholder="Enter passcode..." class="w-full bg-navy-900 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-amber-500 text-center tracking-widest">
+                <button type="submit" class="w-full py-3 bg-amber-500 hover:bg-amber-400 text-navy-900 font-bold rounded-xl transition-all shadow-md">
+                    Unlock Dashboard
+                </button>
+            </form>
+        </div>
+
+        <!-- ADMIN DASHBOARD VIEW -->
+        <div id="adminDashboardView" class="w-full max-w-4xl glass-card rounded-2xl p-6 sm:p-8 hidden flex-col">
+            <div class="flex items-center justify-between pb-4 border-b border-gray-800 mb-6">
+                <div class="flex items-center space-x-2">
+                    <span class="bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-bold px-3 py-1 rounded-full">Admin Panel</span>
+                    <h2 class="text-xl font-bold text-white">Teacher Dashboard</h2>
+                </div>
+                <button onclick="logoutAdmin()" class="px-3 py-1.5 rounded-full bg-rose-500/20 text-rose-300 hover:bg-rose-500/30 text-xs font-semibold border border-rose-500/30">
+                    <i class="fa-solid fa-right-from-bracket mr-1"></i> Exit Admin
+                </button>
+            </div>
+
+            <!-- Tab Buttons -->
+            <div class="flex space-x-2 mb-6 border-b border-gray-800 pb-3">
+                <button id="adminTabQuestionsBtn" onclick="switchAdminTab('questions')" class="px-4 py-2 rounded-xl text-xs font-bold bg-amber-500 text-navy-900 shadow">
+                    Question Sets Management
+                </button>
+                <button id="adminTabScoresBtn" onclick="switchAdminTab('scores')" class="px-4 py-2 rounded-xl text-xs font-bold bg-gray-800 text-gray-400 hover:text-white">
+                    Manage Leaderboard Scores
+                </button>
+            </div>
+
+            <!-- Tab 1: Questions Management -->
+            <div id="adminTabQuestions" class="space-y-6">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-sm font-bold text-gray-300 uppercase">Live Question Deck</h3>
+                    <button onclick="openQuestionModal()" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-navy-900 font-bold text-xs rounded-lg transition-all">
+                        <i class="fa-solid fa-plus mr-1"></i> Add Question
+                    </button>
+                </div>
+
+                <div id="adminQuestionsList" class="space-y-3">
+                    <!-- Dynamic Question Deck Cards -->
+                </div>
+            </div>
+
+            <!-- Tab 2: Score Management -->
+            <div id="adminTabScores" class="hidden space-y-4">
+                <h3 class="text-sm font-bold text-gray-300 uppercase">Manage Student Entries</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="text-[11px] font-extrabold text-gray-400 uppercase border-b border-gray-800">
+                                <th class="pb-3 px-2">Student Name</th>
+                                <th class="pb-3 px-2">Year / Role</th>
+                                <th class="pb-3 px-2">Score</th>
+                                <th class="pb-3 px-2 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminScoresTableBody" class="divide-y divide-gray-800/50 text-sm">
+                            <!-- Populated dynamically with delete actions -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- QUESTION EDITOR MODAL -->
+    <div id="questionModal" class="fixed inset-0 bg-black/80 backdrop-blur-md hidden items-center justify-center p-4 z-50">
+        <div class="w-full max-w-lg glass-card rounded-2xl p-6 flex flex-col space-y-4 border border-gray-700">
+            <h3 id="modalTitle" class="text-lg font-bold text-white">Add New Question</h3>
+            <form onsubmit="handleSaveQuestion(event)" class="space-y-3">
+                <input type="hidden" id="editQuestionId">
+                <div>
+                    <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">Target Language Name *</label>
+                    <input type="text" id="targetLanguage" required placeholder="e.g. Swahili" class="w-full bg-navy-900 border border-gray-700 rounded-xl px-3 py-2 text-white text-sm">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">Clue 1 (50 Points) *</label>
+                    <input type="text" id="clue1" required class="w-full bg-navy-900 border border-gray-700 rounded-xl px-3 py-2 text-white text-sm">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">Clue 2 (40 Points) *</label>
+                    <input type="text" id="clue2" required class="w-full bg-navy-900 border border-gray-700 rounded-xl px-3 py-2 text-white text-sm">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">Clue 3 (30 Points) *</label>
+                    <input type="text" id="clue3" required class="w-full bg-navy-900 border border-gray-700 rounded-xl px-3 py-2 text-white text-sm">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">Clue 4 (20 Points) *</label>
+                    <input type="text" id="clue4" required class="w-full bg-navy-900 border border-gray-700 rounded-xl px-3 py-2 text-white text-sm">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">Clue 5 (10 Points) *</label>
+                    <input type="text" id="clue5" required class="w-full bg-navy-900 border border-gray-700 rounded-xl px-3 py-2 text-white text-sm">
+                </div>
+
+                <div class="flex justify-end space-x-2 pt-2">
+                    <button type="button" onclick="closeQuestionModal()" class="px-4 py-2 rounded-xl bg-gray-800 text-gray-300 hover:bg-gray-700 text-xs font-semibold">Cancel</button>
+                    <button type="submit" class="px-4 py-2 rounded-xl bg-amber-500 text-navy-900 font-extrabold text-xs hover:bg-amber-400">Save Question</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- UI Notification Toast -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-navy-800 border border-amber-500/50 text-white px-4 py-3 rounded-xl shadow-2xl hidden items-center space-x-3 z-50 text-sm font-semibold">
+        <i id="toastIcon" class="fa-solid fa-circle-check text-amber-400"></i>
+        <span id="toastMessage">Notification</span>
+    </div>
+
+    <!-- Firebase JS SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Firebase Configuration Setup
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'pgs-languages-day-2026';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+            apiKey: "demo-key",
+            authDomain: "demo.firebaseapp.com",
+            projectId: "demo-project",
+            storageBucket: "demo.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:123456"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Firestore Collections Paths (Rule 1 Compliant)
+        const SCORES_COLLECTION = collection(db, 'artifacts', appId, 'public', 'data', 'scores');
+        const QUESTIONS_COLLECTION = collection(db, 'artifacts', appId, 'public', 'data', 'questions');
+
+        // Initial Default Question Deck
+        const DEFAULT_QUESTIONS = [
+            {
+                id: 'q1',
+                targetLanguage: 'Japanese',
+                clues: [
+                    'It uses three distinct writing systems: Hiragana, Katakana, and Kanji.',
+                    'This language has no grammatical gender or plural forms for nouns.',
+                    'Anime, Manga, and Sushi originate from the country where it is spoken.',
+                    'The native name for this language is "Nihongo".',
+                    'The capital city where it is spoken is Tokyo.'
+                ]
+            },
+            {
+                id: 'q2',
+                targetLanguage: 'Spanish',
+                clues: [
+                    'It is a Romance language derived from Vulgar Latin.',
+                    'It uses inverted question marks (¿) and exclamation marks (¡).',
+                    'It is spoken natively by over 480 million people in Spain and Latin America.',
+                    'Common greetings include "Hola", "Buenos días", and "Gracias".',
+                    'Flamenco dancing and Tapas are part of its culture.'
+                ]
+            },
+            {
+                id: 'q3',
+                targetLanguage: 'German',
+                clues: [
+                    'Nouns in this language are always capitalized.',
+                    'It has compound words like "Krankenwagen" (ambulance).',
+                    'It is an official language of Germany, Austria, and Switzerland.',
+                    'Its alphabet includes umlaut letters: Ä, Ö, Ü, and the Eszett (ß).',
+                    'Famous for Oktoberfest and Berlin.'
+                ]
+            },
+            {
+                id: 'q4',
+                targetLanguage: 'Mandarin',
+                clues: [
+                    'It is a tonal language where word meaning changes with pitch.',
+                    'It uses logographic characters rather than a phonetic alphabet.',
+                    'It is the most spoken native language in the entire world.',
+                    'Commonly transcribed using the Pinyin Romanization system.',
+                    'Spoken in Beijing and celebrated during the Lunar New Year.'
+                ]
+            },
+            {
+                id: 'q5',
+                targetLanguage: 'Arabic',
+                clues: [
+                    'It is written from right to left in a cursive script.',
+                    'It belongs to the Semitic language family.',
+                    'Numbers widely used worldwide (1, 2, 3) are called numerals of this language origin.',
+                    'Official language across North Africa and the Middle East.',
+                    'Common greeting is "As-salamu alaykum".'
+                ]
             }
-          }
+        ];
+
+        // State Variables
+        let currentUser = null;
+        let activeQuestions = [...DEFAULT_QUESTIONS];
+        let rawScores = [];
+        let currentGameIndex = 0;
+        let currentRevealedClues = 1;
+        let playerSession = { name: '', yearGroup: '', currentScore: 0 };
+
+        // Authenticate then setup Firestore Real-time Listeners
+        async function initializeAuthAndSync() {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+                currentUser = auth.currentUser;
+
+                // Sync Live Questions
+                onSnapshot(QUESTIONS_COLLECTION, (snapshot) => {
+                    if (!snapshot.empty) {
+                        activeQuestions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    } else {
+                        // Seed default questions to Firestore if empty
+                        DEFAULT_QUESTIONS.forEach(q => {
+                            setDoc(doc(QUESTIONS_COLLECTION, q.id), q);
+                        });
+                        activeQuestions = [...DEFAULT_QUESTIONS];
+                    }
+                    renderAdminQuestionsList();
+                }, (err) => console.error("Questions Sync Error:", err));
+
+                // Sync Live Scores
+                onSnapshot(SCORES_COLLECTION, (snapshot) => {
+                    rawScores = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    renderLeaderboard();
+                    renderAdminScores();
+                }, (err) => console.error("Scores Sync Error:", err));
+
+            } catch (err) {
+                console.error("Firebase Auth Error:", err);
+            }
         }
-        return matrix[b.length][a.length];
-      }
 
-      handleCorrectGuess() {
-        this.roundCompleted = true;
-        this.correctCount++;
-        
-        const roundPoints = this.pointValues[this.revealedCluesCount - 1];
-        this.score += roundPoints;
+        window.onload = initializeAuthAndSync;
 
-        document.getElementById('display-total-score').textContent = this.score;
+        // Navigation Controller
+        window.showView = function(viewId) {
+            const views = ['welcomeView', 'gameplayView', 'summaryView', 'leaderboardView', 'adminLoginView', 'adminDashboardView'];
+            views.forEach(v => {
+                const el = document.getElementById(v);
+                if (el) el.style.display = (v === viewId) ? 'flex' : 'none';
+            });
 
-        soundFX.playCorrect();
+            // Update Nav Pill Button Highlights
+            document.getElementById('navPlayBtn').className = (viewId === 'welcomeView' || viewId === 'gameplayView') 
+                ? 'px-4 py-2 rounded-full text-xs sm:text-sm font-semibold flex items-center space-x-2 bg-amber-500 text-navy-900 hover:bg-amber-400 transition-all shadow-md'
+                : 'px-4 py-2 rounded-full text-xs sm:text-sm font-semibold flex items-center space-x-2 bg-gray-800/80 text-gray-300 hover:bg-gray-700 hover:text-white transition-all border border-gray-700/50';
 
-        if (typeof confetti === 'function') {
-          confetti({
-            particleCount: 90,
-            spread: 75,
-            origin: { y: 0.6 }
-          });
+            document.getElementById('navLeaderboardBtn').className = (viewId === 'leaderboardView') 
+                ? 'px-4 py-2 rounded-full text-xs sm:text-sm font-semibold flex items-center space-x-2 bg-amber-500 text-navy-900 hover:bg-amber-400 transition-all shadow-md'
+                : 'px-4 py-2 rounded-full text-xs sm:text-sm font-semibold flex items-center space-x-2 bg-gray-800/80 text-gray-300 hover:bg-gray-700 hover:text-white transition-all border border-gray-700/50';
+
+            document.getElementById('navAdminBtn').className = (viewId === 'adminLoginView' || viewId === 'adminDashboardView') 
+                ? 'px-4 py-2 rounded-full text-xs sm:text-sm font-semibold flex items-center space-x-2 bg-amber-500 text-navy-900 hover:bg-amber-400 transition-all shadow-md'
+                : 'px-4 py-2 rounded-full text-xs sm:text-sm font-semibold flex items-center space-x-2 bg-gray-800/80 text-gray-300 hover:bg-gray-700 hover:text-white transition-all border border-gray-700/50';
+        };
+
+        // Start Game Handler
+        window.handleStartGame = function(e) {
+            e.preventDefault();
+            const name = document.getElementById('studentName').value.trim();
+            const year = document.getElementById('studentYearGroup').value;
+
+            if (!name) return;
+
+            playerSession = {
+                name: name,
+                yearGroup: year,
+                currentScore: 0
+            };
+
+            currentGameIndex = 0;
+            document.getElementById('gamePlayerTag').innerText = `${playerSession.name} (${playerSession.yearGroup})`;
+            document.getElementById('totalPointsDisplay').innerText = '0';
+
+            showView('gameplayView');
+            loadQuestion(0);
+        };
+
+        // Load Question Data
+        function loadQuestion(index) {
+            if (index >= activeQuestions.length) {
+                finishGame();
+                return;
+            }
+
+            currentRevealedClues = 1;
+            document.getElementById('questionCounter').innerText = `${index + 1} / ${activeQuestions.length}`;
+            document.getElementById('languageGuessInput').value = '';
+            
+            const feedbackBox = document.getElementById('feedbackBox');
+            feedbackBox.className = 'mt-4 p-3 rounded-xl text-center text-sm font-bold hidden';
+            
+            renderClues();
         }
 
-        const currentLang = this.questions[this.currentRoundIdx];
-        this.showFeedback(
-          true,
-          `<i class="fa-solid fa-circle-check text-2xl text-emerald-400"></i>
-           <div>
-             <div class="text-base text-emerald-300">Correct! It is ${currentLang.name}!</div>
-             <div class="text-xs text-slate-300 font-normal">You earned <strong>+${roundPoints} points</strong> using ${this.revealedCluesCount} clue(s).</div>
-           </div>`
-        );
+        // Render Hints/Clues
+        function renderClues() {
+            const question = activeQuestions[currentGameIndex];
+            const cluesContainer = document.getElementById('cluesContainer');
+            cluesContainer.innerHTML = '';
 
-        this.finishRoundUI();
-      }
+            const pointsWorth = 60 - (currentRevealedClues * 10);
+            document.getElementById('currentPointsValue').innerText = `Worth ${pointsWorth} Points`;
 
-      handleWrongGuess() {
-        soundFX.playWrong();
+            for (let i = 0; i < currentRevealedClues; i++) {
+                const clueDiv = document.createElement('div');
+                clueDiv.className = 'bg-navy-900/90 border border-gray-700/60 rounded-xl p-3 text-xs sm:text-sm text-gray-200 flex items-start space-x-2 shadow-inner';
+                clueDiv.innerHTML = `
+                    <span class="bg-amber-500/20 text-amber-400 font-bold px-2 py-0.5 rounded text-[10px]">Hint ${i+1}</span>
+                    <span>${question.clues[i]}</span>
+                `;
+                cluesContainer.appendChild(clueDiv);
+            }
 
-        if (this.revealedCluesCount < 5) {
-          this.revealNextClue();
-          this.showFeedback(
-            false,
-            `<i class="fa-solid fa-circle-xmark text-xl text-rose-400"></i>
-             <span>Not quite right! Revealing next clue...</span>`
-          );
-        } else {
-          this.roundCompleted = true;
-          const currentLang = this.questions[this.currentRoundIdx];
-          this.showFeedback(
-            false,
-            `<i class="fa-solid fa-face-frown text-2xl text-rose-400"></i>
-             <div>
-               <div class="text-base text-rose-300">Out of clues!</div>
-               <div class="text-xs text-slate-300 font-normal">The correct language was <strong>${currentLang.name}</strong>. (0 points)</div>
-             </div>`
-          );
-          this.finishRoundUI();
+            const nextBtn = document.getElementById('nextClueBtn');
+            if (currentRevealedClues >= 5) {
+                nextBtn.style.display = 'none';
+            } else {
+                nextBtn.style.display = 'flex';
+            }
         }
-      }
 
-      giveUp() {
-        if (this.roundCompleted) return;
-        this.roundCompleted = true;
-        soundFX.playWrong();
+        window.revealNextClue = function() {
+            if (currentRevealedClues < 5) {
+                currentRevealedClues++;
+                renderClues();
+            }
+        };
 
-        const currentLang = this.questions[this.currentRoundIdx];
-        this.showFeedback(
-          false,
-          `<i class="fa-solid fa-flag text-xl text-amber-400"></i>
-           <div>
-             <div class="text-base text-amber-300">Round Forfeited</div>
-             <div class="text-xs text-slate-300 font-normal">The correct language was <strong>${currentLang.name}</strong>.</div>
-           </div>`
-        );
+        // Handle Language Answer Submission
+        window.handleGuessSubmit = function(e) {
+            e.preventDefault();
+            const input = document.getElementById('languageGuessInput').value.trim().toLowerCase();
+            const currentQ = activeQuestions[currentGameIndex];
+            const target = currentQ.targetLanguage.toLowerCase();
+            const feedbackBox = document.getElementById('feedbackBox');
 
-        this.revealedCluesCount = 5;
-        this.renderClues();
-        this.finishRoundUI();
-      }
+            if (input === target) {
+                const pointsEarned = 60 - (currentRevealedClues * 10);
+                playerSession.currentScore += pointsEarned;
+                document.getElementById('totalPointsDisplay').innerText = playerSession.currentScore;
 
-      showFeedback(isSuccess, htmlContent) {
-        const feedback = document.getElementById('feedback-message');
-        feedback.innerHTML = htmlContent;
-        feedback.classList.remove('hidden', 'bg-emerald-500/20', 'border-emerald-500/40', 'bg-rose-500/20', 'border-rose-500/40');
+                feedbackBox.innerText = `Correct! It was ${currentQ.targetLanguage}. +${pointsEarned} Points!`;
+                feedbackBox.className = 'mt-4 p-3 rounded-xl text-center text-sm font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 block';
 
-        if (isSuccess) {
-          feedback.classList.add('bg-emerald-500/20', 'border', 'border-emerald-500/40', 'text-emerald-200');
-        } else {
-          feedback.classList.add('bg-rose-500/20', 'border', 'border-rose-500/40', 'text-rose-200');
+                setTimeout(() => {
+                    currentGameIndex++;
+                    loadQuestion(currentGameIndex);
+                }, 1400);
+
+            } else {
+                feedbackBox.innerText = `Incorrect guess! Try again or reveal another hint.`;
+                feedbackBox.className = 'mt-4 p-3 rounded-xl text-center text-sm font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40 block';
+            }
+        };
+
+        // Complete Session & Save Score to Cloud
+        async function finishGame() {
+            document.getElementById('finalScoreDisplay').innerText = playerSession.currentScore;
+            showView('summaryView');
+
+            if (auth.currentUser) {
+                const docId = `score_${Date.now()}`;
+                try {
+                    await setDoc(doc(SCORES_COLLECTION, docId), {
+                        fullName: playerSession.name,
+                        yearGroup: playerSession.yearGroup,
+                        score: playerSession.currentScore,
+                        timestamp: Date.now()
+                    });
+                    showToast("Score saved to live leaderboard!");
+                } catch (e) {
+                    console.error("Error saving score:", e);
+                }
+            }
         }
-      }
 
-      finishRoundUI() {
-        document.getElementById('guess-input').disabled = true;
-        document.getElementById('submit-guess-btn').disabled = true;
-        document.getElementById('next-clue-btn').disabled = true;
-        
-        document.getElementById('round-complete-actions').classList.remove('hidden');
-      }
+        window.resetGameToHome = function() {
+            document.getElementById('studentName').value = '';
+            showView('welcomeView');
+        };
 
-      nextRound() {
-        this.currentRoundIdx++;
-        if (this.currentRoundIdx < this.questions.length) {
-          this.startRound();
-        } else {
-          this.endGame();  
+        // Render Public Leaderboard with Deduplication
+        function renderLeaderboard() {
+            const tableBody = document.getElementById('leaderboardTableBody');
+            tableBody.innerHTML = '';
+
+            // Group by Full Name and retain maximum score
+            const bestScoresMap = {};
+            rawScores.forEach(entry => {
+                const key = entry.fullName.trim().toLowerCase();
+                if (!bestScoresMap[key] || entry.score > bestScoresMap[key].score) {
+                    bestScoresMap[key] = entry;
+                }
+            });
+
+            // Sort descending by highest score
+            const sortedLeaderboard = Object.values(bestScoresMap).sort((a, b) => b.score - a.score);
+
+            if (sortedLeaderboard.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="4" class="text-center py-6 text-gray-500">No scores recorded yet. Be the first to play!</td></tr>`;
+                return;
+            }
+
+            sortedLeaderboard.forEach((entry, idx) => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-navy-800/40 transition-colors';
+
+                let rankBadge = `<span class="font-bold text-gray-400">#${idx + 1}</span>`;
+                if (idx === 0) rankBadge = `<span class="bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded font-black"><i class="fa-solid fa-crown mr-1"></i>1st</span>`;
+                else if (idx === 1) rankBadge = `<span class="bg-gray-400/20 text-gray-300 px-2 py-0.5 rounded font-black">2nd</span>`;
+                else if (idx === 2) rankBadge = `<span class="bg-amber-700/20 text-amber-600 px-2 py-0.5 rounded font-black">3rd</span>`;
+
+                tr.innerHTML = `
+                    <td class="py-3 px-2">${rankBadge}</td>
+                    <td class="py-3 px-2 font-semibold text-white">${escapeHtml(entry.fullName)}</td>
+                    <td class="py-3 px-2 text-xs text-gray-400">${escapeHtml(entry.yearGroup)}</td>
+                    <td class="py-3 px-2 text-right font-black text-amber-400">${entry.score}</td>
+                `;
+                tableBody.appendChild(tr);
+            });
         }
-      }
 
-      async endGame() {
-        await leaderboard.addScore(
-          this.playerName,
-          this.playerYear,
-          this.score,
-          this.correctCount,
-          this.questions.length
-        );
+        // Admin Login Code Verification
+        window.handleAdminLogin = function(e) {
+            e.preventDefault();
+            const pass = document.getElementById('adminPasscode').value;
+            if (pass === 'PGS2026') {
+                showView('adminDashboardView');
+                document.getElementById('adminPasscode').value = '';
+            } else {
+                showToast("Incorrect passcode!", "error");
+            }
+        };
 
-        document.getElementById('summary-final-score').textContent = `${this.score} pts`;
-        document.getElementById('summary-correct-count').textContent = `${this.correctCount} / ${this.questions.length}`;
-        const acc = Math.round((this.correctCount / this.questions.length) * 100);
-        document.getElementById('summary-accuracy').textContent = `${acc}%`;
+        window.logoutAdmin = function() {
+            showView('welcomeView');
+        };
 
-        this.showTab('summary');
+        window.switchAdminTab = function(tab) {
+            const qTab = document.getElementById('adminTabQuestions');
+            const sTab = document.getElementById('adminTabScores');
+            const qBtn = document.getElementById('adminTabQuestionsBtn');
+            const sBtn = document.getElementById('adminTabScoresBtn');
 
-        if (acc >= 60 && typeof confetti === 'function') {
-          confetti({
-            particleCount: 140,
-            spread: 90,
-            origin: { y: 0.4 }
-          });
+            if (tab === 'questions') {
+                qTab.style.display = 'block';
+                sTab.style.display = 'none';
+                qBtn.className = 'px-4 py-2 rounded-xl text-xs font-bold bg-amber-500 text-navy-900 shadow';
+                sBtn.className = 'px-4 py-2 rounded-xl text-xs font-bold bg-gray-800 text-gray-400 hover:text-white';
+            } else {
+                qTab.style.display = 'none';
+                sTab.style.display = 'block';
+                sBtn.className = 'px-4 py-2 rounded-xl text-xs font-bold bg-amber-500 text-navy-900 shadow';
+                qBtn.className = 'px-4 py-2 rounded-xl text-xs font-bold bg-gray-800 text-gray-400 hover:text-white';
+            }
+        };
+
+        // Render Score Management with Delete Action Icons
+        function renderAdminScores() {
+            const tbody = document.getElementById('adminScoresTableBody');
+            tbody.innerHTML = '';
+
+            if (rawScores.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="text-center py-6 text-gray-500">No score records found.</td></tr>`;
+                return;
+            }
+
+            // Sort by most recent
+            const sorted = [...rawScores].sort((a, b) => b.timestamp - a.timestamp);
+
+            sorted.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-navy-800/40 transition-colors';
+                tr.innerHTML = `
+                    <td class="py-3 px-2 font-semibold text-white">${escapeHtml(item.fullName)}</td>
+                    <td class="py-3 px-2 text-xs text-gray-400">${escapeHtml(item.yearGroup)}</td>
+                    <td class="py-3 px-2 font-bold text-amber-400">${item.score}</td>
+                    <td class="py-3 px-2 text-right">
+                        <button onclick="deleteScoreEntry('${item.id}')" class="p-2 text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 rounded-lg transition-colors" title="Delete Entry">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
         }
-      }
 
-      resetToWelcome() {
-        this.showTab('welcome');
-      }
+        // Delete Individual Score Entry
+        window.deleteScoreEntry = async function(id) {
+            if (!auth.currentUser) return;
+            try {
+                await deleteDoc(doc(SCORES_COLLECTION, id));
+                showToast("Score entry removed");
+            } catch (err) {
+                console.error("Error deleting score:", err);
+            }
+        };
 
-      escapeHTML(str) {
-        return (str || '').replace(/[&<>'"]/g, 
-          tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
-        );
-      }
-    }
+        // Render Questions Management
+        function renderAdminQuestionsList() {
+            const container = document.getElementById('adminQuestionsList');
+            container.innerHTML = '';
 
-    const app = new AppEngine();
+            activeQuestions.forEach((q, idx) => {
+                const card = document.createElement('div');
+                card.className = 'bg-navy-900/90 border border-gray-800 rounded-xl p-4 flex items-center justify-between';
+                card.innerHTML = `
+                    <div>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-xs font-bold text-amber-400">Q${idx + 1}</span>
+                            <h4 class="font-bold text-white">${escapeHtml(q.targetLanguage)}</h4>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-1 line-clamp-1">1st Hint: "${escapeHtml(q.clues[0])}"</p>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="editQuestion('${q.id}')" class="p-2 text-amber-400 hover:bg-amber-500/10 rounded-lg">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </button>
+                        <button onclick="deleteQuestion('${q.id}')" class="p-2 text-rose-400 hover:bg-rose-500/10 rounded-lg">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
 
-    window.onload = function() {
-      app.init();
-    };
-  </script>
+        // Question Editor Modal Handlers
+        window.openQuestionModal = function(qId = null) {
+            document.getElementById('editQuestionId').value = qId || '';
+            document.getElementById('modalTitle').innerText = qId ? 'Edit Question' : 'Add New Question';
+
+            if (qId) {
+                const q = activeQuestions.find(item => item.id === qId);
+                if (q) {
+                    document.getElementById('targetLanguage').value = q.targetLanguage;
+                    document.getElementById('clue1').value = q.clues[0] || '';
+                    document.getElementById('clue2').value = q.clues[1] || '';
+                    document.getElementById('clue3').value = q.clues[2] || '';
+                    document.getElementById('clue4').value = q.clues[3] || '';
+                    document.getElementById('clue5').value = q.clues[4] || '';
+                }
+            } else {
+                document.getElementById('targetLanguage').value = '';
+                document.getElementById('clue1').value = '';
+                document.getElementById('clue2').value = '';
+                document.getElementById('clue3').value = '';
+                document.getElementById('clue4').value = '';
+                document.getElementById('clue5').value = '';
+            }
+
+            const modal = document.getElementById('questionModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        };
+
+        window.closeQuestionModal = function() {
+            const modal = document.getElementById('questionModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        };
+
+        window.handleSaveQuestion = async function(e) {
+            e.preventDefault();
+            if (!auth.currentUser) return;
+
+            const qId = document.getElementById('editQuestionId').value || `q_${Date.now()}`;
+            const questionObj = {
+                id: qId,
+                targetLanguage: document.getElementById('targetLanguage').value.trim(),
+                clues: [
+                    document.getElementById('clue1').value.trim(),
+                    document.getElementById('clue2').value.trim(),
+                    document.getElementById('clue3').value.trim(),
+                    document.getElementById('clue4').value.trim(),
+                    document.getElementById('clue5').value.trim()
+                ]
+            };
+
+            try {
+                await setDoc(doc(QUESTIONS_COLLECTION, qId), questionObj);
+                showToast("Question set updated globally!");
+                closeQuestionModal();
+            } catch (err) {
+                console.error("Error saving question:", err);
+            }
+        };
+
+        window.editQuestion = function(qId) {
+            openQuestionModal(qId);
+        };
+
+        window.deleteQuestion = async function(qId) {
+            if (!auth.currentUser) return;
+            try {
+                await deleteDoc(doc(QUESTIONS_COLLECTION, qId));
+                showToast("Question set deleted");
+            } catch (err) {
+                console.error("Error deleting question:", err);
+            }
+        };
+
+        // Utility: HTML Escaping
+        function escapeHtml(str) {
+            return String(str).replace(/[&<>"']/g, function(m) {
+                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
+            });
+        }
+
+        // Notification Toast Display
+        function showToast(msg, type = "success") {
+            const toast = document.getElementById('toast');
+            const msgEl = document.getElementById('toastMessage');
+            const iconEl = document.getElementById('toastIcon');
+
+            msgEl.innerText = msg;
+            if (type === "error") {
+                iconEl.className = "fa-solid fa-circle-xmark text-rose-400";
+            } else {
+                iconEl.className = "fa-solid fa-circle-check text-amber-400";
+            }
+
+            toast.classList.remove('hidden');
+            toast.classList.add('flex');
+
+            setTimeout(() => {
+                toast.classList.add('hidden');
+                toast.classList.remove('flex');
+            }, 3000);
+        }
+    </script>
 </body>
 </html>
