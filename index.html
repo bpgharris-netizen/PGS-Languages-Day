@@ -398,74 +398,186 @@
         </div>
     </div>
 
-    <script>
-        // Global Cloud Storage Endpoint
-        const CLOUD_BIN_URL = 'https://api.jsonbin.io/v3/b/673e1234abcd1234abcd1234';
-        const CLOUD_API_KEY = '$2a$10$1234567890abcdefghijklmnopqrstuvwxyz';
+    <!-- IN-APP TOAST NOTIFICATION (Replaces browser alerts) -->
+    <div id="admin-toast" class="fixed top-5 right-5 z-50 hidden bg-slate-900/90 backdrop-blur-md border border-amber-400/40 text-white text-xs px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2 transition-all duration-300">
+        <i id="toast-icon" class="fa-solid fa-circle-info text-amber-400"></i>
+        <span id="toast-message">Notification message</span>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, addDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // Global appData Object
+        const defaultQuestions = [
+            {
+                answer: "Japanese",
+                clues: [
+                    "Uses three distinct writing systems (Hiragana, Katakana, and Kanji)",
+                    "Spoken primarily in an East Asian island nation in the Pacific Ocean",
+                    "Famous globally for anime, manga, sushi, and samurai history",
+                    "Capital city where spoken is Tokyo",
+                    "The word for 'Hello' in this language is 'Konnichiwa'"
+                ]
+            },
+            {
+                answer: "Spanish",
+                clues: [
+                    "Second most spoken native language in the world",
+                    "Uses inverted question marks (¿) and exclamation marks (¡)",
+                    "Official language in over 20 countries across Europe and Americas",
+                    "Famous for tapas, paella, and flamenco dancing",
+                    "The word for 'Thank you' in this language is 'Gracias'"
+                ]
+            },
+            {
+                answer: "French",
+                clues: [
+                    "Known as the 'Language of Love' and an official UN language",
+                    "Uses accent marks like acute (é), grave (è), and circumflex (ê)",
+                    "Spoken in France, parts of Canada, Switzerland, and West Africa",
+                    "Famous for the Eiffel Tower, baguettes, and croissants",
+                    "The word for 'Hello' in this language is 'Bonjour'"
+                ]
+            },
+            {
+                answer: "German",
+                clues: [
+                    "Famous for long compound words like 'Krankenwagen' and 'Schadenfreude'",
+                    "Capitalizes all nouns in written sentences",
+                    "Spoken in Germany, Austria, Liechtenstein, and parts of Switzerland",
+                    "Famous for Oktoberfest, castles, and pretzels",
+                    "The word for 'Thank you' in this language is 'Danke'"
+                ]
+            },
+            {
+                answer: "Italian",
+                clues: [
+                    "A Romance language directly descended from Vulgar Latin",
+                    "Musical terms like 'allegro', 'piano', and 'forte' come from it",
+                    "Spoken in a boot-shaped peninsula country in Southern Europe",
+                    "Famous for pizza, pasta, gelato, and the Colosseum",
+                    "The word for 'Goodbye' in this language is 'Arrivederci'"
+                ]
+            }
+        ];
+
         let appData = {
-            questions: [
-                {
-                    answer: "Japanese",
-                    clues: [
-                        "Uses three distinct writing systems (Hiragana, Katakana, and Kanji)",
-                        "Spoken primarily in an East Asian island nation in the Pacific Ocean",
-                        "Famous globally for anime, manga, sushi, and samurai history",
-                        "Capital city where spoken is Tokyo",
-                        "The word for 'Hello' in this language is 'Konnichiwa'"
-                    ]
-                },
-                {
-                    answer: "Spanish",
-                    clues: [
-                        "Second most spoken native language in the world",
-                        "Uses inverted question marks (¿) and exclamation marks (¡)",
-                        "Official language in over 20 countries across Europe and Americas",
-                        "Famous for tapas, paella, and flamenco dancing",
-                        "The word for 'Thank you' in this language is 'Gracias'"
-                    ]
-                },
-                {
-                    answer: "French",
-                    clues: [
-                        "Known as the 'Language of Love' and an official UN language",
-                        "Uses accent marks like acute (é), grave (è), and circumflex (ê)",
-                        "Spoken in France, parts of Canada, Switzerland, and West Africa",
-                        "Famous for the Eiffel Tower, baguettes, and croissants",
-                        "The word for 'Hello' in this language is 'Bonjour'"
-                    ]
-                },
-                {
-                    answer: "German",
-                    clues: [
-                        "Famous for long compound words like 'Krankenwagen' and 'Schadenfreude'",
-                        "Capitalizes all nouns in written sentences",
-                        "Spoken in Germany, Austria, Liechtenstein, and parts of Switzerland",
-                        "Famous for Oktoberfest, castles, and pretzels",
-                        "The word for 'Thank you' in this language is 'Danke'"
-                    ]
-                },
-                {
-                    answer: "Italian",
-                    clues: [
-                        "A Romance language directly descended from Vulgar Latin",
-                        "Musical terms like 'allegro', 'piano', and 'forte' come from it",
-                        "Spoken in a boot-shaped peninsula country in Southern Europe",
-                        "Famous for pizza, pasta, gelato, and the Colosseum",
-                        "The word for 'Goodbye' in this language is 'Arrivederci'"
-                    ]
-                }
-            ],
+            questions: [...defaultQuestions],
             scores: []
         };
 
         let currentQuiz = null;
         let editingQuestionIndex = null;
+        let currentUser = null;
 
-        // -------------------------------------------------------------
-        // AUDIO SYNTHESIZER (NO EXTERNAL AUDIO FILES REQUIRED)
-        // -------------------------------------------------------------
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'pgs-languages-quiz';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' 
+            ? (typeof __firebase_config === 'string' ? JSON.parse(__firebase_config) : __firebase_config)
+            : { apiKey: "demo", authDomain: "demo", projectId: "demo" };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Authenticate user before querying Firestore
+        async function authenticateUser() {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (err) {
+                try {
+                    await signInAnonymously(auth);
+                } catch (e) {
+                    console.error("Auth error:", e);
+                }
+            }
+        }
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                subscribeToLiveCloudData();
+            }
+        });
+
+        function subscribeToLiveCloudData() {
+            if (!currentUser) return;
+
+            // Strict path for shared public scores
+            const scoresRef = collection(db, 'artifacts', appId, 'public', 'data', 'scores');
+            onSnapshot(scoresRef, (snapshot) => {
+                const fetchedScores = [];
+                snapshot.forEach((doc) => {
+                    fetchedScores.push({ id: doc.id, ...doc.data() });
+                });
+                appData.scores = fetchedScores;
+                renderLeaderboard();
+                if (document.getElementById('admin-content') && !document.getElementById('admin-content').classList.contains('hidden')) {
+                    renderAdminScores();
+                }
+            }, (error) => {
+                console.error("Error subscribing to scores:", error);
+            });
+
+            // Strict path for shared public questions
+            const questionsRef = collection(db, 'artifacts', appId, 'public', 'data', 'questions');
+            onSnapshot(questionsRef, (snapshot) => {
+                if (!snapshot.empty) {
+                    const fetchedQuestions = [];
+                    snapshot.forEach((doc) => {
+                        fetchedQuestions.push({ id: doc.id, ...doc.data() });
+                    });
+                    appData.questions = fetchedQuestions;
+                } else {
+                    seedDefaultQuestions();
+                }
+                if (document.getElementById('admin-content') && !document.getElementById('admin-content').classList.contains('hidden')) {
+                    renderAdminQuestions();
+                }
+            }, (error) => {
+                console.error("Error subscribing to questions:", error);
+            });
+        }
+
+        async function seedDefaultQuestions() {
+            if (!currentUser) return;
+            try {
+                const questionsRef = collection(db, 'artifacts', appId, 'public', 'data', 'questions');
+                for (const q of defaultQuestions) {
+                    await addDoc(questionsRef, q);
+                }
+            } catch(e) {
+                console.warn("Seeding initial questions failed", e);
+            }
+        }
+
+        function showToast(message, isError = false) {
+            const toast = document.getElementById('admin-toast');
+            const msgEl = document.getElementById('toast-message');
+            const iconEl = document.getElementById('toast-icon');
+
+            msgEl.innerText = message;
+            if (isError) {
+                toast.classList.remove('border-amber-400/40');
+                toast.classList.add('border-rose-500/50');
+                iconEl.className = 'fa-solid fa-triangle-exclamation text-rose-400';
+            } else {
+                toast.classList.remove('border-rose-500/50');
+                toast.classList.add('border-amber-400/40');
+                iconEl.className = 'fa-solid fa-circle-check text-amber-400';
+            }
+
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3000);
+        }
+
         function playAudioTone(type) {
             try {
                 const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -476,8 +588,8 @@
 
                 if (type === 'correct') {
                     osc.type = 'triangle';
-                    osc.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
-                    osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.1); // E5
+                    osc.frequency.setValueAtTime(523.25, ctx.currentTime);
+                    osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.1);
                     gain.gain.setValueAtTime(0.2, ctx.currentTime);
                     gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
                     osc.start();
@@ -494,58 +606,6 @@
             } catch(e) {}
         }
 
-        // -------------------------------------------------------------
-        // CLOUD STORAGE FETCH / SAVE
-        // -------------------------------------------------------------
-        async function fetchCloudData() {
-            // Check local backup first
-            const localBackup = localStorage.getItem('pgs_languages_data');
-            if (localBackup) {
-                try {
-                    const parsed = JSON.parse(localBackup);
-                    if (parsed.scores) appData.scores = parsed.scores;
-                    if (parsed.questions) appData.questions = parsed.questions;
-                } catch(e) {}
-            }
-
-            try {
-                const res = await fetch(`${CLOUD_BIN_URL}/latest`, {
-                    headers: { 'X-Access-Key': CLOUD_API_KEY }
-                });
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data.record) {
-                        if (data.record.scores) appData.scores = data.record.scores;
-                        if (data.record.questions) appData.questions = data.record.questions;
-                        localStorage.setItem('pgs_languages_data', JSON.stringify(appData));
-                    }
-                }
-            } catch(err) {
-                console.warn("Using local storage fallback.");
-            }
-
-            renderLeaderboard();
-        }
-
-        async function saveCloudData() {
-            localStorage.setItem('pgs_languages_data', JSON.stringify(appData));
-            try {
-                await fetch(CLOUD_BIN_URL, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Access-Key': CLOUD_API_KEY
-                    },
-                    body: JSON.stringify(appData)
-                });
-            } catch(err) {
-                console.warn("Saved to local backup.");
-            }
-        }
-
-        // -------------------------------------------------------------
-        // SCREEN SWITCHING
-        // -------------------------------------------------------------
         function showScreen(screenId) {
             ['screen-welcome', 'screen-game', 'screen-result', 'screen-leaderboard'].forEach(id => {
                 document.getElementById(id).classList.add('hidden');
@@ -557,9 +617,6 @@
             }
         }
 
-        // -------------------------------------------------------------
-        // GAMEPLAY LOGIC
-        // -------------------------------------------------------------
         function handleStartGame(e) {
             e.preventDefault();
             const name = document.getElementById('student-name').value.trim();
@@ -594,6 +651,7 @@
 
         function renderClues() {
             const round = currentQuiz.rounds[currentQuiz.currentRoundIdx];
+            if (!round) return;
             const container = document.getElementById('clues-container');
             container.innerHTML = '';
 
@@ -611,7 +669,7 @@
                     clueBox.className = "p-3.5 rounded-2xl bg-slate-900/90 border border-amber-400/30 text-xs sm:text-sm text-slate-200 flex items-start gap-3 shadow-sm";
                     clueBox.innerHTML = `
                         <span class="px-2 py-0.5 rounded bg-amber-400/20 text-amber-400 font-black text-[10px] shrink-0">HINT ${i+1} (${pointValues[i]} pts)</span>
-                        <span class="font-medium leading-relaxed">${round.clues[i] || 'Hint locked.'}</span>
+                        <span class="font-medium leading-relaxed">${round.clues ? (round.clues[i] || 'Hint locked.') : 'Hint locked.'}</span>
                     `;
                 } else {
                     clueBox.className = "p-3 rounded-2xl bg-slate-950/40 border border-white/5 text-xs text-slate-500 flex items-center justify-between font-medium";
@@ -694,23 +752,30 @@
             }
         }
 
-        function finishQuiz() {
+        async function finishQuiz() {
             try { confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); } catch(e){}
             document.getElementById('final-score-display').innerText = `${currentQuiz.totalScore} pts`;
 
-            appData.scores.push({
+            const scoreEntry = {
                 name: currentQuiz.studentName,
                 year: currentQuiz.yearGroup,
-                score: currentQuiz.totalScore
-            });
+                score: currentQuiz.totalScore,
+                createdAt: Date.now()
+            };
 
-            saveCloudData();
+            if (currentUser) {
+                try {
+                    const scoresRef = collection(db, 'artifacts', appId, 'public', 'data', 'scores');
+                    await addDoc(scoresRef, scoreEntry);
+                    showToast("Score saved to live school leaderboard!");
+                } catch(e) {
+                    console.error("Failed saving score to cloud:", e);
+                }
+            }
+
             showScreen('screen-result');
         }
 
-        // -------------------------------------------------------------
-        // LEADERBOARD (HIGHEST SCORE ONLY PER STUDENT)
-        // -------------------------------------------------------------
         function renderLeaderboard() {
             const tbody = document.getElementById('leaderboard-table-body');
             tbody.innerHTML = '';
@@ -720,9 +785,10 @@
                 return;
             }
 
-            // Deduplicate by name to keep highest score only
+            // Deduplicate by name to show only highest score per student
             const topScores = {};
             appData.scores.forEach(s => {
+                if (!s.name) return;
                 const key = s.name.trim().toLowerCase();
                 if (!topScores[key] || s.score > topScores[key].score) {
                     topScores[key] = s;
@@ -751,12 +817,9 @@
         }
 
         function escapeHtml(str) {
-            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            return (str || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
         }
 
-        // -------------------------------------------------------------
-        // TEACHER ADMIN PANEL (Passcode: PGS2026)
-        // -------------------------------------------------------------
         function openAdminModal() {
             document.getElementById('admin-modal').classList.remove('hidden');
             document.getElementById('admin-modal').classList.add('flex');
@@ -774,8 +837,9 @@
                 document.getElementById('admin-content').classList.remove('hidden');
                 renderAdminQuestions();
                 renderAdminScores();
+                showToast("Admin access granted.");
             } else {
-                alert("Incorrect Passcode!");
+                showToast("Incorrect Passcode!", true);
             }
         }
 
@@ -801,22 +865,29 @@
                 div.className = "flex justify-between items-center p-3 rounded-2xl bg-slate-950 border border-white/10";
                 div.innerHTML = `
                     <div>
-                        <div class="font-bold text-white text-xs">${q.answer}</div>
+                        <div class="font-bold text-white text-xs">${escapeHtml(q.answer)}</div>
                         <div class="text-[10px] text-slate-400">5 clues configured</div>
                     </div>
                     <div class="flex gap-2">
                         <button onclick="openQuestionEditor(${idx})" class="px-2.5 py-1 bg-amber-400/20 text-amber-400 rounded-lg text-xs font-bold">Edit</button>
-                        <button onclick="deleteQuestion(${idx})" class="px-2.5 py-1 bg-rose-500/20 text-rose-300 rounded-lg text-xs font-bold">Delete</button>
+                        <button onclick="deleteQuestion('${q.id || ''}', ${idx})" class="px-2.5 py-1 bg-rose-500/20 text-rose-300 rounded-lg text-xs font-bold">Delete</button>
                     </div>
                 `;
                 container.appendChild(div);
             });
         }
 
-        function deleteQuestion(idx) {
-            if (confirm("Delete this question?")) {
+        async function deleteQuestion(docId, idx) {
+            if (currentUser && docId) {
+                try {
+                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'questions', docId);
+                    await deleteDoc(docRef);
+                    showToast("Question deleted from live database.");
+                } catch(e) {
+                    console.error("Error deleting question:", e);
+                }
+            } else {
                 appData.questions.splice(idx, 1);
-                saveCloudData();
                 renderAdminQuestions();
             }
         }
@@ -832,7 +903,7 @@
                     <td class="p-2 text-slate-400">${s.year}</td>
                     <td class="p-2 font-bold text-amber-400">${s.score}</td>
                     <td class="p-2 text-right">
-                        <button onclick="deleteSingleScore(${idx})" class="text-rose-400 hover:text-rose-300">
+                        <button onclick="deleteSingleScore('${s.id || ''}', ${idx})" class="text-rose-400 hover:text-rose-300">
                             <i class="fa-solid fa-trash text-xs"></i>
                         </button>
                     </td>
@@ -841,19 +912,34 @@
             });
         }
 
-        function deleteSingleScore(idx) {
-            appData.scores.splice(idx, 1);
-            saveCloudData();
-            renderAdminScores();
-            renderLeaderboard();
-        }
-
-        function clearAllScores() {
-            if (confirm("Reset ALL student scores on the leaderboard?")) {
-                appData.scores = [];
-                saveCloudData();
+        async function deleteSingleScore(docId, idx) {
+            if (currentUser && docId) {
+                try {
+                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'scores', docId);
+                    await deleteDoc(docRef);
+                    showToast("Score record deleted.");
+                } catch(e) {
+                    console.error("Error deleting score:", e);
+                }
+            } else {
+                appData.scores.splice(idx, 1);
                 renderAdminScores();
                 renderLeaderboard();
+            }
+        }
+
+        async function clearAllScores() {
+            if (!currentUser) return;
+            try {
+                for (const s of appData.scores) {
+                    if (s.id) {
+                        const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'scores', s.id);
+                        await deleteDoc(docRef);
+                    }
+                }
+                showToast("All leaderboard scores reset.");
+            } catch(e) {
+                console.error("Error resetting scores:", e);
             }
         }
 
@@ -882,10 +968,10 @@
             document.getElementById('question-editor-modal').classList.remove('flex');
         }
 
-        function saveQuestionFromEditor() {
+        async function saveQuestionFromEditor() {
             const answer = document.getElementById('editor-answer').value.trim();
             if (!answer) {
-                alert("Please enter the correct language answer!");
+                showToast("Please enter the correct language answer!", true);
                 return;
             }
 
@@ -895,21 +981,45 @@
                 clues.push(c || `Clue ${i}`);
             }
 
-            if (editingQuestionIndex !== null) {
-                appData.questions[editingQuestionIndex] = { answer: answer, clues: clues };
-            } else {
-                appData.questions.push({ answer: answer, clues: clues });
+            const newQuestionObj = { answer: answer, clues: clues };
+
+            if (currentUser) {
+                try {
+                    const questionsRef = collection(db, 'artifacts', appId, 'public', 'data', 'questions');
+                    if (editingQuestionIndex !== null && appData.questions[editingQuestionIndex] && appData.questions[editingQuestionIndex].id) {
+                        const existingId = appData.questions[editingQuestionIndex].id;
+                        const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'questions', existingId);
+                        await deleteDoc(docRef);
+                    }
+                    await addDoc(questionsRef, newQuestionObj);
+                    showToast("Question saved to live database!");
+                } catch(e) {
+                    console.error("Failed saving question:", e);
+                }
             }
 
-            saveCloudData();
             closeQuestionEditor();
-            renderAdminQuestions();
         }
 
-        // Initialize on Window Load
-        window.onload = function() {
-            fetchCloudData();
-        };
+        window.showScreen = showScreen;
+        window.handleStartGame = handleStartGame;
+        window.revealNextClue = revealNextClue;
+        window.submitAnswer = submitAnswer;
+        window.giveUpRound = giveUpRound;
+        window.openAdminModal = openAdminModal;
+        window.closeAdminModal = closeAdminModal;
+        window.verifyAdminPasscode = verifyAdminPasscode;
+        window.switchAdminTab = switchAdminTab;
+        window.openQuestionEditor = openQuestionEditor;
+        window.closeQuestionEditor = closeQuestionEditor;
+        window.saveQuestionFromEditor = saveQuestionFromEditor;
+        window.deleteQuestion = deleteQuestion;
+        window.deleteSingleScore = deleteSingleScore;
+        window.clearAllScores = clearAllScores;
+
+        window.addEventListener('load', () => {
+            authenticateUser();
+        });
     </script>
 </body>
 </html>
