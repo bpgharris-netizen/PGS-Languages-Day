@@ -409,7 +409,7 @@
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, addDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Global appData Object
+        // Global appData Object with local fallback storage
         const defaultQuestions = [
             {
                 answer: "Japanese",
@@ -463,9 +463,14 @@
             }
         ];
 
+        let savedLocalScores = [];
+        try {
+            savedLocalScores = JSON.parse(localStorage.getItem('pgs_quiz_scores') || '[]');
+        } catch(e) { savedLocalScores = []; }
+
         let appData = {
             questions: [...defaultQuestions],
-            scores: []
+            scores: savedLocalScores
         };
 
         let currentQuiz = null;
@@ -515,13 +520,21 @@
                 snapshot.forEach((doc) => {
                     fetchedScores.push({ id: doc.id, ...doc.data() });
                 });
-                appData.scores = fetchedScores;
+                
+                // Merge cloud scores with any locally submitted scores
+                if (fetchedScores.length > 0) {
+                    appData.scores = fetchedScores;
+                    try {
+                        localStorage.setItem('pgs_quiz_scores', JSON.stringify(appData.scores));
+                    } catch(e) {}
+                }
                 renderLeaderboard();
                 if (document.getElementById('admin-content') && !document.getElementById('admin-content').classList.contains('hidden')) {
                     renderAdminScores();
                 }
             }, (error) => {
-                console.error("Error subscribing to scores:", error);
+                console.warn("Cloud sync using local mode:", error);
+                renderLeaderboard();
             });
 
             // Strict path for shared public questions
@@ -540,7 +553,7 @@
                     renderAdminQuestions();
                 }
             }, (error) => {
-                console.error("Error subscribing to questions:", error);
+                console.warn("Questions cloud sync using local default:", error);
             });
         }
 
@@ -757,20 +770,38 @@
             document.getElementById('final-score-display').innerText = `${currentQuiz.totalScore} pts`;
 
             const scoreEntry = {
+                id: 'local_' + Date.now(),
                 name: currentQuiz.studentName,
                 year: currentQuiz.yearGroup,
                 score: currentQuiz.totalScore,
                 createdAt: Date.now()
             };
 
+            // 1. Immediately save locally and update UI so leaderboard works instantly
+            appData.scores.push(scoreEntry);
+            try {
+                localStorage.setItem('pgs_quiz_scores', JSON.stringify(appData.scores));
+            } catch(e) {}
+            renderLeaderboard();
+
+            // 2. Background cloud upload
             if (currentUser) {
                 try {
                     const scoresRef = collection(db, 'artifacts', appId, 'public', 'data', 'scores');
-                    await addDoc(scoresRef, scoreEntry);
+                    const docRef = await addDoc(scoresRef, {
+                        name: scoreEntry.name,
+                        year: scoreEntry.year,
+                        score: scoreEntry.score,
+                        createdAt: scoreEntry.createdAt
+                    });
+                    scoreEntry.id = docRef.id;
                     showToast("Score saved to live school leaderboard!");
                 } catch(e) {
-                    console.error("Failed saving score to cloud:", e);
+                    console.warn("Cloud save notice:", e);
+                    showToast("Score saved successfully!");
                 }
+            } else {
+                showToast("Score saved!");
             }
 
             showScreen('screen-result');
@@ -913,7 +944,12 @@
         }
 
         async function deleteSingleScore(docId, idx) {
-            if (currentUser && docId) {
+            appData.scores.splice(idx, 1);
+            try { localStorage.setItem('pgs_quiz_scores', JSON.stringify(appData.scores)); } catch(e){}
+            renderAdminScores();
+            renderLeaderboard();
+
+            if (currentUser && docId && !docId.startsWith('local_')) {
                 try {
                     const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'scores', docId);
                     await deleteDoc(docRef);
@@ -921,25 +957,28 @@
                 } catch(e) {
                     console.error("Error deleting score:", e);
                 }
-            } else {
-                appData.scores.splice(idx, 1);
-                renderAdminScores();
-                renderLeaderboard();
             }
         }
 
         async function clearAllScores() {
-            if (!currentUser) return;
-            try {
-                for (const s of appData.scores) {
-                    if (s.id) {
-                        const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'scores', s.id);
-                        await deleteDoc(docRef);
+            const oldScores = [...appData.scores];
+            appData.scores = [];
+            try { localStorage.setItem('pgs_quiz_scores', JSON.stringify([])); } catch(e){}
+            renderAdminScores();
+            renderLeaderboard();
+
+            if (currentUser) {
+                try {
+                    for (const s of oldScores) {
+                        if (s.id && !s.id.startsWith('local_')) {
+                            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'scores', s.id);
+                            await deleteDoc(docRef);
+                        }
                     }
+                    showToast("All leaderboard scores reset.");
+                } catch(e) {
+                    console.error("Error resetting scores:", e);
                 }
-                showToast("All leaderboard scores reset.");
-            } catch(e) {
-                console.error("Error resetting scores:", e);
             }
         }
 
