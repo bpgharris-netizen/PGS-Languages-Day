@@ -597,16 +597,10 @@
             const name = document.getElementById('student-name').value.trim();
             const year = document.getElementById('student-year').value;
             if (!name || !year) return;
-            
-            // Randomly select 5 questions from the pool for this game session
-            const selectedRounds = [...window.appData.questions]
-                .sort(() => Math.random() - 0.5)
-                .slice(0, 5);
-
             window.currentQuiz = {
                 studentName: name,
                 yearGroup: year,
-                rounds: selectedRounds,
+                rounds: [...window.appData.questions].sort(() => Math.random() - 0.5),
                 currentRoundIdx: 0,
                 cluesRevealed: 1,
                 totalScore: 0
@@ -631,18 +625,24 @@
             const pointValues = [50, 40, 30, 20, 10];
             document.getElementById('clues-revealed-count').innerText = `${window.currentQuiz.cluesRevealed}/5`;
             document.getElementById('current-clue-value').innerText = `${pointValues[window.currentQuiz.cluesRevealed - 1]} pts`;
-            
-            // Cumulatively render all unlocked hints so far
-            for (let i = 0; i < window.currentQuiz.cluesRevealed; i++) {
+            for (let i = 0; i < 5; i++) {
                 const clueBox = document.createElement('div');
-                clueBox.className = "p-3.5 rounded-2xl bg-slate-900/90 border border-amber-400/30 text-xs sm:text-sm text-slate-200 flex items-start gap-3 shadow-sm";
-                clueBox.innerHTML = `
-                    <span class="px-2 py-0.5 rounded bg-amber-400/20 text-amber-400 font-black text-[10px] shrink-0">HINT ${i+1} (${pointValues[i]} pts)</span>
-                    <span class="font-medium leading-relaxed">${round.clues ? (round.clues[i] || 'Hint locked.') : 'Hint locked.'}</span>
-                `;
+                const isRevealed = i < window.currentQuiz.cluesRevealed;
+                if (isRevealed) {
+                    clueBox.className = "p-3.5 rounded-2xl bg-slate-900/90 border border-amber-400/30 text-xs sm:text-sm text-slate-200 flex items-start gap-3 shadow-sm";
+                    clueBox.innerHTML = `
+                        <span class="px-2 py-0.5 rounded bg-amber-400/20 text-amber-400 font-black text-[10px] shrink-0">HINT ${i+1} (${pointValues[i]} pts)</span>
+                        <span class="font-medium leading-relaxed">${round.clues ? (round.clues[i] || 'Hint locked.') : 'Hint locked.'}</span>
+                    `;
+                } else {
+                    clueBox.className = "p-3 rounded-2xl bg-slate-950/40 border border-white/5 text-xs text-slate-500 flex items-center justify-between font-medium";
+                    clueBox.innerHTML = `
+                        <span>🔒 Hint ${i+1} Locked</span>
+                        <span class="text-[10px]">${pointValues[i]} pts</span>
+                    `;
+                }
                 container.appendChild(clueBox);
             }
-
             const revealBtn = document.getElementById('reveal-clue-btn');
             if (window.currentQuiz.cluesRevealed >= 5) {
                 revealBtn.classList.add('hidden');
@@ -784,7 +784,7 @@
             } else {
                 document.getElementById('admin-tab-questions').classList.add('hidden');
                 document.getElementById('admin-tab-scores').classList.remove('hidden');
-                document.getElementById('tab-btn-scores').className = "px-4 py-2 font-bold text-amber-400 border-b-2 border-amber-400";
+                document.getElementById('tab-btn-scores').className = "px-4 py-2 font-bold border-b-2 border-amber-400 text-amber-400";
                 document.getElementById('tab-btn-questions').className = "px-4 py-2 font-bold text-slate-400 border-b-2 border-transparent";
             }
         }
