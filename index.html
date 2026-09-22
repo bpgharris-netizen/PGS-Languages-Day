@@ -78,7 +78,7 @@
             <div class="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm font-semibold">
                 <div id="cloud-status-badge" class="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[11px] font-bold">
                     <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span>Live Sync Active</span>
+                    <span id="sync-status-text">Live Database Sync</span>
                 </div>
                 <button onclick="showScreen('screen-welcome')" class="px-3 py-1.5 rounded-lg text-slate-300 hover:text-white transition flex items-center gap-1.5">
                     <i class="fa-solid fa-play text-amber-400 text-xs"></i> Play
@@ -366,16 +366,17 @@
         <i id="toast-icon" class="fa-solid fa-circle-info text-amber-400"></i>
         <span id="toast-message">Notification message</span>
     </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, addDoc, setDoc, deleteDoc, onSnapshot, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
         // Global App ID & Shared Fallback Cloud Config
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'pgs-languages-day-2026';
         const firebaseConfig = typeof __firebase_config !== 'undefined' 
             ? JSON.parse(__firebase_config) 
             : {
-                // Public Cloud Relay Project Configuration
                 apiKey: "AIzaSyD_PGS_LANG_DAY_DUMMY_KEY",
                 authDomain: "pgs-languages-day-2026.firebaseapp.com",
                 projectId: "pgs-languages-day-2026",
@@ -383,88 +384,58 @@
                 messagingSenderId: "10987654321",
                 appId: "1:10987654321:web:a1b2c3d4e5f6"
             };
-        const defaultQuestions = [
-            {
-                id: "q_japanese",
-                answer: "Japanese",
-                clues: [
-                    "Uses three distinct writing systems (Hiragana, Katakana, and Kanji)",
-                    "Spoken primarily in an East Asian island nation in the Pacific Ocean",
-                    "Famous globally for anime, manga, sushi, and samurai history",
-                    "Capital city where spoken is Tokyo",
-                    "The word for 'Hello' in this language is 'Konnichiwa'"
-                ]
-            },
-            {
-                id: "q_spanish",
-                answer: "Spanish",
-                clues: [
-                    "Second most spoken native language in the world",
-                    "Uses inverted question marks (¿) and exclamation marks (¡)",
-                    "Official language in over 20 countries across Europe and Americas",
-                    "Famous for tapas, paella, and flamenco dancing",
-                    "The word for 'Thank you' in this language is 'Gracias'"
-                ]
-            },
-            {
-                id: "q_french",
-                answer: "French",
-                clues: [
-                    "Known as the 'Language of Love' and an official UN language",
-                    "Uses accent marks like acute (é), grave (è), and circumflex (ê)",
-                    "Spoken in France, parts of Canada, Switzerland, and West Africa",
-                    "Famous for the Eiffel Tower, baguettes, and croissants",
-                    "The word for 'Hello' in this language is 'Bonjour'"
-                ]
-            },
-            {
-                id: "q_german",
-                answer: "German",
-                clues: [
-                    "Famous for long compound words like 'Krankenwagen' and 'Schadenfreude'",
-                    "Capitalizes all nouns in written sentences",
-                    "Spoken in Germany, Austria, Liechtenstein, and parts of Switzerland",
-                    "Famous for Oktoberfest, castles, and pretzels",
-                    "The word for 'Thank you' in this language is 'Danke'"
-                ]
-            },
-            {
-                id: "q_italian",
-                answer: "Italian",
-                clues: [
-                    "A Romance language directly descended from Vulgar Latin",
-                    "Musical terms like 'allegro', 'piano', and 'forte' come from it",
-                    "Spoken in a boot-shaped peninsula country in Southern Europe",
-                    "Famous for pizza, pasta, gelato, and the Colosseum",
-                    "The word for 'Goodbye' in this language is 'Arrivederci'"
-                ]
-            }
-        ];
+
         let savedLocalScores = [];
         try {
             savedLocalScores = JSON.parse(localStorage.getItem('pgs_quiz_scores') || '[]');
         } catch(e) { savedLocalScores = []; }
+
         window.appData = {
-            questions: [...defaultQuestions],
+            questions: [], // Starts empty until pulled from Firestore
             scores: savedLocalScores
         };
+
         window.currentQuiz = null;
         window.editingQuestionIndex = null;
         let db = null;
         let auth = null;
         let currentUser = null;
+
         async function initFirebaseSync() {
             try {
                 const app = initializeApp(firebaseConfig);
                 auth = getAuth(app);
                 db = getFirestore(app);
+                
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                     currentUser = (await signInWithCustomToken(auth, __initial_auth_token)).user;
                 } else {
                     currentUser = (await signInAnonymously(auth)).user;
                 }
                 if (!currentUser) return;
-                // Live Listener for Public Scores
+
+                // 1. Force Listen to Questions Collection from Firestore
+                const questionsCol = collection(db, 'artifacts', appId, 'public', 'data', 'questions');
+                onSnapshot(questionsCol, (snapshot) => {
+                    const fetchedQuestions = [];
+                    snapshot.forEach(doc => {
+                        fetchedQuestions.push({ id: doc.id, ...doc.data() });
+                    });
+                    
+                    if (fetchedQuestions.length > 0) {
+                        window.appData.questions = fetchedQuestions;
+                        console.log(`[Live Sync] Successfully loaded ${fetchedQuestions.length} questions from Firestore!`);
+                        
+                        // Update UI if admin panel is open
+                        if (document.getElementById('admin-content') && !document.getElementById('admin-content').classList.contains('hidden')) {
+                            renderAdminQuestions();
+                        }
+                    } else {
+                        console.warn("[Live Sync] Database questions collection returned 0 items.");
+                    }
+                }, (error) => console.error("[Firestore Error] Failed to read questions:", error));
+
+                // 2. Live Listener for Public Scores
                 const scoresCol = collection(db, 'artifacts', appId, 'public', 'data', 'scores');
                 onSnapshot(scoresCol, (snapshot) => {
                     const cloudScores = [];
@@ -478,37 +449,37 @@
                         }
                     }
                 }, (error) => console.warn("Firestore scores sync warning:", error));
-                // Live Listener for Questions
-                const questionsCol = collection(db, 'artifacts', appId, 'public', 'data', 'questions');
-                onSnapshot(questionsCol, (snapshot) => {
-                    const cloudQuestions = [];
-                    snapshot.forEach(doc => cloudQuestions.push({ id: doc.id, ...doc.data() }));
-                    if (cloudQuestions.length > 0) {
-                        window.appData.questions = cloudQuestions;
-                        if (document.getElementById('admin-content') && !document.getElementById('admin-content').classList.contains('hidden')) {
-                            renderAdminQuestions();
-                        }
-                    }
-                }, (error) => console.warn("Firestore questions sync warning:", error));
+
             } catch(e) {
-                console.warn("Firebase fallback initialized in local mode:", e);
+                console.warn("Firebase initialized in fallback mode:", e);
             }
         }
+
+        // Secondary HTTP Sync Backup to guarantee data retrieval
         async function fetchCloudData() {
-            // Also attempt HTTP fallback sync
             try {
-                const res = await fetch(`https://kvdb.io/PGS_Languages_Day_Quiz_2026_LiveSync/scores`);
+                // Check Firestore via HTTP or API Relay
+                const res = await fetch(`https://kvdb.io/PGS_Languages_Day_Quiz_2026_LiveSync/questions`);
                 if (res.ok) {
-                    const data = await res.json();
-                    if (Array.isArray(data) && data.length > 0) {
-                        window.appData.scores = data;
-                        localStorage.setItem('pgs_quiz_scores', JSON.stringify(data));
+                    const qData = await res.json();
+                    if (Array.isArray(qData) && qData.length > 0) {
+                        window.appData.questions = qData;
+                    }
+                }
+                const scoreRes = await fetch(`https://kvdb.io/PGS_Languages_Day_Quiz_2026_LiveSync/scores`);
+                if (scoreRes.ok) {
+                    const sData = await scoreRes.json();
+                    if (Array.isArray(sData) && sData.length > 0) {
+                        window.appData.scores = sData;
+                        localStorage.setItem('pgs_quiz_scores', JSON.stringify(sData));
                     }
                 }
             } catch(e) {}
+            
             renderLeaderboard();
-            showToast("Leaderboard synced live!");
+            showToast("Database and leaderboard synced live!");
         }
+
         async function syncScoresToCloud(newScores) {
             window.appData.scores = newScores;
             localStorage.setItem('pgs_quiz_scores', JSON.stringify(newScores));
@@ -529,9 +500,19 @@
                 });
             } catch(e) {}
         }
+
         async function syncQuestionsToCloud(newQuestions) {
             window.appData.questions = newQuestions;
             renderAdminQuestions();
+            if (db && currentUser) {
+                try {
+                    // Update/add last added question into Firestore
+                    const lastQuestion = newQuestions[newQuestions.length - 1];
+                    if (lastQuestion) {
+                        await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'questions', lastQuestion.id || ('q_' + Date.now())), lastQuestion);
+                    }
+                } catch(e) { console.warn("Firestore question write error:", e); }
+            }
             try {
                 await fetch(`https://kvdb.io/PGS_Languages_Day_Quiz_2026_LiveSync/questions`, {
                     method: 'POST',
@@ -540,6 +521,7 @@
                 });
             } catch(e) {}
         }
+
         function showToast(message, isError = false) {
             const toast = document.getElementById('admin-toast');
             const msgEl = document.getElementById('toast-message');
@@ -557,6 +539,7 @@
             toast.classList.remove('hidden');
             setTimeout(() => toast.classList.add('hidden'), 3000);
         }
+
         function playAudioTone(type) {
             try {
                 const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -583,6 +566,7 @@
                 }
             } catch(e) {}
         }
+
         function showScreen(screenId) {
             ['screen-welcome', 'screen-game', 'screen-result', 'screen-leaderboard'].forEach(id => {
                 document.getElementById(id).classList.add('hidden');
@@ -592,11 +576,19 @@
                 renderLeaderboard();
             }
         }
+
         function handleStartGame(e) {
             e.preventDefault();
             const name = document.getElementById('student-name').value.trim();
             const year = document.getElementById('student-year').value;
             if (!name || !year) return;
+
+            if (!window.appData.questions || window.appData.questions.length === 0) {
+                showToast("Loading questions from database... Please try again in 2 seconds.", true);
+                fetchCloudData();
+                return;
+            }
+
             window.currentQuiz = {
                 studentName: name,
                 yearGroup: year,
@@ -608,6 +600,7 @@
             showScreen('screen-game');
             loadRound();
         }
+
         function loadRound() {
             window.currentQuiz.cluesRevealed = 1;
             document.getElementById('hud-progress').innerText = `Round ${window.currentQuiz.currentRoundIdx + 1}/${window.currentQuiz.rounds.length}`;
@@ -617,6 +610,7 @@
             hideFeedback();
             renderClues();
         }
+
         function renderClues() {
             const round = window.currentQuiz.rounds[window.currentQuiz.currentRoundIdx];
             if (!round) return;
@@ -625,6 +619,7 @@
             const pointValues = [50, 40, 30, 20, 10];
             document.getElementById('clues-revealed-count').innerText = `${window.currentQuiz.cluesRevealed}/5`;
             document.getElementById('current-clue-value').innerText = `${pointValues[window.currentQuiz.cluesRevealed - 1]} pts`;
+            
             for (let i = 0; i < 5; i++) {
                 const clueBox = document.createElement('div');
                 const isRevealed = i < window.currentQuiz.cluesRevealed;
@@ -650,20 +645,24 @@
                 revealBtn.classList.remove('hidden');
             }
         }
+
         function revealNextClue() {
             if (window.currentQuiz.cluesRevealed < 5) {
                 window.currentQuiz.cluesRevealed++;
                 renderClues();
             }
         }
+
         function submitAnswer(e) {
             e.preventDefault();
             const guess = document.getElementById('guess-input').value.trim().toLowerCase();
             const round = window.currentQuiz.rounds[window.currentQuiz.currentRoundIdx];
             const actualAnswer = round.answer.toLowerCase();
             if (!guess) return;
+
             const pointValues = [50, 40, 30, 20, 10];
             const earnedPoints = pointValues[window.currentQuiz.cluesRevealed - 1];
+
             if (guess === actualAnswer) {
                 window.currentQuiz.totalScore += earnedPoints;
                 playAudioTone('correct');
@@ -677,12 +676,14 @@
                 showFeedback(`Incorrect guess. Try revealing another clue or guess again!`, 'wrong');
             }
         }
+
         function giveUpRound() {
             const round = window.currentQuiz.rounds[window.currentQuiz.currentRoundIdx];
             playAudioTone('wrong');
             showFeedback(`Round Forfeited (0 pts). The answer was "${round.answer}".`, 'wrong');
             setTimeout(nextRound, 2000);
         }
+
         function showFeedback(msg, type) {
             const banner = document.getElementById('feedback-banner');
             banner.innerText = msg;
@@ -693,9 +694,11 @@
                 banner.classList.add('bg-rose-500/20', 'text-rose-300');
             }
         }
+
         function hideFeedback() {
             document.getElementById('feedback-banner').classList.add('hidden');
         }
+
         function nextRound() {
             window.currentQuiz.currentRoundIdx++;
             if (window.currentQuiz.currentRoundIdx < window.currentQuiz.rounds.length) {
@@ -704,9 +707,11 @@
                 finishQuiz();
             }
         }
+
         async function finishQuiz() {
             try { confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); } catch(e){}
             document.getElementById('final-score-display').innerText = `${window.currentQuiz.totalScore} pts`;
+            
             const scoreEntry = {
                 id: 'score_' + Date.now(),
                 name: window.currentQuiz.studentName,
@@ -714,11 +719,13 @@
                 score: window.currentQuiz.totalScore,
                 createdAt: Date.now()
             };
+
             const updatedScores = [...window.appData.scores, scoreEntry];
             await syncScoresToCloud(updatedScores);
             showToast("Score synced live across all school devices!");
             showScreen('screen-result');
         }
+
         function renderLeaderboard() {
             const tbody = document.getElementById('leaderboard-table-body');
             tbody.innerHTML = '';
@@ -726,6 +733,7 @@
                 tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-500">No student scores submitted yet!</td></tr>`;
                 return;
             }
+
             // Deduplicate by name to show only highest score per student
             const topScores = {};
             window.appData.scores.forEach(s => {
@@ -735,6 +743,7 @@
                     topScores[key] = s;
                 }
             });
+
             const sorted = Object.values(topScores).sort((a, b) => b.score - a.score);
             sorted.forEach((item, idx) => {
                 const tr = document.createElement('tr');
@@ -743,6 +752,7 @@
                 if (idx === 0) rankBadge = `👑`;
                 else if (idx === 1) rankBadge = `🥈`;
                 else if (idx === 2) rankBadge = `🥉`;
+
                 tr.innerHTML = `
                     <td class="p-3">${rankBadge}</td>
                     <td class="p-3 font-bold text-white">${escapeHtml(item.name)}</td>
@@ -752,17 +762,21 @@
                 tbody.appendChild(tr);
             });
         }
+
         function escapeHtml(str) {
             return (str || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
         }
+
         function openAdminModal() {
             document.getElementById('admin-modal').classList.remove('hidden');
             document.getElementById('admin-modal').classList.add('flex');
         }
+
         function closeAdminModal() {
             document.getElementById('admin-modal').classList.add('hidden');
             document.getElementById('admin-modal').classList.remove('flex');
         }
+
         function verifyAdminPasscode() {
             const pass = document.getElementById('admin-pass-input').value;
             if (pass === 'PGS2026') {
@@ -775,6 +789,7 @@
                 showToast("Incorrect Passcode!", true);
             }
         }
+
         function switchAdminTab(tab) {
             if (tab === 'questions') {
                 document.getElementById('admin-tab-questions').classList.remove('hidden');
@@ -788,9 +803,16 @@
                 document.getElementById('tab-btn-questions').className = "px-4 py-2 font-bold text-slate-400 border-b-2 border-transparent";
             }
         }
+
         function renderAdminQuestions() {
             const container = document.getElementById('admin-questions-container');
             container.innerHTML = '';
+            
+            if (!window.appData.questions || window.appData.questions.length === 0) {
+                container.innerHTML = `<div class="p-4 text-center text-xs text-slate-400">No questions loaded in database yet. Click "Add Question" to create one!</div>`;
+                return;
+            }
+
             window.appData.questions.forEach((q, idx) => {
                 const div = document.createElement('div');
                 div.className = "flex justify-between items-center p-3 rounded-2xl bg-slate-950 border border-white/10";
@@ -807,11 +829,19 @@
                 container.appendChild(div);
             });
         }
+
         async function deleteQuestion(idx) {
+            const q = window.appData.questions[idx];
+            if (q && q.id && db) {
+                try {
+                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'questions', q.id));
+                } catch(e){}
+            }
             window.appData.questions.splice(idx, 1);
             await syncQuestionsToCloud(window.appData.questions);
             showToast("Question deleted.");
         }
+
         function renderAdminScores() {
             const tbody = document.getElementById('admin-scores-tbody');
             tbody.innerHTML = '';
@@ -831,17 +861,20 @@
                 tbody.appendChild(tr);
             });
         }
+
         async function deleteSingleScore(idx) {
             window.appData.scores.splice(idx, 1);
             await syncScoresToCloud(window.appData.scores);
             renderAdminScores();
             showToast("Score record deleted.");
         }
+
         async function clearAllScores() {
             await syncScoresToCloud([]);
             renderAdminScores();
             showToast("All leaderboard scores reset.");
         }
+
         function openQuestionEditor(idx = null) {
             window.editingQuestionIndex = idx;
             if (idx !== null && window.appData.questions[idx]) {
@@ -861,10 +894,12 @@
             document.getElementById('question-editor-modal').classList.remove('hidden');
             document.getElementById('question-editor-modal').classList.add('flex');
         }
+
         function closeQuestionEditor() {
             document.getElementById('question-editor-modal').classList.add('hidden');
             document.getElementById('question-editor-modal').classList.remove('flex');
         }
+
         async function saveQuestionFromEditor() {
             const answer = document.getElementById('editor-answer').value.trim();
             if (!answer) {
@@ -876,20 +911,28 @@
                 const c = document.getElementById(`editor-clue-${i}`).value.trim();
                 clues.push(c || `Clue ${i}`);
             }
+
+            const existingId = (window.editingQuestionIndex !== null && window.appData.questions[window.editingQuestionIndex])
+                ? window.appData.questions[window.editingQuestionIndex].id
+                : 'q_' + Date.now();
+
             const newQuestionObj = { 
-                id: 'q_' + Date.now(),
+                id: existingId,
                 answer: answer, 
                 clues: clues 
             };
+
             if (window.editingQuestionIndex !== null && window.appData.questions[window.editingQuestionIndex]) {
                 window.appData.questions[window.editingQuestionIndex] = newQuestionObj;
             } else {
                 window.appData.questions.push(newQuestionObj);
             }
+
             await syncQuestionsToCloud(window.appData.questions);
             closeQuestionEditor();
-            showToast("Question saved to live server!");
+            showToast("Question saved and synced live!");
         }
+
         window.showScreen = showScreen;
         window.handleStartGame = handleStartGame;
         window.revealNextClue = revealNextClue;
@@ -906,10 +949,11 @@
         window.deleteSingleScore = deleteSingleScore;
         window.clearAllScores = clearAllScores;
         window.fetchCloudData = fetchCloudData;
-        // Initialize Cloud Sync on Load
+
+        // Initialize Live Sync on Window Load
         window.addEventListener('load', () => {
             initFirebaseSync();
-            renderLeaderboard();
+            fetchCloudData();
         });
     </script>
 </body>
