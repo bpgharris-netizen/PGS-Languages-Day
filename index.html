@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PGS Languages Day</title>
+    <title>PGS Languages Day Quiz</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -102,7 +102,7 @@
 
     <main class="flex-1 flex items-center justify-center p-4 py-8">
 
-        <!-- SCREEN 1: WELCOME FORM (EXACT MATCH TO SCREENSHOT) -->
+        <!-- SCREEN 1: WELCOME FORM -->
         <section id="screen-welcome" class="w-full max-w-md mx-auto">
             <div class="glass-card rounded-3xl p-6 sm:p-8 space-y-6 text-center">
                 
@@ -212,7 +212,7 @@
                     </form>
 
                     <!-- Give Up Button -->
-                    <button type="button" onclick="giveUpRound()" class="w-full text-xs text-slate-400 hover:text-amber-400 py-2 border border-white/5 rounded-xl hover:border-amber-400/30 transition flex items-center justify-center gap-1.5">
+                    <button type="button" onclick="giveUpRound()" class="w-full text-xs text-slate-400 hover:text-amber-400 py-2.5 border border-white/5 rounded-xl hover:border-amber-400/30 transition flex items-center justify-center gap-1.5 font-bold">
                         <i class="fa-solid fa-flag text-xs"></i> Give Up (0 pts & Reveal Answer)
                     </button>
                 </div>
@@ -258,12 +258,12 @@
                         <h2 class="text-xl font-black text-white flex items-center gap-2">
                             🏆 Global School Leaderboard
                         </h2>
-                        <p class="text-xs text-slate-400">Live rankings (Shows highest score only per student)</p>
+                        <p class="text-xs text-slate-400">Live rankings across all school devices (Highest score only per student)</p>
                     </div>
 
                     <div class="flex gap-2">
                         <button onclick="fetchCloudData()" class="px-3 py-1.5 glass-card rounded-xl text-xs text-slate-300 hover:text-white flex items-center gap-1.5">
-                            <i class="fa-solid fa-rotate-right text-xs"></i> Refresh
+                            <i class="fa-solid fa-rotate-right text-xs"></i> Refresh Live
                         </button>
                         <button onclick="showScreen('screen-welcome')" class="brand-gold-btn px-3 py-1.5 rounded-xl text-xs font-bold">
                             Back
@@ -398,20 +398,18 @@
         </div>
     </div>
 
-    <!-- IN-APP TOAST NOTIFICATION (Replaces browser alerts) -->
+    <!-- IN-APP TOAST NOTIFICATION -->
     <div id="admin-toast" class="fixed top-5 right-5 z-50 hidden bg-slate-900/90 backdrop-blur-md border border-amber-400/40 text-white text-xs px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2 transition-all duration-300">
         <i id="toast-icon" class="fa-solid fa-circle-info text-amber-400"></i>
         <span id="toast-message">Notification message</span>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, addDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    <script>
+        const BUCKET_URL = 'https://kvdb.io/PGS_Languages_Day_Quiz_2026_LiveSync/';
 
-        // Global appData Object with local fallback storage
         const defaultQuestions = [
             {
+                id: "q_japanese",
                 answer: "Japanese",
                 clues: [
                     "Uses three distinct writing systems (Hiragana, Katakana, and Kanji)",
@@ -422,6 +420,7 @@
                 ]
             },
             {
+                id: "q_spanish",
                 answer: "Spanish",
                 clues: [
                     "Second most spoken native language in the world",
@@ -432,6 +431,7 @@
                 ]
             },
             {
+                id: "q_french",
                 answer: "French",
                 clues: [
                     "Known as the 'Language of Love' and an official UN language",
@@ -442,6 +442,7 @@
                 ]
             },
             {
+                id: "q_german",
                 answer: "German",
                 clues: [
                     "Famous for long compound words like 'Krankenwagen' and 'Schadenfreude'",
@@ -452,6 +453,7 @@
                 ]
             },
             {
+                id: "q_italian",
                 answer: "Italian",
                 clues: [
                     "A Romance language directly descended from Vulgar Latin",
@@ -475,98 +477,64 @@
 
         let currentQuiz = null;
         let editingQuestionIndex = null;
-        let currentUser = null;
 
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'pgs-languages-quiz';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' 
-            ? (typeof __firebase_config === 'string' ? JSON.parse(__firebase_config) : __firebase_config)
-            : { apiKey: "demo", authDomain: "demo", projectId: "demo" };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        // Authenticate user before querying Firestore
-        async function authenticateUser() {
+        async function fetchCloudData() {
             try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
+                // 1. Fetch live global scores
+                const scoresRes = await fetch(BUCKET_URL + 'scores');
+                if (scoresRes.ok) {
+                    const cloudScores = await scoresRes.json();
+                    if (Array.isArray(cloudScores) && cloudScores.length > 0) {
+                        appData.scores = cloudScores;
+                        localStorage.setItem('pgs_quiz_scores', JSON.stringify(cloudScores));
+                    }
                 }
-            } catch (err) {
-                try {
-                    await signInAnonymously(auth);
-                } catch (e) {
-                    console.error("Auth error:", e);
-                }
-            }
-        }
 
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                currentUser = user;
-                subscribeToLiveCloudData();
-            }
-        });
-
-        function subscribeToLiveCloudData() {
-            if (!currentUser) return;
-
-            // Strict path for shared public scores
-            const scoresRef = collection(db, 'artifacts', appId, 'public', 'data', 'scores');
-            onSnapshot(scoresRef, (snapshot) => {
-                const fetchedScores = [];
-                snapshot.forEach((doc) => {
-                    fetchedScores.push({ id: doc.id, ...doc.data() });
-                });
-                
-                // Merge cloud scores with any locally submitted scores
-                if (fetchedScores.length > 0) {
-                    appData.scores = fetchedScores;
-                    try {
-                        localStorage.setItem('pgs_quiz_scores', JSON.stringify(appData.scores));
-                    } catch(e) {}
-                }
-                renderLeaderboard();
-                if (document.getElementById('admin-content') && !document.getElementById('admin-content').classList.contains('hidden')) {
-                    renderAdminScores();
-                }
-            }, (error) => {
-                console.warn("Cloud sync using local mode:", error);
-                renderLeaderboard();
-            });
-
-            // Strict path for shared public questions
-            const questionsRef = collection(db, 'artifacts', appId, 'public', 'data', 'questions');
-            onSnapshot(questionsRef, (snapshot) => {
-                if (!snapshot.empty) {
-                    const fetchedQuestions = [];
-                    snapshot.forEach((doc) => {
-                        fetchedQuestions.push({ id: doc.id, ...doc.data() });
-                    });
-                    appData.questions = fetchedQuestions;
-                } else {
-                    seedDefaultQuestions();
-                }
-                if (document.getElementById('admin-content') && !document.getElementById('admin-content').classList.contains('hidden')) {
-                    renderAdminQuestions();
-                }
-            }, (error) => {
-                console.warn("Questions cloud sync using local default:", error);
-            });
-        }
-
-        async function seedDefaultQuestions() {
-            if (!currentUser) return;
-            try {
-                const questionsRef = collection(db, 'artifacts', appId, 'public', 'data', 'questions');
-                for (const q of defaultQuestions) {
-                    await addDoc(questionsRef, q);
+                // 2. Fetch live questions
+                const questionsRes = await fetch(BUCKET_URL + 'questions');
+                if (questionsRes.ok) {
+                    const cloudQuestions = await questionsRes.json();
+                    if (Array.isArray(cloudQuestions) && cloudQuestions.length > 0) {
+                        appData.questions = cloudQuestions;
+                    }
                 }
             } catch(e) {
-                console.warn("Seeding initial questions failed", e);
+                console.warn("Using cached data:", e);
             }
+            renderLeaderboard();
+            if (document.getElementById('admin-content') && !document.getElementById('admin-content').classList.contains('hidden')) {
+                renderAdminQuestions();
+                renderAdminScores();
+            }
+        }
+
+        async function syncScoresToCloud(newScores) {
+            appData.scores = newScores;
+            localStorage.setItem('pgs_quiz_scores', JSON.stringify(newScores));
+            renderLeaderboard();
+            try {
+                await fetch(BUCKET_URL + 'scores', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(newScores)
+                });
+            } catch(e) {
+                console.warn("Cloud score update error:", e);
+            }
+        }
+
+        async function syncQuestionsToCloud(newQuestions) {
+            appData.questions = newQuestions;
+            try {
+                await fetch(BUCKET_URL + 'questions', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(newQuestions)
+                });
+            } catch(e) {
+                console.warn("Cloud questions update error:", e);
+            }
+            renderAdminQuestions();
         }
 
         function showToast(message, isError = false) {
@@ -626,7 +594,7 @@
             document.getElementById(screenId).classList.remove('hidden');
 
             if (screenId === 'screen-leaderboard') {
-                renderLeaderboard();
+                fetchCloudData();
             }
         }
 
@@ -669,10 +637,9 @@
             container.innerHTML = '';
 
             const pointValues = [50, 40, 30, 20, 10];
-            const currentVal = pointValues[currentQuiz.cluesRevealed - 1];
 
             document.getElementById('clues-revealed-count').innerText = `${currentQuiz.cluesRevealed}/5`;
-            document.getElementById('current-clue-value').innerText = `${currentVal} pts`;
+            document.getElementById('current-clue-value').innerText = `${pointValues[currentQuiz.cluesRevealed - 1]} pts`;
 
             for (let i = 0; i < 5; i++) {
                 const clueBox = document.createElement('div');
@@ -770,40 +737,16 @@
             document.getElementById('final-score-display').innerText = `${currentQuiz.totalScore} pts`;
 
             const scoreEntry = {
-                id: 'local_' + Date.now(),
+                id: 'score_' + Date.now(),
                 name: currentQuiz.studentName,
                 year: currentQuiz.yearGroup,
                 score: currentQuiz.totalScore,
                 createdAt: Date.now()
             };
 
-            // 1. Immediately save locally and update UI so leaderboard works instantly
-            appData.scores.push(scoreEntry);
-            try {
-                localStorage.setItem('pgs_quiz_scores', JSON.stringify(appData.scores));
-            } catch(e) {}
-            renderLeaderboard();
-
-            // 2. Background cloud upload
-            if (currentUser) {
-                try {
-                    const scoresRef = collection(db, 'artifacts', appId, 'public', 'data', 'scores');
-                    const docRef = await addDoc(scoresRef, {
-                        name: scoreEntry.name,
-                        year: scoreEntry.year,
-                        score: scoreEntry.score,
-                        createdAt: scoreEntry.createdAt
-                    });
-                    scoreEntry.id = docRef.id;
-                    showToast("Score saved to live school leaderboard!");
-                } catch(e) {
-                    console.warn("Cloud save notice:", e);
-                    showToast("Score saved successfully!");
-                }
-            } else {
-                showToast("Score saved!");
-            }
-
+            const updatedScores = [...appData.scores, scoreEntry];
+            await syncScoresToCloud(updatedScores);
+            showToast("Score synced live to all devices!");
             showScreen('screen-result');
         }
 
@@ -901,26 +844,17 @@
                     </div>
                     <div class="flex gap-2">
                         <button onclick="openQuestionEditor(${idx})" class="px-2.5 py-1 bg-amber-400/20 text-amber-400 rounded-lg text-xs font-bold">Edit</button>
-                        <button onclick="deleteQuestion('${q.id || ''}', ${idx})" class="px-2.5 py-1 bg-rose-500/20 text-rose-300 rounded-lg text-xs font-bold">Delete</button>
+                        <button onclick="deleteQuestion(${idx})" class="px-2.5 py-1 bg-rose-500/20 text-rose-300 rounded-lg text-xs font-bold">Delete</button>
                     </div>
                 `;
                 container.appendChild(div);
             });
         }
 
-        async function deleteQuestion(docId, idx) {
-            if (currentUser && docId) {
-                try {
-                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'questions', docId);
-                    await deleteDoc(docRef);
-                    showToast("Question deleted from live database.");
-                } catch(e) {
-                    console.error("Error deleting question:", e);
-                }
-            } else {
-                appData.questions.splice(idx, 1);
-                renderAdminQuestions();
-            }
+        async function deleteQuestion(idx) {
+            appData.questions.splice(idx, 1);
+            await syncQuestionsToCloud(appData.questions);
+            showToast("Question deleted.");
         }
 
         function renderAdminScores() {
@@ -934,7 +868,7 @@
                     <td class="p-2 text-slate-400">${s.year}</td>
                     <td class="p-2 font-bold text-amber-400">${s.score}</td>
                     <td class="p-2 text-right">
-                        <button onclick="deleteSingleScore('${s.id || ''}', ${idx})" class="text-rose-400 hover:text-rose-300">
+                        <button onclick="deleteSingleScore(${idx})" class="text-rose-400 hover:text-rose-300">
                             <i class="fa-solid fa-trash text-xs"></i>
                         </button>
                     </td>
@@ -943,43 +877,17 @@
             });
         }
 
-        async function deleteSingleScore(docId, idx) {
+        async function deleteSingleScore(idx) {
             appData.scores.splice(idx, 1);
-            try { localStorage.setItem('pgs_quiz_scores', JSON.stringify(appData.scores)); } catch(e){}
+            await syncScoresToCloud(appData.scores);
             renderAdminScores();
-            renderLeaderboard();
-
-            if (currentUser && docId && !docId.startsWith('local_')) {
-                try {
-                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'scores', docId);
-                    await deleteDoc(docRef);
-                    showToast("Score record deleted.");
-                } catch(e) {
-                    console.error("Error deleting score:", e);
-                }
-            }
+            showToast("Score record deleted.");
         }
 
         async function clearAllScores() {
-            const oldScores = [...appData.scores];
-            appData.scores = [];
-            try { localStorage.setItem('pgs_quiz_scores', JSON.stringify([])); } catch(e){}
+            await syncScoresToCloud([]);
             renderAdminScores();
-            renderLeaderboard();
-
-            if (currentUser) {
-                try {
-                    for (const s of oldScores) {
-                        if (s.id && !s.id.startsWith('local_')) {
-                            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'scores', s.id);
-                            await deleteDoc(docRef);
-                        }
-                    }
-                    showToast("All leaderboard scores reset.");
-                } catch(e) {
-                    console.error("Error resetting scores:", e);
-                }
-            }
+            showToast("All leaderboard scores reset.");
         }
 
         function openQuestionEditor(idx = null) {
@@ -1020,44 +928,27 @@
                 clues.push(c || `Clue ${i}`);
             }
 
-            const newQuestionObj = { answer: answer, clues: clues };
+            const newQuestionObj = { 
+                id: 'q_' + Date.now(),
+                answer: answer, 
+                clues: clues 
+            };
 
-            if (currentUser) {
-                try {
-                    const questionsRef = collection(db, 'artifacts', appId, 'public', 'data', 'questions');
-                    if (editingQuestionIndex !== null && appData.questions[editingQuestionIndex] && appData.questions[editingQuestionIndex].id) {
-                        const existingId = appData.questions[editingQuestionIndex].id;
-                        const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'questions', existingId);
-                        await deleteDoc(docRef);
-                    }
-                    await addDoc(questionsRef, newQuestionObj);
-                    showToast("Question saved to live database!");
-                } catch(e) {
-                    console.error("Failed saving question:", e);
-                }
+            if (editingQuestionIndex !== null && appData.questions[editingQuestionIndex]) {
+                appData.questions[editingQuestionIndex] = newQuestionObj;
+            } else {
+                appData.questions.push(newQuestionObj);
             }
 
+            await syncQuestionsToCloud(appData.questions);
             closeQuestionEditor();
+            showToast("Question saved to live server!");
         }
 
-        window.showScreen = showScreen;
-        window.handleStartGame = handleStartGame;
-        window.revealNextClue = revealNextClue;
-        window.submitAnswer = submitAnswer;
-        window.giveUpRound = giveUpRound;
-        window.openAdminModal = openAdminModal;
-        window.closeAdminModal = closeAdminModal;
-        window.verifyAdminPasscode = verifyAdminPasscode;
-        window.switchAdminTab = switchAdminTab;
-        window.openQuestionEditor = openQuestionEditor;
-        window.closeQuestionEditor = closeQuestionEditor;
-        window.saveQuestionFromEditor = saveQuestionFromEditor;
-        window.deleteQuestion = deleteQuestion;
-        window.deleteSingleScore = deleteSingleScore;
-        window.clearAllScores = clearAllScores;
-
+        // Initialize Cloud Data and Periodic 8-second polling
         window.addEventListener('load', () => {
-            authenticateUser();
+            fetchCloudData();
+            setInterval(fetchCloudData, 8000);
         });
     </script>
 </body>
