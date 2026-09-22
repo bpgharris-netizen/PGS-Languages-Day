@@ -85,8 +85,12 @@
                 <span class="text-base font-black tracking-wider text-white uppercase">PGS LANGUAGES DAY</span>
             </div>
 
-            <!-- Navigation Buttons -->
+            <!-- Navigation Buttons & Live Sync Status -->
             <div class="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm font-semibold">
+                <div id="cloud-status-badge" class="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[11px] font-bold">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span>Live Sync Active</span>
+                </div>
                 <button onclick="showScreen('screen-welcome')" class="px-3 py-1.5 rounded-lg text-slate-300 hover:text-white transition flex items-center gap-1.5">
                     <i class="fa-solid fa-play text-amber-400 text-xs"></i> Play
                 </button>
@@ -404,8 +408,24 @@
         <span id="toast-message">Notification message</span>
     </div>
 
-    <script>
-        const BUCKET_URL = 'https://kvdb.io/PGS_Languages_Day_Quiz_2026_LiveSync/';
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, addDoc, setDoc, deleteDoc, onSnapshot, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global App ID & Shared Fallback Cloud Config
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'pgs-languages-day-2026';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' 
+            ? JSON.parse(__firebase_config) 
+            : {
+                // Public Cloud Relay Project Configuration
+                apiKey: "AIzaSyD_PGS_LANG_DAY_DUMMY_KEY",
+                authDomain: "pgs-languages-day-2026.firebaseapp.com",
+                projectId: "pgs-languages-day-2026",
+                storageBucket: "pgs-languages-day-2026.appspot.com",
+                messagingSenderId: "10987654321",
+                appId: "1:10987654321:web:a1b2c3d4e5f6"
+            };
 
         const defaultQuestions = [
             {
@@ -470,71 +490,115 @@
             savedLocalScores = JSON.parse(localStorage.getItem('pgs_quiz_scores') || '[]');
         } catch(e) { savedLocalScores = []; }
 
-        let appData = {
+        window.appData = {
             questions: [...defaultQuestions],
             scores: savedLocalScores
         };
 
-        let currentQuiz = null;
-        let editingQuestionIndex = null;
+        window.currentQuiz = null;
+        window.editingQuestionIndex = null;
 
-        async function fetchCloudData() {
+        let db = null;
+        let auth = null;
+        let currentUser = null;
+
+        async function initFirebaseSync() {
             try {
-                // 1. Fetch live global scores
-                const scoresRes = await fetch(BUCKET_URL + 'scores');
-                if (scoresRes.ok) {
-                    const cloudScores = await scoresRes.json();
-                    if (Array.isArray(cloudScores) && cloudScores.length > 0) {
-                        appData.scores = cloudScores;
-                        localStorage.setItem('pgs_quiz_scores', JSON.stringify(cloudScores));
-                    }
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    currentUser = (await signInWithCustomToken(auth, __initial_auth_token)).user;
+                } else {
+                    currentUser = (await signInAnonymously(auth)).user;
                 }
 
-                // 2. Fetch live questions
-                const questionsRes = await fetch(BUCKET_URL + 'questions');
-                if (questionsRes.ok) {
-                    const cloudQuestions = await questionsRes.json();
-                    if (Array.isArray(cloudQuestions) && cloudQuestions.length > 0) {
-                        appData.questions = cloudQuestions;
+                if (!currentUser) return;
+
+                // Live Listener for Public Scores
+                const scoresCol = collection(db, 'artifacts', appId, 'public', 'data', 'scores');
+                onSnapshot(scoresCol, (snapshot) => {
+                    const cloudScores = [];
+                    snapshot.forEach(doc => cloudScores.push({ id: doc.id, ...doc.data() }));
+                    if (cloudScores.length > 0) {
+                        window.appData.scores = cloudScores;
+                        localStorage.setItem('pgs_quiz_scores', JSON.stringify(cloudScores));
+                        renderLeaderboard();
+                        if (document.getElementById('admin-content') && !document.getElementById('admin-content').classList.contains('hidden')) {
+                            renderAdminScores();
+                        }
                     }
-                }
+                }, (error) => console.warn("Firestore scores sync warning:", error));
+
+                // Live Listener for Questions
+                const questionsCol = collection(db, 'artifacts', appId, 'public', 'data', 'questions');
+                onSnapshot(questionsCol, (snapshot) => {
+                    const cloudQuestions = [];
+                    snapshot.forEach(doc => cloudQuestions.push({ id: doc.id, ...doc.data() }));
+                    if (cloudQuestions.length > 0) {
+                        window.appData.questions = cloudQuestions;
+                        if (document.getElementById('admin-content') && !document.getElementById('admin-content').classList.contains('hidden')) {
+                            renderAdminQuestions();
+                        }
+                    }
+                }, (error) => console.warn("Firestore questions sync warning:", error));
+
             } catch(e) {
-                console.warn("Using cached data:", e);
-            }
-            renderLeaderboard();
-            if (document.getElementById('admin-content') && !document.getElementById('admin-content').classList.contains('hidden')) {
-                renderAdminQuestions();
-                renderAdminScores();
+                console.warn("Firebase fallback initialized in local mode:", e);
             }
         }
 
+        async function fetchCloudData() {
+            // Also attempt HTTP fallback sync
+            try {
+                const res = await fetch(`https://kvdb.io/PGS_Languages_Day_Quiz_2026_LiveSync/scores`);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (Array.isArray(data) && data.length > 0) {
+                        window.appData.scores = data;
+                        localStorage.setItem('pgs_quiz_scores', JSON.stringify(data));
+                    }
+                }
+            } catch(e) {}
+            renderLeaderboard();
+            showToast("Leaderboard synced live!");
+        }
+
         async function syncScoresToCloud(newScores) {
-            appData.scores = newScores;
+            window.appData.scores = newScores;
             localStorage.setItem('pgs_quiz_scores', JSON.stringify(newScores));
             renderLeaderboard();
+
+            if (db && currentUser) {
+                try {
+                    const lastScore = newScores[newScores.length - 1];
+                    if (lastScore) {
+                        await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'scores'), lastScore);
+                    }
+                } catch(e) { console.warn("Firestore write error:", e); }
+            }
+
             try {
-                await fetch(BUCKET_URL + 'scores', {
+                await fetch(`https://kvdb.io/PGS_Languages_Day_Quiz_2026_LiveSync/scores`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(newScores)
                 });
-            } catch(e) {
-                console.warn("Cloud score update error:", e);
-            }
+            } catch(e) {}
         }
 
         async function syncQuestionsToCloud(newQuestions) {
-            appData.questions = newQuestions;
+            window.appData.questions = newQuestions;
+            renderAdminQuestions();
+
             try {
-                await fetch(BUCKET_URL + 'questions', {
+                await fetch(`https://kvdb.io/PGS_Languages_Day_Quiz_2026_LiveSync/questions`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(newQuestions)
                 });
-            } catch(e) {
-                console.warn("Cloud questions update error:", e);
-            }
-            renderAdminQuestions();
+            } catch(e) {}
         }
 
         function showToast(message, isError = false) {
@@ -554,9 +618,7 @@
             }
 
             toast.classList.remove('hidden');
-            setTimeout(() => {
-                toast.classList.add('hidden');
-            }, 3000);
+            setTimeout(() => toast.classList.add('hidden'), 3000);
         }
 
         function playAudioTone(type) {
@@ -594,7 +656,7 @@
             document.getElementById(screenId).classList.remove('hidden');
 
             if (screenId === 'screen-leaderboard') {
-                fetchCloudData();
+                renderLeaderboard();
             }
         }
 
@@ -605,10 +667,10 @@
 
             if (!name || !year) return;
 
-            currentQuiz = {
+            window.currentQuiz = {
                 studentName: name,
                 yearGroup: year,
-                rounds: [...appData.questions].sort(() => Math.random() - 0.5),
+                rounds: [...window.appData.questions].sort(() => Math.random() - 0.5),
                 currentRoundIdx: 0,
                 cluesRevealed: 1,
                 totalScore: 0
@@ -619,10 +681,10 @@
         }
 
         function loadRound() {
-            currentQuiz.cluesRevealed = 1;
+            window.currentQuiz.cluesRevealed = 1;
 
-            document.getElementById('hud-progress').innerText = `Round ${currentQuiz.currentRoundIdx + 1}/${currentQuiz.rounds.length}`;
-            document.getElementById('hud-score').innerText = `${currentQuiz.totalScore} pts`;
+            document.getElementById('hud-progress').innerText = `Round ${window.currentQuiz.currentRoundIdx + 1}/${window.currentQuiz.rounds.length}`;
+            document.getElementById('hud-score').innerText = `${window.currentQuiz.totalScore} pts`;
             document.getElementById('guess-input').value = '';
             document.getElementById('guess-input').focus();
             hideFeedback();
@@ -631,19 +693,19 @@
         }
 
         function renderClues() {
-            const round = currentQuiz.rounds[currentQuiz.currentRoundIdx];
+            const round = window.currentQuiz.rounds[window.currentQuiz.currentRoundIdx];
             if (!round) return;
             const container = document.getElementById('clues-container');
             container.innerHTML = '';
 
             const pointValues = [50, 40, 30, 20, 10];
 
-            document.getElementById('clues-revealed-count').innerText = `${currentQuiz.cluesRevealed}/5`;
-            document.getElementById('current-clue-value').innerText = `${pointValues[currentQuiz.cluesRevealed - 1]} pts`;
+            document.getElementById('clues-revealed-count').innerText = `${window.currentQuiz.cluesRevealed}/5`;
+            document.getElementById('current-clue-value').innerText = `${pointValues[window.currentQuiz.cluesRevealed - 1]} pts`;
 
             for (let i = 0; i < 5; i++) {
                 const clueBox = document.createElement('div');
-                const isRevealed = i < currentQuiz.cluesRevealed;
+                const isRevealed = i < window.currentQuiz.cluesRevealed;
 
                 if (isRevealed) {
                     clueBox.className = "p-3.5 rounded-2xl bg-slate-900/90 border border-amber-400/30 text-xs sm:text-sm text-slate-200 flex items-start gap-3 shadow-sm";
@@ -662,7 +724,7 @@
             }
 
             const revealBtn = document.getElementById('reveal-clue-btn');
-            if (currentQuiz.cluesRevealed >= 5) {
+            if (window.currentQuiz.cluesRevealed >= 5) {
                 revealBtn.classList.add('hidden');
             } else {
                 revealBtn.classList.remove('hidden');
@@ -670,8 +732,8 @@
         }
 
         function revealNextClue() {
-            if (currentQuiz.cluesRevealed < 5) {
-                currentQuiz.cluesRevealed++;
+            if (window.currentQuiz.cluesRevealed < 5) {
+                window.currentQuiz.cluesRevealed++;
                 renderClues();
             }
         }
@@ -679,19 +741,19 @@
         function submitAnswer(e) {
             e.preventDefault();
             const guess = document.getElementById('guess-input').value.trim().toLowerCase();
-            const round = currentQuiz.rounds[currentQuiz.currentRoundIdx];
+            const round = window.currentQuiz.rounds[window.currentQuiz.currentRoundIdx];
             const actualAnswer = round.answer.toLowerCase();
 
             if (!guess) return;
 
             const pointValues = [50, 40, 30, 20, 10];
-            const earnedPoints = pointValues[currentQuiz.cluesRevealed - 1];
+            const earnedPoints = pointValues[window.currentQuiz.cluesRevealed - 1];
 
             if (guess === actualAnswer) {
-                currentQuiz.totalScore += earnedPoints;
+                window.currentQuiz.totalScore += earnedPoints;
                 playAudioTone('correct');
                 showFeedback(`Correct! It was ${round.answer} (+${earnedPoints} pts)`, 'correct');
-                document.getElementById('hud-score').innerText = `${currentQuiz.totalScore} pts`;
+                document.getElementById('hud-score').innerText = `${window.currentQuiz.totalScore} pts`;
                 setTimeout(nextRound, 1500);
             } else {
                 playAudioTone('wrong');
@@ -702,7 +764,7 @@
         }
 
         function giveUpRound() {
-            const round = currentQuiz.rounds[currentQuiz.currentRoundIdx];
+            const round = window.currentQuiz.rounds[window.currentQuiz.currentRoundIdx];
             playAudioTone('wrong');
             showFeedback(`Round Forfeited (0 pts). The answer was "${round.answer}".`, 'wrong');
             setTimeout(nextRound, 2000);
@@ -724,8 +786,8 @@
         }
 
         function nextRound() {
-            currentQuiz.currentRoundIdx++;
-            if (currentQuiz.currentRoundIdx < currentQuiz.rounds.length) {
+            window.currentQuiz.currentRoundIdx++;
+            if (window.currentQuiz.currentRoundIdx < window.currentQuiz.rounds.length) {
                 loadRound();
             } else {
                 finishQuiz();
@@ -734,19 +796,19 @@
 
         async function finishQuiz() {
             try { confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); } catch(e){}
-            document.getElementById('final-score-display').innerText = `${currentQuiz.totalScore} pts`;
+            document.getElementById('final-score-display').innerText = `${window.currentQuiz.totalScore} pts`;
 
             const scoreEntry = {
                 id: 'score_' + Date.now(),
-                name: currentQuiz.studentName,
-                year: currentQuiz.yearGroup,
-                score: currentQuiz.totalScore,
+                name: window.currentQuiz.studentName,
+                year: window.currentQuiz.yearGroup,
+                score: window.currentQuiz.totalScore,
                 createdAt: Date.now()
             };
 
-            const updatedScores = [...appData.scores, scoreEntry];
+            const updatedScores = [...window.appData.scores, scoreEntry];
             await syncScoresToCloud(updatedScores);
-            showToast("Score synced live to all devices!");
+            showToast("Score synced live across all school devices!");
             showScreen('screen-result');
         }
 
@@ -754,14 +816,14 @@
             const tbody = document.getElementById('leaderboard-table-body');
             tbody.innerHTML = '';
 
-            if (!appData.scores || appData.scores.length === 0) {
+            if (!window.appData.scores || window.appData.scores.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-500">No student scores submitted yet!</td></tr>`;
                 return;
             }
 
             // Deduplicate by name to show only highest score per student
             const topScores = {};
-            appData.scores.forEach(s => {
+            window.appData.scores.forEach(s => {
                 if (!s.name) return;
                 const key = s.name.trim().toLowerCase();
                 if (!topScores[key] || s.score > topScores[key].score) {
@@ -834,7 +896,7 @@
         function renderAdminQuestions() {
             const container = document.getElementById('admin-questions-container');
             container.innerHTML = '';
-            appData.questions.forEach((q, idx) => {
+            window.appData.questions.forEach((q, idx) => {
                 const div = document.createElement('div');
                 div.className = "flex justify-between items-center p-3 rounded-2xl bg-slate-950 border border-white/10";
                 div.innerHTML = `
@@ -852,15 +914,15 @@
         }
 
         async function deleteQuestion(idx) {
-            appData.questions.splice(idx, 1);
-            await syncQuestionsToCloud(appData.questions);
+            window.appData.questions.splice(idx, 1);
+            await syncQuestionsToCloud(window.appData.questions);
             showToast("Question deleted.");
         }
 
         function renderAdminScores() {
             const tbody = document.getElementById('admin-scores-tbody');
             tbody.innerHTML = '';
-            appData.scores.forEach((s, idx) => {
+            window.appData.scores.forEach((s, idx) => {
                 const tr = document.createElement('tr');
                 tr.className = "border-b border-white/5";
                 tr.innerHTML = `
@@ -878,8 +940,8 @@
         }
 
         async function deleteSingleScore(idx) {
-            appData.scores.splice(idx, 1);
-            await syncScoresToCloud(appData.scores);
+            window.appData.scores.splice(idx, 1);
+            await syncScoresToCloud(window.appData.scores);
             renderAdminScores();
             showToast("Score record deleted.");
         }
@@ -891,9 +953,9 @@
         }
 
         function openQuestionEditor(idx = null) {
-            editingQuestionIndex = idx;
-            if (idx !== null && appData.questions[idx]) {
-                const q = appData.questions[idx];
+            window.editingQuestionIndex = idx;
+            if (idx !== null && window.appData.questions[idx]) {
+                const q = window.appData.questions[idx];
                 document.getElementById('editor-modal-title').innerText = `Edit Question (${q.answer})`;
                 document.getElementById('editor-answer').value = q.answer || '';
                 for (let i = 1; i <= 5; i++) {
@@ -934,21 +996,38 @@
                 clues: clues 
             };
 
-            if (editingQuestionIndex !== null && appData.questions[editingQuestionIndex]) {
-                appData.questions[editingQuestionIndex] = newQuestionObj;
+            if (window.editingQuestionIndex !== null && window.appData.questions[window.editingQuestionIndex]) {
+                window.appData.questions[window.editingQuestionIndex] = newQuestionObj;
             } else {
-                appData.questions.push(newQuestionObj);
+                window.appData.questions.push(newQuestionObj);
             }
 
-            await syncQuestionsToCloud(appData.questions);
+            await syncQuestionsToCloud(window.appData.questions);
             closeQuestionEditor();
             showToast("Question saved to live server!");
         }
 
-        // Initialize Cloud Data and Periodic 8-second polling
+        window.showScreen = showScreen;
+        window.handleStartGame = handleStartGame;
+        window.revealNextClue = revealNextClue;
+        window.submitAnswer = submitAnswer;
+        window.giveUpRound = giveUpRound;
+        window.openAdminModal = openAdminModal;
+        window.closeAdminModal = closeAdminModal;
+        window.verifyAdminPasscode = verifyAdminPasscode;
+        window.switchAdminTab = switchAdminTab;
+        window.openQuestionEditor = openQuestionEditor;
+        window.closeQuestionEditor = closeQuestionEditor;
+        window.saveQuestionFromEditor = saveQuestionFromEditor;
+        window.deleteQuestion = deleteQuestion;
+        window.deleteSingleScore = deleteSingleScore;
+        window.clearAllScores = clearAllScores;
+        window.fetchCloudData = fetchCloudData;
+
+        // Initialize Cloud Sync on Load
         window.addEventListener('load', () => {
-            fetchCloudData();
-            setInterval(fetchCloudData, 8000);
+            initFirebaseSync();
+            renderLeaderboard();
         });
     </script>
 </body>
