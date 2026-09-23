@@ -93,12 +93,8 @@
                         Guess the <span class="text-amber-400">Secret<br>Language</span>
                     </h2>
                     <p class="text-slate-400 text-xs sm:text-sm leading-relaxed max-w-xs mx-auto">
-                        5 clues per round. Reveal hints early for maximum points!
+                        Listen to or read the clues, figure out the mystery language, and test your knowledge for Languages Day!
                     </p>
-                </div>
-
-                <div id="db-counter-banner" class="p-3 bg-amber-400/10 border border-amber-400/20 rounded-xl text-xs text-amber-300 font-bold">
-                    <i class="fa-solid fa-database mr-1"></i> Loaded <span id="q-count-badge">0</span> Database Questions
                 </div>
 
                 <form onsubmit="handleStartGame(event)" class="space-y-4 text-left pt-2">
@@ -352,7 +348,7 @@
             measurementId: "G-PEQD89WEXF"
         };
 
-     
+        // SHA-256 Hash for '1732PGS'
         const ADMIN_HASH = "809bdc5cfd98393eef2507d39103848b59d9f583f707f5020c6db08c02c6d734";
 
         async function hashString(str) {
@@ -373,12 +369,6 @@
         let db = null;
         let auth = null;
 
-        function updateUIQuestionCount() {
-            const count = window.appData.questions ? window.appData.questions.length : 0;
-            const badge = document.getElementById('q-count-badge');
-            if (badge) badge.innerText = count;
-        }
-
         async function initFirebaseSync() {
             try {
                 const app = initializeApp(firebaseConfig);
@@ -394,7 +384,6 @@
                         fetched.push({ id: docSnap.id, ...docSnap.data() });
                     });
                     window.appData.questions = fetched;
-                    updateUIQuestionCount();
                     if (document.getElementById('admin-content') && !document.getElementById('admin-content').classList.contains('hidden')) {
                         renderAdminQuestions();
                     }
