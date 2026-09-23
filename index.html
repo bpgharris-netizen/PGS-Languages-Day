@@ -349,16 +349,16 @@
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        const firebaseConfig = typeof __firebase_config !== 'undefined' 
-            ? JSON.parse(__firebase_config) 
-            : {
-                apiKey: "AIzaSyD_PGS_LANG_DAY_DUMMY_KEY",
-                authDomain: "pgs-languages-day-2026.firebaseapp.com",
-                projectId: "pgs-languages-day-2026",
-                storageBucket: "pgs-languages-day-2026.appspot.com",
-                messagingSenderId: "10987654321",
-                appId: "1:10987654321:web:a1b2c3d4e5f6"
-            };
+        // Real Firebase configuration inserted here
+        const firebaseConfig = {
+            apiKey: "AIzaSyAh9t8mohM8biWaW2_3IbOuoZEIXIyQQkE",
+            authDomain: "pgslanguagesday.firebaseapp.com",
+            projectId: "pgslanguagesday",
+            storageBucket: "pgslanguagesday.firebasestorage.app",
+            messagingSenderId: "306068250159",
+            appId: "1:306068250159:web:c633603673b27546e170da",
+            measurementId: "G-PEQD89WEXF"
+        };
 
         window.appData = {
             questions: [],
