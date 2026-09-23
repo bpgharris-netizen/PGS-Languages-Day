@@ -254,7 +254,7 @@
                 <p class="text-xs text-slate-300 max-w-xs mx-auto">Enter passcode to manage questions and moderate scores.</p>
                 <div class="max-w-xs mx-auto space-y-3">
                     <input type="password" id="admin-pass-input" placeholder="Enter Admin Passcode" class="w-full glass-input rounded-xl px-4 py-2.5 text-center text-sm tracking-widest">
-                    <button onclick="verifyAdminPasscode()" class="w-full brand-gold-btn py-2.5 rounded-xl text-xs uppercase font-extrabold">
+                    <button id="unlock-admin-btn" type="button" class="w-full brand-gold-btn py-2.5 rounded-xl text-xs uppercase font-extrabold">
                         Unlock Admin Access
                     </button>
                 </div>
@@ -348,20 +348,12 @@
             measurementId: "G-PEQD89WEXF"
         };
 
-        // Standard encrypted hash check for passcode: '1732PGS'
-        const TARGET_HASH = "809bdc5cfd98393eef2507d39103848b59d9f583f707f5020c6db08c02c6d734";
+        // UNENCRYPTED PASSCODE CHECK
+        const ADMIN_PASSCODE = "1732PGS";
 
-        window.verifyAdminPasscode = async function() {
-            const inputVal = document.getElementById('admin-pass-input').value;
-            if (!inputVal) return;
-
-            // Explicit Web Crypto digest calculation
-            const msgUint8 = new TextEncoder().encode(inputVal);
-            const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            const computedHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-
-            if (computedHash === TARGET_HASH) {
+        function verifyAdminPasscode() {
+            const inputVal = document.getElementById('admin-pass-input').value.trim();
+            if (inputVal === ADMIN_PASSCODE) {
                 document.getElementById('admin-gate').classList.add('hidden');
                 document.getElementById('admin-content').classList.remove('hidden');
                 renderAdminQuestions();
@@ -369,7 +361,7 @@
             } else {
                 showToast("Incorrect Passcode!", true);
             }
-        };
+        }
 
         window.appData = {
             questions: [],
@@ -841,8 +833,12 @@
         window.deleteSingleScore = deleteSingleScore;
         window.clearAllScores = clearAllScores;
 
-        window.addEventListener('load', () => {
+        window.addEventListener('DOMContentLoaded', () => {
             initFirebaseSync();
+            const btn = document.getElementById('unlock-admin-btn');
+            if (btn) {
+                btn.addEventListener('click', verifyAdminPasscode);
+            }
         });
     </script>
 </body>
