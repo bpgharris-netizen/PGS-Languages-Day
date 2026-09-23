@@ -348,16 +348,28 @@
             measurementId: "G-PEQD89WEXF"
         };
 
-        // SHA-256 Hash for '1732PGS'
-        const ADMIN_HASH = "809bdc5cfd98393eef2507d39103848b59d9f583f707f5020c6db08c02c6d734";
+        // Standard encrypted hash check for passcode: '1732PGS'
+        const TARGET_HASH = "809bdc5cfd98393eef2507d39103848b59d9f583f707f5020c6db08c02c6d734";
 
-        async function hashString(str) {
-            const encoder = new TextEncoder();
-            const data = encoder.encode(str);
-            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+        window.verifyAdminPasscode = async function() {
+            const inputVal = document.getElementById('admin-pass-input').value;
+            if (!inputVal) return;
+
+            // Explicit Web Crypto digest calculation
+            const msgUint8 = new TextEncoder().encode(inputVal);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
             const hashArray = Array.from(new Uint8Array(hashBuffer));
-            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-        }
+            const computedHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+            if (computedHash === TARGET_HASH) {
+                document.getElementById('admin-gate').classList.add('hidden');
+                document.getElementById('admin-content').classList.remove('hidden');
+                renderAdminQuestions();
+                renderAdminScores();
+            } else {
+                showToast("Incorrect Passcode!", true);
+            }
+        };
 
         window.appData = {
             questions: [],
@@ -665,20 +677,6 @@
             document.getElementById('admin-modal').classList.remove('flex');
         }
 
-        async function verifyAdminPasscode() {
-            const inputPass = document.getElementById('admin-pass-input').value;
-            const inputHash = await hashString(inputPass);
-
-            if (inputHash === ADMIN_HASH) {
-                document.getElementById('admin-gate').classList.add('hidden');
-                document.getElementById('admin-content').classList.remove('hidden');
-                renderAdminQuestions();
-                renderAdminScores();
-            } else {
-                showToast("Incorrect Passcode!", true);
-            }
-        }
-
         function switchAdminTab(tab) {
             if (tab === 'questions') {
                 document.getElementById('admin-tab-questions').classList.remove('hidden');
@@ -835,7 +833,6 @@
         window.giveUpRound = giveUpRound;
         window.openAdminModal = openAdminModal;
         window.closeAdminModal = closeAdminModal;
-        window.verifyAdminPasscode = verifyAdminPasscode;
         window.switchAdminTab = switchAdminTab;
         window.openQuestionEditor = openQuestionEditor;
         window.closeQuestionEditor = closeQuestionEditor;
