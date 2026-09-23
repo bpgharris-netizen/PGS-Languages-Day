@@ -50,9 +50,6 @@
             transform: translateY(-1px);
             box-shadow: 0 8px 25px rgba(245, 158, 11, 0.35);
         }
-        .brand-gold-btn:active {
-            transform: translateY(0);
-        }
         .shake {
             animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
         }
@@ -67,18 +64,16 @@
 <body class="min-h-screen flex flex-col justify-between selection:bg-amber-500 selection:text-slate-950">
     <header class="w-full border-b border-white/5 bg-slate-950/40 backdrop-blur-md px-4 sm:px-8 py-3.5 sticky top-0 z-40">
         <div class="max-w-6xl mx-auto flex items-center justify-between gap-4">
-            <!-- Brand Logo -->
             <div class="flex items-center gap-3 cursor-pointer" onclick="showScreen('screen-welcome')">
                 <div class="w-9 h-9 rounded-xl bg-amber-400 text-slate-950 font-black flex items-center justify-center text-sm shadow-md">
                     A文
                 </div>
                 <span class="text-base font-black tracking-wider text-white uppercase">PGS LANGUAGES DAY</span>
             </div>
-            <!-- Navigation Buttons & Live Sync Status -->
             <div class="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm font-semibold">
                 <div id="cloud-status-badge" class="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[11px] font-bold">
                     <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span id="sync-status-text">Question Database Active</span>
+                    <span id="sync-status-text">Connected to Firestore</span>
                 </div>
                 <button onclick="showScreen('screen-welcome')" class="px-3 py-1.5 rounded-lg text-slate-300 hover:text-white transition flex items-center gap-1.5">
                     <i class="fa-solid fa-play text-amber-400 text-xs"></i> Play
@@ -97,19 +92,16 @@
         <!-- SCREEN 1: WELCOME FORM -->
         <section id="screen-welcome" class="w-full max-w-md mx-auto">
             <div class="glass-card rounded-3xl p-6 sm:p-8 space-y-6 text-center">
-                
-                <!-- Pill Tag -->
                 <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-400/10 border border-amber-400/30 text-amber-400 text-[11px] font-bold uppercase tracking-widest">
                     <i class="fa-solid fa-globe text-xs"></i>
                     <span>LANGUAGE MYSTERY CHALLENGE</span>
                 </div>
-                <!-- Title & Subtitle -->
                 <div class="space-y-2">
                     <h2 class="text-3xl sm:text-4xl font-black text-white tracking-tight leading-snug">
                         Guess the <span class="text-amber-400">Secret<br>Language</span>
                     </h2>
                     <p class="text-slate-400 text-xs sm:text-sm leading-relaxed max-w-xs mx-auto">
-                        5 clues per round. Reveal hints early for maximum points! Compete with students live across all school devices.
+                        5 clues per round. Reveal hints early for maximum points!
                     </p>
                 </div>
 
@@ -117,7 +109,6 @@
                     <i class="fa-solid fa-database mr-1"></i> Loaded <span id="q-count-badge">0</span> Database Questions
                 </div>
 
-                <!-- Registration Form -->
                 <form onsubmit="handleStartGame(event)" class="space-y-4 text-left pt-2">
                     <div>
                         <label for="student-name" class="block text-[11px] font-extrabold text-slate-400 uppercase tracking-wider mb-2">
@@ -155,9 +146,8 @@
             </div>
         </section>
 
-        <!-- SCREEN 2: GAMEPLAY SCREEN -->
+        <!-- SCREEN 2: GAMEPLAY -->
         <section id="screen-game" class="hidden w-full max-w-xl mx-auto space-y-4">
-            <!-- HUD Header -->
             <div class="glass-card rounded-2xl p-4 flex justify-between items-center">
                 <div class="flex items-center gap-3">
                     <span class="px-3 py-1 bg-amber-400/10 text-amber-400 text-xs font-bold rounded-lg border border-amber-400/30">
@@ -171,9 +161,7 @@
                 </div>
             </div>
 
-            <!-- Game Card -->
             <div id="game-card" class="glass-card rounded-3xl p-6 sm:p-8 space-y-6">
-                <!-- Potential Points Bar -->
                 <div class="flex items-center justify-between border-b border-white/5 pb-4">
                     <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">
                         Clues Unlocked: <span id="clues-revealed-count" class="text-amber-400 font-extrabold">1/5</span>
@@ -182,17 +170,12 @@
                         Value: <span id="current-clue-value" class="text-emerald-400 font-black text-sm">50 pts</span>
                     </span>
                 </div>
-                <!-- Clues List Container -->
-                <div id="clues-container" class="space-y-3">
-                    <!-- Clues 1 to 5 dynamically inserted -->
-                </div>
-                <!-- Reveal Next Clue Action -->
+                <div id="clues-container" class="space-y-3"></div>
                 <div class="text-center pt-1">
                     <button id="reveal-clue-btn" onclick="revealNextClue()" class="px-4 py-2 rounded-xl bg-slate-900 border border-amber-400/30 text-amber-400 hover:bg-slate-800 text-xs font-bold transition flex items-center justify-center gap-2 mx-auto">
                         <i class="fa-solid fa-eye text-xs"></i> Reveal Next Hint (-10 Points)
                     </button>
                 </div>
-                <!-- Answer Form & Give Up Button -->
                 <div class="space-y-3 pt-2 border-t border-white/5">
                     <form onsubmit="submitAnswer(event)" class="flex gap-2">
                         <input type="text" id="guess-input" autocomplete="off" placeholder="Type mystery language name..." class="flex-grow glass-input rounded-xl px-4 py-3 text-sm font-medium">
@@ -200,17 +183,15 @@
                             Submit
                         </button>
                     </form>
-                    <!-- Give Up Button -->
                     <button type="button" onclick="giveUpRound()" class="w-full text-xs text-slate-400 hover:text-amber-400 py-2.5 border border-white/5 rounded-xl hover:border-amber-400/30 transition flex items-center justify-center gap-1.5 font-bold">
                         <i class="fa-solid fa-flag text-xs"></i> Give Up (0 pts & Reveal Answer)
                     </button>
                 </div>
-                <!-- Feedback Banner -->
                 <div id="feedback-banner" class="hidden p-3.5 rounded-xl text-center font-bold text-xs"></div>
             </div>
         </section>
 
-        <!-- SCREEN 3: QUIZ COMPLETE RESULT -->
+        <!-- SCREEN 3: RESULT -->
         <section id="screen-result" class="hidden w-full max-w-md mx-auto text-center space-y-6">
             <div class="glass-card rounded-3xl p-8 space-y-6">
                 <div class="w-16 h-16 brand-gold-btn rounded-2xl mx-auto flex items-center justify-center text-3xl shadow-xl">
@@ -235,7 +216,7 @@
             </div>
         </section>
 
-        <!-- SCREEN 4: GLOBAL LEADERBOARD -->
+        <!-- SCREEN 4: LEADERBOARD -->
         <section id="screen-leaderboard" class="hidden w-full max-w-2xl mx-auto space-y-4">
             <div class="glass-card rounded-3xl p-6 sm:p-8 space-y-6">
                 <div class="flex flex-wrap justify-between items-center gap-3 border-b border-white/10 pb-4">
@@ -243,16 +224,11 @@
                         <h2 class="text-xl font-black text-white flex items-center gap-2">
                             🏆 Global School Leaderboard
                         </h2>
-                        <p class="text-xs text-slate-400">Live rankings across all school devices (Highest score only per student)</p>
+                        <p class="text-xs text-slate-400">Live rankings across all school devices</p>
                     </div>
-                    <div class="flex gap-2">
-                        <button onclick="fetchCloudData()" class="px-3 py-1.5 glass-card rounded-xl text-xs text-slate-300 hover:text-white flex items-center gap-1.5">
-                            <i class="fa-solid fa-rotate-right text-xs"></i> Refresh Live
-                        </button>
-                        <button onclick="showScreen('screen-welcome')" class="brand-gold-btn px-3 py-1.5 rounded-xl text-xs font-bold">
-                            Back
-                        </button>
-                    </div>
+                    <button onclick="showScreen('screen-welcome')" class="brand-gold-btn px-3 py-1.5 rounded-xl text-xs font-bold">
+                        Back
+                    </button>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-xs">
@@ -264,9 +240,7 @@
                                 <th class="p-3 text-right">Highest Score</th>
                             </tr>
                         </thead>
-                        <tbody id="leaderboard-table-body">
-                            <!-- Dynamic rows -->
-                        </tbody>
+                        <tbody id="leaderboard-table-body"></tbody>
                     </table>
                 </div>
             </div>
@@ -284,7 +258,6 @@
                     <i class="fa-solid fa-xmark text-lg"></i>
                 </button>
             </div>
-            <!-- Passcode Gate -->
             <div id="admin-gate" class="text-center py-6 space-y-4">
                 <div class="w-12 h-12 rounded-full bg-amber-400/10 text-amber-400 flex items-center justify-center mx-auto text-xl border border-amber-400/20">
                     🔒
@@ -297,9 +270,7 @@
                     </button>
                 </div>
             </div>
-            <!-- Authenticated Admin Content -->
             <div id="admin-content" class="hidden space-y-6">
-                <!-- Tabs -->
                 <div class="flex border-b border-white/10 text-xs">
                     <button onclick="switchAdminTab('questions')" id="tab-btn-questions" class="px-4 py-2 font-bold border-b-2 border-amber-400 text-amber-400">
                         Manage Questions
@@ -308,24 +279,15 @@
                         Moderate Leaderboard
                     </button>
                 </div>
-                <!-- Tab 1: Questions Manager -->
                 <div id="admin-tab-questions" class="space-y-4">
                     <div class="flex flex-wrap justify-between items-center gap-2">
-                        <span class="text-xs font-bold text-slate-300">Active Challenge Questions</span>
-                        <div class="flex gap-2">
-                            <button onclick="seedDatabaseDefaultQuestions()" class="px-2.5 py-1 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded-xl text-xs font-bold hover:bg-emerald-500/30">
-                                <i class="fa-solid fa-cloud-arrow-up"></i> Seed / Restore 10 Default Questions
-                            </button>
-                            <button onclick="openQuestionEditor()" class="brand-gold-btn px-3 py-1 rounded-xl text-xs font-extrabold flex items-center gap-1">
-                                <i class="fa-solid fa-plus text-[10px]"></i> Add Question
-                            </button>
-                        </div>
+                        <span class="text-xs font-bold text-slate-300">Active Firestore Questions</span>
+                        <button onclick="openQuestionEditor()" class="brand-gold-btn px-3 py-1 rounded-xl text-xs font-extrabold flex items-center gap-1">
+                            <i class="fa-solid fa-plus text-[10px]"></i> Add Question
+                        </button>
                     </div>
-                    <div id="admin-questions-container" class="space-y-2">
-                        <!-- Questions listed dynamically -->
-                    </div>
+                    <div id="admin-questions-container" class="space-y-2"></div>
                 </div>
-                <!-- Tab 2: Score Moderation -->
                 <div id="admin-tab-scores" class="hidden space-y-4">
                     <div class="flex justify-between items-center">
                         <span class="text-xs font-bold text-slate-300">All Saved Scores</span>
@@ -343,9 +305,7 @@
                                     <th class="p-2 text-right">Delete</th>
                                 </tr>
                             </thead>
-                            <tbody id="admin-scores-tbody">
-                                <!-- Dynamic scores list -->
-                            </tbody>
+                            <tbody id="admin-scores-tbody"></tbody>
                         </table>
                     </div>
                 </div>
@@ -357,19 +317,18 @@
     <div id="question-editor-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center p-4 z-50">
         <div class="glass-card max-w-lg w-full rounded-3xl p-6 space-y-4 max-h-[85vh] overflow-y-auto">
             <h3 id="editor-modal-title" class="text-sm font-bold text-white">Add Question</h3>
-            
             <div class="space-y-3 text-xs">
                 <div>
                     <label class="block text-slate-300 font-bold mb-1">Correct Mystery Language Answer</label>
-                    <input type="text" id="editor-answer" placeholder="e.g. Japanese" class="w-full glass-input rounded-xl px-3 py-2 text-xs font-bold text-amber-400">
+                    <input type="text" id="editor-answer" placeholder="e.g. Dutch" class="w-full glass-input rounded-xl px-3 py-2 text-xs font-bold text-amber-400">
                 </div>
                 <div class="space-y-2 pt-1">
                     <label class="block text-slate-300 font-bold">5 Clues (Hardest to Easiest)</label>
-                    <input type="text" id="editor-clue-1" placeholder="Clue 1 (50 pts): e.g. Uses 3 writing systems" class="w-full glass-input rounded-xl px-3 py-2 text-xs">
-                    <input type="text" id="editor-clue-2" placeholder="Clue 2 (40 pts): e.g. Spoken in an island nation" class="w-full glass-input rounded-xl px-3 py-2 text-xs">
-                    <input type="text" id="editor-clue-3" placeholder="Clue 3 (30 pts): e.g. Famous for anime and sushi" class="w-full glass-input rounded-xl px-3 py-2 text-xs">
-                    <input type="text" id="editor-clue-4" placeholder="Clue 4 (20 pts): e.g. Capital city is Tokyo" class="w-full glass-input rounded-xl px-3 py-2 text-xs">
-                    <input type="text" id="editor-clue-5" placeholder="Clue 5 (10 pts): e.g. Hello is 'Konnichiwa'" class="w-full glass-input rounded-xl px-3 py-2 text-xs">
+                    <input type="text" id="editor-clue-1" placeholder="Clue 1 (50 pts)" class="w-full glass-input rounded-xl px-3 py-2 text-xs">
+                    <input type="text" id="editor-clue-2" placeholder="Clue 2 (40 pts)" class="w-full glass-input rounded-xl px-3 py-2 text-xs">
+                    <input type="text" id="editor-clue-3" placeholder="Clue 3 (30 pts)" class="w-full glass-input rounded-xl px-3 py-2 text-xs">
+                    <input type="text" id="editor-clue-4" placeholder="Clue 4 (20 pts)" class="w-full glass-input rounded-xl px-3 py-2 text-xs">
+                    <input type="text" id="editor-clue-5" placeholder="Clue 5 (10 pts)" class="w-full glass-input rounded-xl px-3 py-2 text-xs">
                 </div>
             </div>
             <div class="flex justify-end gap-2 pt-3 border-t border-white/10">
@@ -379,32 +338,17 @@
         </div>
     </div>
 
-    <!-- IN-APP TOAST NOTIFICATION -->
-    <div id="admin-toast" class="fixed top-5 right-5 z-50 hidden bg-slate-900/90 backdrop-blur-md border border-amber-400/40 text-white text-xs px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2 transition-all duration-300">
+    <!-- TOAST NOTIFICATION -->
+    <div id="admin-toast" class="fixed top-5 right-5 z-50 hidden bg-slate-900/90 backdrop-blur-md border border-amber-400/40 text-white text-xs px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2">
         <i id="toast-icon" class="fa-solid fa-circle-info text-amber-400"></i>
-        <span id="toast-message">Notification message</span>
+        <span id="toast-message">Notification</span>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, addDoc, setDoc, deleteDoc, onSnapshot, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Global Default Set of Questions for PGS Languages Day
-        const defaultQuestionsSet = [
-            { id: 'q1', answer: 'Japanese', clues: ['Uses three distinct writing systems simultaneously.', 'Has no genetic relationship to Chinese despite sharing characters.', 'Spoken by over 125 million people in an East Asian island nation.', 'Famous worldwide for anime, manga, and sushi culture.', 'Saying "Hello" in this language is "Konnichiwa".'] },
-            { id: 'q2', answer: 'Spanish', clues: ['Uses the inverted question mark (¿) at the start of questions.', 'It is the official language in 20 different countries.', 'It is a Romance language derived directly from Vulgar Latin.', 'Second most spoken native language in the world.', 'Saying "Hello" in this language is "Hola".'] },
-            { id: 'q3', answer: 'French', clues: ['Over 30% of English vocabulary originates from this language.', 'It was the official language of England for over 300 years after 1066.', 'Official language of the Olympic Games alongside English.', 'Known worldwide as the language of romance and diplomacy.', 'Saying "Thank you" in this language is "Merci".'] },
-            { id: 'q4', answer: 'German', clues: ['Famous for long compound words like "Krankenwagen".', 'All nouns are capitalized in written text regardless of position.', 'Spoken in Germany, Austria, and parts of Switzerland.', 'Has three grammatical genders: masculine, feminine, and neuter.', 'Saying "Good day" in this language is "Guten Tag".'] },
-            { id: 'q5', answer: 'Italian', clues: ['Almost all native words in this language end in a vowel.', 'Direct descendant of the Latin spoken by the Roman Empire.', 'Famous for musical notation terms like piano, allegro, and tempo.', 'The official language of Italy and San Marino.', 'Saying "Goodbye" or "Hello" in this language is "Ciao".'] },
-            { id: 'q6', answer: 'Mandarin', clues: ['Uses a tonal system where pitch changes word meaning completely.', 'Has no verb conjugations or tense changes.', 'Uses logographic characters rather than an alphabet.', 'Most spoken native language on Earth with over 1 billion speakers.', 'Saying "Hello" in this language is "Nǐ hǎo".'] },
-            { id: 'q7', answer: 'Arabic', clues: ['Written from right to left using a cursive script.', 'Has influenced many English words like algebra, coffee, and zero.', 'Official language in over 22 countries across North Africa & Middle East.', 'Uses digits that Europeans called "Arabic numerals".', 'Saying "Hello" in this language is "Marhaban" or "Salam".'] },
-            { id: 'q8', answer: 'Russian', clues: ['Written using the Cyrillic alphabet consisting of 33 letters.', 'Largest native language in Europe.', 'Official language of the International Space Station alongside English.', 'Has no word for the present tense of "to be" (am/is/are).', 'Saying "Yes" in this language is "Da" and "Thank you" is "Spasibo".'] },
-            { id: 'q9', answer: 'Greek', clues: ['Has one of the longest documented histories of any Indo-European language.', 'The basis for thousands of scientific, medical, and mathematical symbols.', 'Uses its own unique alphabet starting with Alpha and ending with Omega.', 'Official language of Greece and Cyprus.', 'Saying "Hello" in this language is "Yassas".'] },
-            { id: 'q10', answer: 'Welsh', clues: ['Uses a Celtic language family structure where initial consonants change.', 'Has a village name with 58 letters starting with "Llanfairpwllgwyngyll...".', 'Co-official language in Wales alongside English.', 'Famous for its distinctive double "L" sound (ll).', 'Saying "Thank you" in this language is "Diolch".'] }
-        ];
-
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'pgs-languages-day-2026';
         const firebaseConfig = typeof __firebase_config !== 'undefined' 
             ? JSON.parse(__firebase_config) 
             : {
@@ -416,21 +360,15 @@
                 appId: "1:10987654321:web:a1b2c3d4e5f6"
             };
 
-        let savedLocalScores = [];
-        try {
-            savedLocalScores = JSON.parse(localStorage.getItem('pgs_quiz_scores') || '[]');
-        } catch(e) { savedLocalScores = []; }
-
         window.appData = {
-            questions: defaultQuestionsSet, // Initialize with 10 default questions so database is never empty
-            scores: savedLocalScores
+            questions: [],
+            scores: []
         };
 
         window.currentQuiz = null;
         window.editingQuestionIndex = null;
         let db = null;
         let auth = null;
-        let currentUser = null;
 
         function updateUIQuestionCount() {
             const count = window.appData.questions ? window.appData.questions.length : 0;
@@ -439,105 +377,38 @@
         }
 
         async function initFirebaseSync() {
-            updateUIQuestionCount();
             try {
                 const app = initializeApp(firebaseConfig);
                 auth = getAuth(app);
                 db = getFirestore(app);
                 
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    currentUser = (await signInAnonymously(auth)).user;
-                } else {
-                    currentUser = (await signInAnonymously(auth)).user;
-                }
+                await signInAnonymously(auth);
 
-                // Listen to nested questions path
-                const questionsCol = collection(db, 'artifacts', appId, 'public', 'data', 'questions');
+                // DIRECT ROOT PATH ACCESS to match your database structure: 'questions'
+                const questionsCol = collection(db, 'questions');
                 onSnapshot(questionsCol, (snapshot) => {
                     const fetched = [];
-                    snapshot.forEach(doc => fetched.push({ id: doc.id, ...doc.data() }));
-                    if (fetched.length > 0) {
-                        window.appData.questions = fetched;
-                        updateUIQuestionCount();
-                        console.log(`[Firestore Sync] Loaded ${fetched.length} questions from database.`);
-                        if (document.getElementById('admin-content') && !document.getElementById('admin-content').classList.contains('hidden')) {
-                            renderAdminQuestions();
-                        }
+                    snapshot.forEach(docSnap => {
+                        fetched.push({ id: docSnap.id, ...docSnap.data() });
+                    });
+                    window.appData.questions = fetched;
+                    updateUIQuestionCount();
+                    if (document.getElementById('admin-content') && !document.getElementById('admin-content').classList.contains('hidden')) {
+                        renderAdminQuestions();
                     }
-                }, (err) => console.warn("Firestore collection sync fallback mode:", err));
+                }, (err) => console.error("Firestore error loading questions:", err));
 
-                // Listen to Scores collection
-                const scoresCol = collection(db, 'artifacts', appId, 'public', 'data', 'scores');
+                // DIRECT ROOT PATH ACCESS for scores: 'scores'
+                const scoresCol = collection(db, 'scores');
                 onSnapshot(scoresCol, (snapshot) => {
                     const cloudScores = [];
-                    snapshot.forEach(doc => cloudScores.push({ id: doc.id, ...doc.data() }));
-                    if (cloudScores.length > 0) {
-                        window.appData.scores = cloudScores;
-                        localStorage.setItem('pgs_quiz_scores', JSON.stringify(cloudScores));
-                        renderLeaderboard();
-                    }
+                    snapshot.forEach(docSnap => cloudScores.push({ id: docSnap.id, ...docSnap.data() }));
+                    window.appData.scores = cloudScores;
+                    renderLeaderboard();
                 });
 
             } catch(e) {
-                console.warn("Firebase initialized in standard mode:", e);
-            }
-        }
-
-        async function seedDatabaseDefaultQuestions() {
-            showToast("Pushing questions into database...");
-            window.appData.questions = defaultQuestionsSet;
-            updateUIQuestionCount();
-            
-            if (db) {
-                try {
-                    for (const q of defaultQuestionsSet) {
-                        await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'questions', q.id), q);
-                    }
-                } catch(e) { console.warn("Seed write warning:", e); }
-            }
-            renderAdminQuestions();
-            showToast("10 Questions successfully synced to database!");
-        }
-
-        async function fetchCloudData() {
-            try {
-                const res = await fetch(`https://kvdb.io/PGS_Languages_Day_Quiz_2026_LiveSync/questions`);
-                if (res.ok) {
-                    const qData = await res.json();
-                    if (Array.isArray(qData) && qData.length > 0) {
-                        window.appData.questions = qData;
-                        updateUIQuestionCount();
-                    }
-                }
-            } catch(e) {}
-            renderLeaderboard();
-        }
-
-        async function syncScoresToCloud(newScores) {
-            window.appData.scores = newScores;
-            localStorage.setItem('pgs_quiz_scores', JSON.stringify(newScores));
-            renderLeaderboard();
-            if (db) {
-                try {
-                    const lastScore = newScores[newScores.length - 1];
-                    if (lastScore) {
-                        await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'scores'), lastScore);
-                    }
-                } catch(e) {}
-            }
-        }
-
-        async function syncQuestionsToCloud(newQuestions) {
-            window.appData.questions = newQuestions;
-            updateUIQuestionCount();
-            renderAdminQuestions();
-            if (db) {
-                try {
-                    const lastQuestion = newQuestions[newQuestions.length - 1];
-                    if (lastQuestion) {
-                        await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'questions', lastQuestion.id || ('q_' + Date.now())), lastQuestion);
-                    }
-                } catch(e) {}
+                console.error("Firebase init failed:", e);
             }
         }
 
@@ -603,7 +474,8 @@
             if (!name || !year) return;
 
             if (!window.appData.questions || window.appData.questions.length === 0) {
-                window.appData.questions = defaultQuestionsSet;
+                showToast("No questions found in database!", true);
+                return;
             }
 
             window.currentQuiz = {
@@ -737,9 +609,11 @@
                 createdAt: Date.now()
             };
 
-            const updatedScores = [...window.appData.scores, scoreEntry];
-            await syncScoresToCloud(updatedScores);
-            showToast("Score synced live across all school devices!");
+            if (db) {
+                try {
+                    await setDoc(doc(db, 'scores', scoreEntry.id), scoreEntry);
+                } catch(e) { console.error("Error saving score:", e); }
+            }
             showScreen('screen-result');
         }
 
@@ -800,7 +674,6 @@
                 document.getElementById('admin-content').classList.remove('hidden');
                 renderAdminQuestions();
                 renderAdminScores();
-                showToast("Admin access granted.");
             } else {
                 showToast("Incorrect Passcode!", true);
             }
@@ -825,7 +698,7 @@
             container.innerHTML = '';
             
             if (!window.appData.questions || window.appData.questions.length === 0) {
-                container.innerHTML = `<div class="p-4 text-center text-xs text-slate-400">No questions loaded. Click "Seed / Restore 10 Default Questions" above to restore your question database!</div>`;
+                container.innerHTML = `<div class="p-4 text-center text-xs text-slate-400">No questions loaded from Firestore.</div>`;
                 return;
             }
 
@@ -835,7 +708,7 @@
                 div.innerHTML = `
                     <div>
                         <div class="font-bold text-white text-xs">${escapeHtml(q.answer)}</div>
-                        <div class="text-[10px] text-slate-400">5 clues configured</div>
+                        <div class="text-[10px] text-slate-400">ID: ${q.id}</div>
                     </div>
                     <div class="flex gap-2">
                         <button onclick="openQuestionEditor(${idx})" class="px-2.5 py-1 bg-amber-400/20 text-amber-400 rounded-lg text-xs font-bold">Edit</button>
@@ -850,12 +723,12 @@
             const q = window.appData.questions[idx];
             if (q && q.id && db) {
                 try {
-                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'questions', q.id));
-                } catch(e){}
+                    await deleteDoc(doc(db, 'questions', q.id));
+                    showToast("Question deleted from Firestore.");
+                } catch(e){
+                    showToast("Failed to delete question.", true);
+                }
             }
-            window.appData.questions.splice(idx, 1);
-            await syncQuestionsToCloud(window.appData.questions);
-            showToast("Question deleted.");
         }
 
         function renderAdminScores() {
@@ -869,7 +742,7 @@
                     <td class="p-2 text-slate-400">${s.year}</td>
                     <td class="p-2 font-bold text-amber-400">${s.score}</td>
                     <td class="p-2 text-right">
-                        <button onclick="deleteSingleScore(${idx})" class="text-rose-400 hover:text-rose-300">
+                        <button onclick="deleteSingleScore('${s.id}')" class="text-rose-400 hover:text-rose-300">
                             <i class="fa-solid fa-trash text-xs"></i>
                         </button>
                     </td>
@@ -878,17 +751,22 @@
             });
         }
 
-        async function deleteSingleScore(idx) {
-            window.appData.scores.splice(idx, 1);
-            await syncScoresToCloud(window.appData.scores);
-            renderAdminScores();
-            showToast("Score record deleted.");
+        async function deleteSingleScore(docId) {
+            if (db && docId) {
+                try {
+                    await deleteDoc(doc(db, 'scores', docId));
+                    showToast("Score record deleted.");
+                } catch(e){}
+            }
         }
 
         async function clearAllScores() {
-            await syncScoresToCloud([]);
-            renderAdminScores();
-            showToast("All leaderboard scores reset.");
+            if (db && window.appData.scores) {
+                for (const s of window.appData.scores) {
+                    if (s.id) await deleteDoc(doc(db, 'scores', s.id));
+                }
+                showToast("All scores reset.");
+            }
         }
 
         function openQuestionEditor(idx = null) {
@@ -928,25 +806,26 @@
                 clues.push(c || `Clue ${i}`);
             }
 
-            const existingId = (window.editingQuestionIndex !== null && window.appData.questions[window.editingQuestionIndex])
+            const docId = (window.editingQuestionIndex !== null && window.appData.questions[window.editingQuestionIndex])
                 ? window.appData.questions[window.editingQuestionIndex].id
                 : 'q_' + Date.now();
 
             const newQuestionObj = { 
-                id: existingId,
+                id: docId,
                 answer: answer, 
                 clues: clues 
             };
 
-            if (window.editingQuestionIndex !== null && window.appData.questions[window.editingQuestionIndex]) {
-                window.appData.questions[window.editingQuestionIndex] = newQuestionObj;
-            } else {
-                window.appData.questions.push(newQuestionObj);
+            if (db) {
+                try {
+                    await setDoc(doc(db, 'questions', docId), newQuestionObj);
+                    showToast("Saved directly to Firestore!");
+                } catch(e) {
+                    showToast("Error saving to database.", true);
+                }
             }
 
-            await syncQuestionsToCloud(window.appData.questions);
             closeQuestionEditor();
-            showToast("Question saved and synced live!");
         }
 
         window.showScreen = showScreen;
@@ -964,12 +843,9 @@
         window.deleteQuestion = deleteQuestion;
         window.deleteSingleScore = deleteSingleScore;
         window.clearAllScores = clearAllScores;
-        window.fetchCloudData = fetchCloudData;
-        window.seedDatabaseDefaultQuestions = seedDatabaseDefaultQuestions;
 
         window.addEventListener('load', () => {
             initFirebaseSync();
-            fetchCloudData();
         });
     </script>
 </body>
