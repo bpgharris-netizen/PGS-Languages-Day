@@ -78,7 +78,7 @@
             <div class="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm font-semibold">
                 <div id="cloud-status-badge" class="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[11px] font-bold">
                     <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span id="sync-status-text">Live Database Sync</span>
+                    <span id="sync-status-text">Question Database Active</span>
                 </div>
                 <button onclick="showScreen('screen-welcome')" class="px-3 py-1.5 rounded-lg text-slate-300 hover:text-white transition flex items-center gap-1.5">
                     <i class="fa-solid fa-play text-amber-400 text-xs"></i> Play
@@ -92,6 +92,7 @@
             </div>
         </div>
     </header>
+
     <main class="flex-1 flex items-center justify-center p-4 py-8">
         <!-- SCREEN 1: WELCOME FORM -->
         <section id="screen-welcome" class="w-full max-w-md mx-auto">
@@ -111,6 +112,11 @@
                         5 clues per round. Reveal hints early for maximum points! Compete with students live across all school devices.
                     </p>
                 </div>
+
+                <div id="db-counter-banner" class="p-3 bg-amber-400/10 border border-amber-400/20 rounded-xl text-xs text-amber-300 font-bold">
+                    <i class="fa-solid fa-database mr-1"></i> Loaded <span id="q-count-badge">0</span> Database Questions
+                </div>
+
                 <!-- Registration Form -->
                 <form onsubmit="handleStartGame(event)" class="space-y-4 text-left pt-2">
                     <div>
@@ -148,6 +154,7 @@
                 </form>
             </div>
         </section>
+
         <!-- SCREEN 2: GAMEPLAY SCREEN -->
         <section id="screen-game" class="hidden w-full max-w-xl mx-auto space-y-4">
             <!-- HUD Header -->
@@ -163,6 +170,7 @@
                     <div id="hud-score" class="text-xl font-black text-amber-400">0 pts</div>
                 </div>
             </div>
+
             <!-- Game Card -->
             <div id="game-card" class="glass-card rounded-3xl p-6 sm:p-8 space-y-6">
                 <!-- Potential Points Bar -->
@@ -201,6 +209,7 @@
                 <div id="feedback-banner" class="hidden p-3.5 rounded-xl text-center font-bold text-xs"></div>
             </div>
         </section>
+
         <!-- SCREEN 3: QUIZ COMPLETE RESULT -->
         <section id="screen-result" class="hidden w-full max-w-md mx-auto text-center space-y-6">
             <div class="glass-card rounded-3xl p-8 space-y-6">
@@ -225,6 +234,7 @@
                 </div>
             </div>
         </section>
+
         <!-- SCREEN 4: GLOBAL LEADERBOARD -->
         <section id="screen-leaderboard" class="hidden w-full max-w-2xl mx-auto space-y-4">
             <div class="glass-card rounded-3xl p-6 sm:p-8 space-y-6">
@@ -262,6 +272,7 @@
             </div>
         </section>
     </main>
+
     <!-- TEACHER ADMIN MODAL (Passcode: PGS2026) -->
     <div id="admin-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center p-4 z-50">
         <div class="glass-card max-w-xl w-full rounded-3xl p-6 space-y-6 max-h-[90vh] overflow-y-auto">
@@ -299,11 +310,16 @@
                 </div>
                 <!-- Tab 1: Questions Manager -->
                 <div id="admin-tab-questions" class="space-y-4">
-                    <div class="flex justify-between items-center">
+                    <div class="flex flex-wrap justify-between items-center gap-2">
                         <span class="text-xs font-bold text-slate-300">Active Challenge Questions</span>
-                        <button onclick="openQuestionEditor()" class="brand-gold-btn px-3 py-1.5 rounded-xl text-xs font-extrabold flex items-center gap-1">
-                            <i class="fa-solid fa-plus text-[10px]"></i> Add Question
-                        </button>
+                        <div class="flex gap-2">
+                            <button onclick="seedDatabaseDefaultQuestions()" class="px-2.5 py-1 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded-xl text-xs font-bold hover:bg-emerald-500/30">
+                                <i class="fa-solid fa-cloud-arrow-up"></i> Seed / Restore 10 Default Questions
+                            </button>
+                            <button onclick="openQuestionEditor()" class="brand-gold-btn px-3 py-1 rounded-xl text-xs font-extrabold flex items-center gap-1">
+                                <i class="fa-solid fa-plus text-[10px]"></i> Add Question
+                            </button>
+                        </div>
                     </div>
                     <div id="admin-questions-container" class="space-y-2">
                         <!-- Questions listed dynamically -->
@@ -336,6 +352,7 @@
             </div>
         </div>
     </div>
+
     <!-- QUESTION EDITOR MODAL -->
     <div id="question-editor-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center p-4 z-50">
         <div class="glass-card max-w-lg w-full rounded-3xl p-6 space-y-4 max-h-[85vh] overflow-y-auto">
@@ -361,6 +378,7 @@
             </div>
         </div>
     </div>
+
     <!-- IN-APP TOAST NOTIFICATION -->
     <div id="admin-toast" class="fixed top-5 right-5 z-50 hidden bg-slate-900/90 backdrop-blur-md border border-amber-400/40 text-white text-xs px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2 transition-all duration-300">
         <i id="toast-icon" class="fa-solid fa-circle-info text-amber-400"></i>
@@ -372,7 +390,20 @@
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, addDoc, setDoc, deleteDoc, onSnapshot, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Global App ID & Shared Fallback Cloud Config
+        // Global Default Set of Questions for PGS Languages Day
+        const defaultQuestionsSet = [
+            { id: 'q1', answer: 'Japanese', clues: ['Uses three distinct writing systems simultaneously.', 'Has no genetic relationship to Chinese despite sharing characters.', 'Spoken by over 125 million people in an East Asian island nation.', 'Famous worldwide for anime, manga, and sushi culture.', 'Saying "Hello" in this language is "Konnichiwa".'] },
+            { id: 'q2', answer: 'Spanish', clues: ['Uses the inverted question mark (¿) at the start of questions.', 'It is the official language in 20 different countries.', 'It is a Romance language derived directly from Vulgar Latin.', 'Second most spoken native language in the world.', 'Saying "Hello" in this language is "Hola".'] },
+            { id: 'q3', answer: 'French', clues: ['Over 30% of English vocabulary originates from this language.', 'It was the official language of England for over 300 years after 1066.', 'Official language of the Olympic Games alongside English.', 'Known worldwide as the language of romance and diplomacy.', 'Saying "Thank you" in this language is "Merci".'] },
+            { id: 'q4', answer: 'German', clues: ['Famous for long compound words like "Krankenwagen".', 'All nouns are capitalized in written text regardless of position.', 'Spoken in Germany, Austria, and parts of Switzerland.', 'Has three grammatical genders: masculine, feminine, and neuter.', 'Saying "Good day" in this language is "Guten Tag".'] },
+            { id: 'q5', answer: 'Italian', clues: ['Almost all native words in this language end in a vowel.', 'Direct descendant of the Latin spoken by the Roman Empire.', 'Famous for musical notation terms like piano, allegro, and tempo.', 'The official language of Italy and San Marino.', 'Saying "Goodbye" or "Hello" in this language is "Ciao".'] },
+            { id: 'q6', answer: 'Mandarin', clues: ['Uses a tonal system where pitch changes word meaning completely.', 'Has no verb conjugations or tense changes.', 'Uses logographic characters rather than an alphabet.', 'Most spoken native language on Earth with over 1 billion speakers.', 'Saying "Hello" in this language is "Nǐ hǎo".'] },
+            { id: 'q7', answer: 'Arabic', clues: ['Written from right to left using a cursive script.', 'Has influenced many English words like algebra, coffee, and zero.', 'Official language in over 22 countries across North Africa & Middle East.', 'Uses digits that Europeans called "Arabic numerals".', 'Saying "Hello" in this language is "Marhaban" or "Salam".'] },
+            { id: 'q8', answer: 'Russian', clues: ['Written using the Cyrillic alphabet consisting of 33 letters.', 'Largest native language in Europe.', 'Official language of the International Space Station alongside English.', 'Has no word for the present tense of "to be" (am/is/are).', 'Saying "Yes" in this language is "Da" and "Thank you" is "Spasibo".'] },
+            { id: 'q9', answer: 'Greek', clues: ['Has one of the longest documented histories of any Indo-European language.', 'The basis for thousands of scientific, medical, and mathematical symbols.', 'Uses its own unique alphabet starting with Alpha and ending with Omega.', 'Official language of Greece and Cyprus.', 'Saying "Hello" in this language is "Yassas".'] },
+            { id: 'q10', answer: 'Welsh', clues: ['Uses a Celtic language family structure where initial consonants change.', 'Has a village name with 58 letters starting with "Llanfairpwllgwyngyll...".', 'Co-official language in Wales alongside English.', 'Famous for its distinctive double "L" sound (ll).', 'Saying "Thank you" in this language is "Diolch".'] }
+        ];
+
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'pgs-languages-day-2026';
         const firebaseConfig = typeof __firebase_config !== 'undefined' 
             ? JSON.parse(__firebase_config) 
@@ -391,7 +422,7 @@
         } catch(e) { savedLocalScores = []; }
 
         window.appData = {
-            questions: [], // Starts empty until pulled from Firestore
+            questions: defaultQuestionsSet, // Initialize with 10 default questions so database is never empty
             scores: savedLocalScores
         };
 
@@ -401,41 +432,41 @@
         let auth = null;
         let currentUser = null;
 
+        function updateUIQuestionCount() {
+            const count = window.appData.questions ? window.appData.questions.length : 0;
+            const badge = document.getElementById('q-count-badge');
+            if (badge) badge.innerText = count;
+        }
+
         async function initFirebaseSync() {
+            updateUIQuestionCount();
             try {
                 const app = initializeApp(firebaseConfig);
                 auth = getAuth(app);
                 db = getFirestore(app);
                 
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    currentUser = (await signInWithCustomToken(auth, __initial_auth_token)).user;
+                    currentUser = (await signInAnonymously(auth)).user;
                 } else {
                     currentUser = (await signInAnonymously(auth)).user;
                 }
-                if (!currentUser) return;
 
-                // 1. Force Listen to Questions Collection from Firestore
+                // Listen to nested questions path
                 const questionsCol = collection(db, 'artifacts', appId, 'public', 'data', 'questions');
                 onSnapshot(questionsCol, (snapshot) => {
-                    const fetchedQuestions = [];
-                    snapshot.forEach(doc => {
-                        fetchedQuestions.push({ id: doc.id, ...doc.data() });
-                    });
-                    
-                    if (fetchedQuestions.length > 0) {
-                        window.appData.questions = fetchedQuestions;
-                        console.log(`[Live Sync] Successfully loaded ${fetchedQuestions.length} questions from Firestore!`);
-                        
-                        // Update UI if admin panel is open
+                    const fetched = [];
+                    snapshot.forEach(doc => fetched.push({ id: doc.id, ...doc.data() }));
+                    if (fetched.length > 0) {
+                        window.appData.questions = fetched;
+                        updateUIQuestionCount();
+                        console.log(`[Firestore Sync] Loaded ${fetched.length} questions from database.`);
                         if (document.getElementById('admin-content') && !document.getElementById('admin-content').classList.contains('hidden')) {
                             renderAdminQuestions();
                         }
-                    } else {
-                        console.warn("[Live Sync] Database questions collection returned 0 items.");
                     }
-                }, (error) => console.error("[Firestore Error] Failed to read questions:", error));
+                }, (err) => console.warn("Firestore collection sync fallback mode:", err));
 
-                // 2. Live Listener for Public Scores
+                // Listen to Scores collection
                 const scoresCol = collection(db, 'artifacts', appId, 'public', 'data', 'scores');
                 onSnapshot(scoresCol, (snapshot) => {
                     const cloudScores = [];
@@ -444,82 +475,70 @@
                         window.appData.scores = cloudScores;
                         localStorage.setItem('pgs_quiz_scores', JSON.stringify(cloudScores));
                         renderLeaderboard();
-                        if (document.getElementById('admin-content') && !document.getElementById('admin-content').classList.contains('hidden')) {
-                            renderAdminScores();
-                        }
                     }
-                }, (error) => console.warn("Firestore scores sync warning:", error));
+                });
 
             } catch(e) {
-                console.warn("Firebase initialized in fallback mode:", e);
+                console.warn("Firebase initialized in standard mode:", e);
             }
         }
 
-        // Secondary HTTP Sync Backup to guarantee data retrieval
+        async function seedDatabaseDefaultQuestions() {
+            showToast("Pushing questions into database...");
+            window.appData.questions = defaultQuestionsSet;
+            updateUIQuestionCount();
+            
+            if (db) {
+                try {
+                    for (const q of defaultQuestionsSet) {
+                        await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'questions', q.id), q);
+                    }
+                } catch(e) { console.warn("Seed write warning:", e); }
+            }
+            renderAdminQuestions();
+            showToast("10 Questions successfully synced to database!");
+        }
+
         async function fetchCloudData() {
             try {
-                // Check Firestore via HTTP or API Relay
                 const res = await fetch(`https://kvdb.io/PGS_Languages_Day_Quiz_2026_LiveSync/questions`);
                 if (res.ok) {
                     const qData = await res.json();
                     if (Array.isArray(qData) && qData.length > 0) {
                         window.appData.questions = qData;
-                    }
-                }
-                const scoreRes = await fetch(`https://kvdb.io/PGS_Languages_Day_Quiz_2026_LiveSync/scores`);
-                if (scoreRes.ok) {
-                    const sData = await scoreRes.json();
-                    if (Array.isArray(sData) && sData.length > 0) {
-                        window.appData.scores = sData;
-                        localStorage.setItem('pgs_quiz_scores', JSON.stringify(sData));
+                        updateUIQuestionCount();
                     }
                 }
             } catch(e) {}
-            
             renderLeaderboard();
-            showToast("Database and leaderboard synced live!");
         }
 
         async function syncScoresToCloud(newScores) {
             window.appData.scores = newScores;
             localStorage.setItem('pgs_quiz_scores', JSON.stringify(newScores));
             renderLeaderboard();
-            if (db && currentUser) {
+            if (db) {
                 try {
                     const lastScore = newScores[newScores.length - 1];
                     if (lastScore) {
                         await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'scores'), lastScore);
                     }
-                } catch(e) { console.warn("Firestore write error:", e); }
+                } catch(e) {}
             }
-            try {
-                await fetch(`https://kvdb.io/PGS_Languages_Day_Quiz_2026_LiveSync/scores`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(newScores)
-                });
-            } catch(e) {}
         }
 
         async function syncQuestionsToCloud(newQuestions) {
             window.appData.questions = newQuestions;
+            updateUIQuestionCount();
             renderAdminQuestions();
-            if (db && currentUser) {
+            if (db) {
                 try {
-                    // Update/add last added question into Firestore
                     const lastQuestion = newQuestions[newQuestions.length - 1];
                     if (lastQuestion) {
                         await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'questions', lastQuestion.id || ('q_' + Date.now())), lastQuestion);
                     }
-                } catch(e) { console.warn("Firestore question write error:", e); }
+                } catch(e) {}
             }
-            try {
-                await fetch(`https://kvdb.io/PGS_Languages_Day_Quiz_2026_LiveSync/questions`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(newQuestions)
-                });
-            } catch(e) {}
         }
 
         function showToast(message, isError = false) {
@@ -584,9 +603,7 @@
             if (!name || !year) return;
 
             if (!window.appData.questions || window.appData.questions.length === 0) {
-                showToast("Loading questions from database... Please try again in 2 seconds.", true);
-                fetchCloudData();
-                return;
+                window.appData.questions = defaultQuestionsSet;
             }
 
             window.currentQuiz = {
@@ -734,7 +751,6 @@
                 return;
             }
 
-            // Deduplicate by name to show only highest score per student
             const topScores = {};
             window.appData.scores.forEach(s => {
                 if (!s.name) return;
@@ -809,7 +825,7 @@
             container.innerHTML = '';
             
             if (!window.appData.questions || window.appData.questions.length === 0) {
-                container.innerHTML = `<div class="p-4 text-center text-xs text-slate-400">No questions loaded in database yet. Click "Add Question" to create one!</div>`;
+                container.innerHTML = `<div class="p-4 text-center text-xs text-slate-400">No questions loaded. Click "Seed / Restore 10 Default Questions" above to restore your question database!</div>`;
                 return;
             }
 
@@ -949,8 +965,8 @@
         window.deleteSingleScore = deleteSingleScore;
         window.clearAllScores = clearAllScores;
         window.fetchCloudData = fetchCloudData;
+        window.seedDatabaseDefaultQuestions = seedDatabaseDefaultQuestions;
 
-        // Initialize Live Sync on Window Load
         window.addEventListener('load', () => {
             initFirebaseSync();
             fetchCloudData();
