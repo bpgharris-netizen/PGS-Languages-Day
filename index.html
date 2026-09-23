@@ -71,10 +71,6 @@
                 <span class="text-base font-black tracking-wider text-white uppercase">PGS LANGUAGES DAY</span>
             </div>
             <div class="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm font-semibold">
-                <div id="cloud-status-badge" class="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[11px] font-bold">
-                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span id="sync-status-text"></span>
-                </div>
                 <button onclick="showScreen('screen-welcome')" class="px-3 py-1.5 rounded-lg text-slate-300 hover:text-white transition flex items-center gap-1.5">
                     <i class="fa-solid fa-play text-amber-400 text-xs"></i> Play
                 </button>
@@ -82,7 +78,7 @@
                     <i class="fa-solid fa-trophy text-amber-400 text-xs"></i> Leaderboard
                 </button>
                 <button onclick="openAdminModal()" class="px-3.5 py-1.5 rounded-xl bg-amber-400/10 text-amber-400 border border-amber-400/30 hover:bg-amber-400/20 font-bold transition flex items-center gap-1.5 shadow-sm">
-                    <i class="fa-solid fa-lock text-xs"></i> Administrator Panel
+                    <i class="fa-solid fa-lock text-xs"></i> Admin Panel
                 </button>
             </div>
         </div>
@@ -91,18 +87,19 @@
     <main class="flex-1 flex items-center justify-center p-4 py-8">
         <!-- SCREEN 1: WELCOME FORM -->
         <section id="screen-welcome" class="w-full max-w-md mx-auto">
-
-                </div>
+            <div class="glass-card rounded-3xl p-6 sm:p-8 space-y-6 text-center">
                 <div class="space-y-2">
                     <h2 class="text-3xl sm:text-4xl font-black text-white tracking-tight leading-snug">
                         Guess the <span class="text-amber-400">Secret<br>Language</span>
                     </h2>
                     <p class="text-slate-400 text-xs sm:text-sm leading-relaxed max-w-xs mx-auto">
-                        Welcome to Languages Day 2026! In this game you will be given 5 hints, each hint more obvious than the last. Your job is to guess the mystery language, Good luck!
+                        5 clues per round. Reveal hints early for maximum points!
                     </p>
                 </div>
 
-        
+                <div id="db-counter-banner" class="p-3 bg-amber-400/10 border border-amber-400/20 rounded-xl text-xs text-amber-300 font-bold">
+                    <i class="fa-solid fa-database mr-1"></i> Loaded <span id="q-count-badge">0</span> Database Questions
+                </div>
 
                 <form onsubmit="handleStartGame(event)" class="space-y-4 text-left pt-2">
                     <div>
@@ -128,7 +125,8 @@
                                 <option value="Year 9">Year 9</option>
                                 <option value="Year 10">Year 10</option>
                                 <option value="Year 11">Year 11</option>
-                                <option value="Sixth Form">Sixth Form</option>
+                                <option value="Year 12">Year 12</option>
+                                <option value="Year 13">Year 13</option>
                                 <option value="Staff">Staff</option>
                             </select>
                         </div>
@@ -242,12 +240,12 @@
         </section>
     </main>
 
-    <!-- TEACHER ADMIN MODAL (Passcode: PGS2026) -->
+    <!-- ADMIN MODAL -->
     <div id="admin-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center p-4 z-50">
         <div class="glass-card max-w-xl w-full rounded-3xl p-6 space-y-6 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center border-b border-white/10 pb-4">
                 <h3 class="text-sm font-bold text-white flex items-center gap-2">
-                    <i class="fa-solid fa-user-shield text-amber-400"></i> Administrator Panel
+                    <i class="fa-solid fa-user-shield text-amber-400"></i> Admin Panel
                 </h3>
                 <button onclick="closeAdminModal()" class="text-slate-400 hover:text-white">
                     <i class="fa-solid fa-xmark text-lg"></i>
@@ -257,11 +255,11 @@
                 <div class="w-12 h-12 rounded-full bg-amber-400/10 text-amber-400 flex items-center justify-center mx-auto text-xl border border-amber-400/20">
                     🔒
                 </div>
-                <p class="text-xs text-slate-300 max-w-xs mx-auto">Enter the passcode to manage questions and moderate scores.</p>
+                <p class="text-xs text-slate-300 max-w-xs mx-auto">Enter passcode to manage questions and moderate scores.</p>
                 <div class="max-w-xs mx-auto space-y-3">
-                    <input type="password" id="admin-pass-input" placeholder="Passcode ()" class="w-full glass-input rounded-xl px-4 py-2.5 text-center text-sm tracking-widest">
+                    <input type="password" id="admin-pass-input" placeholder="Enter Admin Passcode" class="w-full glass-input rounded-xl px-4 py-2.5 text-center text-sm tracking-widest">
                     <button onclick="verifyAdminPasscode()" class="w-full brand-gold-btn py-2.5 rounded-xl text-xs uppercase font-extrabold">
-                        Unlock
+                        Unlock Admin Access
                     </button>
                 </div>
             </div>
@@ -271,7 +269,7 @@
                         Manage Questions
                     </button>
                     <button onclick="switchAdminTab('scores')" id="tab-btn-scores" class="px-4 py-2 font-bold text-slate-400 border-b-2 border-transparent">
-                        Edit Leaderboard
+                        Moderate Leaderboard
                     </button>
                 </div>
                 <div id="admin-tab-questions" class="space-y-4">
@@ -344,7 +342,6 @@
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Real Firebase configuration inserted here
         const firebaseConfig = {
             apiKey: "AIzaSyAh9t8mohM8biWaW2_3IbOuoZEIXIyQQkE",
             authDomain: "pgslanguagesday.firebaseapp.com",
@@ -354,6 +351,17 @@
             appId: "1:306068250159:web:c633603673b27546e170da",
             measurementId: "G-PEQD89WEXF"
         };
+
+        // Encrypted hash for passcode: 1732PGS
+        const ADMIN_HASH = "809bdc5cfd98393eef2507d39103848b59d9f583f707f5020c6db08c02c6d734";
+
+        async function hashString(str) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(str);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
 
         window.appData = {
             questions: [],
@@ -379,7 +387,6 @@
                 
                 await signInAnonymously(auth);
 
-                // DIRECT ROOT PATH ACCESS to match your database structure: 'questions'
                 const questionsCol = collection(db, 'questions');
                 onSnapshot(questionsCol, (snapshot) => {
                     const fetched = [];
@@ -393,7 +400,6 @@
                     }
                 }, (err) => console.error("Firestore error loading questions:", err));
 
-                // DIRECT ROOT PATH ACCESS for scores: 'scores'
                 const scoresCol = collection(db, 'scores');
                 onSnapshot(scoresCol, (snapshot) => {
                     const cloudScores = [];
@@ -620,7 +626,6 @@
                 return;
             }
 
-            // MODIFIED: Sum up scores per student + year group combination
             const totalScores = {};
             window.appData.scores.forEach(s => {
                 if (!s.name || !s.year) return;
@@ -671,9 +676,11 @@
             document.getElementById('admin-modal').classList.remove('flex');
         }
 
-        function verifyAdminPasscode() {
-            const pass = document.getElementById('admin-pass-input').value;
-            if (pass === 'PGS2026') {
+        async function verifyAdminPasscode() {
+            const inputPass = document.getElementById('admin-pass-input').value;
+            const inputHash = await hashString(inputPass);
+
+            if (inputHash === ADMIN_HASH) {
                 document.getElementById('admin-gate').classList.add('hidden');
                 document.getElementById('admin-content').classList.remove('hidden');
                 renderAdminQuestions();
