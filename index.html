@@ -224,7 +224,7 @@
                         <h2 class="text-xl font-black text-white flex items-center gap-2">
                             🏆 Global School Leaderboard
                         </h2>
-                        <p class="text-xs text-slate-400">Live rankings across all school devices</p>
+                        <p class="text-xs text-slate-400">Live cumulative rankings across all school devices</p>
                     </div>
                     <button onclick="showScreen('screen-welcome')" class="brand-gold-btn px-3 py-1.5 rounded-xl text-xs font-bold">
                         Back
@@ -237,7 +237,7 @@
                                 <th class="p-3">Rank</th>
                                 <th class="p-3">Student</th>
                                 <th class="p-3">Year</th>
-                                <th class="p-3 text-right">Highest Score</th>
+                                <th class="p-3 text-right">Total Cumulative Score</th>
                             </tr>
                         </thead>
                         <tbody id="leaderboard-table-body"></tbody>
@@ -625,16 +625,25 @@
                 return;
             }
 
-            const topScores = {};
+            // MODIFIED: Sum up scores per student + year group combination
+            const totalScores = {};
             window.appData.scores.forEach(s => {
-                if (!s.name) return;
-                const key = s.name.trim().toLowerCase();
-                if (!topScores[key] || s.score > topScores[key].score) {
-                    topScores[key] = s;
+                if (!s.name || !s.year) return;
+                const cleanName = s.name.trim();
+                const key = `${cleanName.toLowerCase()}_${s.year.trim().toLowerCase()}`;
+                
+                if (!totalScores[key]) {
+                    totalScores[key] = {
+                        name: cleanName,
+                        year: s.year,
+                        score: Number(s.score) || 0
+                    };
+                } else {
+                    totalScores[key].score += Number(s.score) || 0;
                 }
             });
 
-            const sorted = Object.values(topScores).sort((a, b) => b.score - a.score);
+            const sorted = Object.values(totalScores).sort((a, b) => b.score - a.score);
             sorted.forEach((item, idx) => {
                 const tr = document.createElement('tr');
                 tr.className = "border-b border-white/5 hover:bg-white/5 transition";
