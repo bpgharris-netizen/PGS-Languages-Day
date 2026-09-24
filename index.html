@@ -348,12 +348,11 @@
             measurementId: "G-PEQD89WEXF"
         };
 
-        // UNENCRYPTED PASSCODE CHECK
-        const ADMIN_PASSCODE = "1732PGS";
+        const VeryWellHiddenSecret = "1732PGS";
 
-        function verifyAdminPasscode() {
+        function verifyHiddenThingSecret() {
             const inputVal = document.getElementById('admin-pass-input').value.trim();
-            if (inputVal === ADMIN_PASSCODE) {
+            if (inputVal === VeryWellHiddenSecret) {
                 document.getElementById('admin-gate').classList.add('hidden');
                 document.getElementById('admin-content').classList.remove('hidden');
                 renderAdminQuestions();
