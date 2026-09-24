@@ -334,6 +334,7 @@
     </div>
 
     <script type="module">
+        import 
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
@@ -348,11 +349,11 @@
             measurementId: "G-PEQD89WEXF"
         };
 
-        const VeryWellHiddenSecret = "1732PGS";
+        const ADMIN_PASSCODE = "1732PGS";
 
         function verifyHiddenThingSecret() {
             const inputVal = document.getElementById('admin-pass-input').value.trim();
-            if (inputVal === VeryWellHiddenSecret) {
+            if (inputVal === ADMIN_PASSCODE) {
                 document.getElementById('admin-gate').classList.add('hidden');
                 document.getElementById('admin-content').classList.remove('hidden');
                 renderAdminQuestions();
