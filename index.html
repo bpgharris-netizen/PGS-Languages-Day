@@ -83,7 +83,6 @@
             </div>
         </div>
     </header>
-
     <main class="flex-1 flex items-center justify-center p-4 py-8">
         <!-- SCREEN 1: WELCOME FORM -->
         <section id="screen-welcome" class="w-full max-w-md mx-auto">
@@ -93,10 +92,9 @@
                         Guess the <span class="text-amber-400">Secret<br>Language</span>
                     </h2>
                     <p class="text-slate-400 text-xs sm:text-sm leading-relaxed max-w-xs mx-auto">
-                        Welcome to Languages Day 2026! In this game, your job is to figure out what the mystery language is. Youy will be given 5 hints, each hint more obvious than the last. Good Luck!
+                        Welcome to Languages Day 2026! In this game, your job is to figure out what the mystery language is. You will be given 5 hints, each hint more obvious than the last. Good Luck!
                     </p>
                 </div>
-
                 <form onsubmit="handleStartGame(event)" class="space-y-4 text-left pt-2">
                     <div>
                         <label for="student-name" class="block text-[11px] font-extrabold text-slate-400 uppercase tracking-wider mb-2">
@@ -134,7 +132,6 @@
                 </form>
             </div>
         </section>
-
         <!-- SCREEN 2: GAMEPLAY -->
         <section id="screen-game" class="hidden w-full max-w-xl mx-auto space-y-4">
             <div class="glass-card rounded-2xl p-4 flex justify-between items-center">
@@ -149,7 +146,6 @@
                     <div id="hud-score" class="text-xl font-black text-amber-400">0 pts</div>
                 </div>
             </div>
-
             <div id="game-card" class="glass-card rounded-3xl p-6 sm:p-8 space-y-6">
                 <div class="flex items-center justify-between border-b border-white/5 pb-4">
                     <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">
@@ -179,7 +175,6 @@
                 <div id="feedback-banner" class="hidden p-3.5 rounded-xl text-center font-bold text-xs"></div>
             </div>
         </section>
-
         <!-- SCREEN 3: RESULT -->
         <section id="screen-result" class="hidden w-full max-w-md mx-auto text-center space-y-6">
             <div class="glass-card rounded-3xl p-8 space-y-6">
@@ -204,7 +199,6 @@
                 </div>
             </div>
         </section>
-
         <!-- SCREEN 4: LEADERBOARD -->
         <section id="screen-leaderboard" class="hidden w-full max-w-2xl mx-auto space-y-4">
             <div class="glass-card rounded-3xl p-6 sm:p-8 space-y-6">
@@ -235,7 +229,6 @@
             </div>
         </section>
     </main>
-
     <!-- ADMIN MODAL -->
     <div id="admin-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center p-4 z-50">
         <div class="glass-card max-w-xl w-full rounded-3xl p-6 space-y-6 max-h-[90vh] overflow-y-auto">
@@ -254,7 +247,7 @@
                 <p class="text-xs text-slate-300 max-w-xs mx-auto">Enter passcode to manage questions and moderate scores.</p>
                 <div class="max-w-xs mx-auto space-y-3">
                     <input type="password" id="admin-pass-input" placeholder="Enter Admin Passcode" class="w-full glass-input rounded-xl px-4 py-2.5 text-center text-sm tracking-widest">
-                    <button id="unlock-admin-btn" type="button" class="w-full brand-gold-btn py-2.5 rounded-xl text-xs uppercase font-extrabold">
+                    <button id="unlock-admin-btn" onclick="verifyAdminPasscode()" type="button" class="w-full brand-gold-btn py-2.5 rounded-xl text-xs uppercase font-extrabold">
                         Unlock Admin Access
                     </button>
                 </div>
@@ -301,7 +294,6 @@
             </div>
         </div>
     </div>
-
     <!-- QUESTION EDITOR MODAL -->
     <div id="question-editor-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center p-4 z-50">
         <div class="glass-card max-w-lg w-full rounded-3xl p-6 space-y-4 max-h-[85vh] overflow-y-auto">
@@ -326,15 +318,12 @@
             </div>
         </div>
     </div>
-
     <!-- TOAST NOTIFICATION -->
     <div id="admin-toast" class="fixed top-5 right-5 z-50 hidden bg-slate-900/90 backdrop-blur-md border border-amber-400/40 text-white text-xs px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2">
         <i id="toast-icon" class="fa-solid fa-circle-info text-amber-400"></i>
         <span id="toast-message">Notification</span>
     </div>
-
     <script type="module">
-        import 
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
@@ -351,7 +340,7 @@
 
         const ADMIN_PASSCODE = "1732PGS";
 
-        function verifyHiddenThingSecret() {
+        function verifyAdminPasscode() {
             const inputVal = document.getElementById('admin-pass-input').value.trim();
             if (inputVal === ADMIN_PASSCODE) {
                 document.getElementById('admin-gate').classList.add('hidden');
@@ -832,13 +821,10 @@
         window.deleteQuestion = deleteQuestion;
         window.deleteSingleScore = deleteSingleScore;
         window.clearAllScores = clearAllScores;
+        window.verifyAdminPasscode = verifyAdminPasscode;
 
-        window.addEventListener('DOMContentLoaded', () => {
+        window.addEventListener('load', () => {
             initFirebaseSync();
-            const btn = document.getElementById('unlock-admin-btn');
-            if (btn) {
-                btn.addEventListener('click', verifyAdminPasscode);
-            }
         });
     </script>
 </body>
