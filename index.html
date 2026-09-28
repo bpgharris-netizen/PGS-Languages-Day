@@ -137,7 +137,7 @@
             <div class="glass-card rounded-2xl p-4 flex justify-between items-center">
                 <div class="flex items-center gap-3">
                     <span class="px-3 py-1 bg-amber-400/10 text-amber-400 text-xs font-bold rounded-lg border border-amber-400/30">
-                       
+                        Official Challenge
                     </span>
                     <span id="hud-progress" class="text-xs text-slate-400 font-semibold">Round 1/5</span>
                 </div>
@@ -164,11 +164,11 @@
                 <div class="space-y-3 pt-2 border-t border-white/5">
                     <form onsubmit="submitAnswer(event)" class="flex gap-2">
                         <input type="text" id="guess-input" autocomplete="off" placeholder="Type mystery language name..." class="flex-grow glass-input rounded-xl px-4 py-3 text-sm font-medium">
-                        <button type="submit" class="brand-gold-btn px-6 rounded-xl text-xs uppercase font-extrabold">
+                        <button id="submit-guess-btn" type="submit" class="brand-gold-btn px-6 rounded-xl text-xs uppercase font-extrabold">
                             Submit
                         </button>
                     </form>
-                    <button type="button" onclick="giveUpRound()" class="w-full text-xs text-slate-400 hover:text-amber-400 py-2.5 border border-white/5 rounded-xl hover:border-amber-400/30 transition flex items-center justify-center gap-1.5 font-bold">
+                    <button id="give-up-btn" type="button" onclick="giveUpRound()" class="w-full text-xs text-slate-400 hover:text-amber-400 py-2.5 border border-white/5 rounded-xl hover:border-amber-400/30 transition flex items-center justify-center gap-1.5 font-bold">
                         <i class="fa-solid fa-flag text-xs"></i> Give Up (0 pts & Reveal Answer)
                     </button>
                 </div>
@@ -362,6 +362,8 @@
         window.editingQuestionIndex = null;
         let db = null;
         let auth = null;
+        let isSubmitting = false;
+        let hasSubmittedFinalScore = false;
 
         async function initFirebaseSync() {
             try {
@@ -462,9 +464,9 @@
                 return;
             }
 
-            // Shuffle available questions and take randomly selected 5 questions
             const shuffledQuestions = [...window.appData.questions].sort(() => Math.random() - 0.5).slice(0, 5);
 
+            hasSubmittedFinalScore = false;
             window.currentQuiz = {
                 studentName: name,
                 yearGroup: year,
@@ -478,11 +480,21 @@
         }
 
         function loadRound() {
+            isSubmitting = false;
             window.currentQuiz.cluesRevealed = 1;
             document.getElementById('hud-progress').innerText = `Round ${window.currentQuiz.currentRoundIdx + 1}/${window.currentQuiz.rounds.length}`;
             document.getElementById('hud-score').innerText = `${window.currentQuiz.totalScore} pts`;
-            document.getElementById('guess-input').value = '';
-            document.getElementById('guess-input').focus();
+            
+            const input = document.getElementById('guess-input');
+            const submitBtn = document.getElementById('submit-guess-btn');
+            const giveUpBtn = document.getElementById('give-up-btn');
+            
+            input.disabled = false;
+            submitBtn.disabled = false;
+            giveUpBtn.disabled = false;
+            
+            input.value = '';
+            input.focus();
             hideFeedback();
             renderClues();
         }
@@ -523,6 +535,7 @@
         }
 
         function revealNextClue() {
+            if (isSubmitting) return;
             if (window.currentQuiz.cluesRevealed < 5) {
                 window.currentQuiz.cluesRevealed++;
                 renderClues();
@@ -531,16 +544,26 @@
 
         function submitAnswer(e) {
             e.preventDefault();
+            if (isSubmitting) return;
+
             const guessInput = document.getElementById('guess-input');
+            const submitBtn = document.getElementById('submit-guess-btn');
+            const giveUpBtn = document.getElementById('give-up-btn');
             const guess = guessInput.value.trim().toLowerCase();
-            const round = window.currentQuiz.rounds[window.currentQuiz.currentRoundIdx];
-            const actualAnswer = round.answer.toLowerCase();
+
             if (!guess) return;
 
+            const round = window.currentQuiz.rounds[window.currentQuiz.currentRoundIdx];
+            const actualAnswer = round.answer.toLowerCase();
             const pointValues = [50, 40, 30, 20, 10];
             const earnedPoints = pointValues[window.currentQuiz.cluesRevealed - 1];
 
             if (guess === actualAnswer) {
+                isSubmitting = true;
+                guessInput.disabled = true;
+                submitBtn.disabled = true;
+                giveUpBtn.disabled = true;
+
                 window.currentQuiz.totalScore += earnedPoints;
                 playAudioTone('correct');
                 showFeedback(`Correct! It was ${round.answer} (+${earnedPoints} pts)`, 'correct');
@@ -563,6 +586,13 @@
         }
 
         function giveUpRound() {
+            if (isSubmitting) return;
+            isSubmitting = true;
+
+            document.getElementById('guess-input').disabled = true;
+            document.getElementById('submit-guess-btn').disabled = true;
+            document.getElementById('give-up-btn').disabled = true;
+
             const round = window.currentQuiz.rounds[window.currentQuiz.currentRoundIdx];
             playAudioTone('wrong');
             showFeedback(`Round Forfeited (0 pts). The answer was "${round.answer}".`, 'wrong');
@@ -594,6 +624,9 @@
         }
 
         async function finishQuiz() {
+            if (hasSubmittedFinalScore) return;
+            hasSubmittedFinalScore = true;
+
             try { confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); } catch(e){}
             document.getElementById('final-score-display').innerText = `${window.currentQuiz.totalScore} pts`;
             
@@ -658,7 +691,7 @@
         }
 
         function escapeHtml(str) {
-            return (str || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            return (str || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace/>/g, "&gt;");
         }
 
         function openAdminModal() {
