@@ -348,6 +348,48 @@
 
         const ADMIN_PASSCODE = "1732PGS";
 
+        // COMPREHENSIVE BAD WORDS LIST FOR SCHOOL QUIZZES
+        const BLOCKED_TERMS = [
+            // Profanity / Swear Words
+            "fuck", "fuk", "fk", "shit", "sh1t", "sht", "bitch", "btch", "b1tch", 
+            "ass", "asshole", "a55", "cunt", "cnt", "dick", "dik", "d1ck", "cock", 
+            "pussy", "psy", "bastard", "wanker", "wnkr", "twat", "prick", "piss", 
+            "bollocks", "bugger", "slut", "slt", "whore", "harlot",
+            // Slurs & Hate Speech
+            "nigger", "nigga", "n1gger", "n1gga", "nigg", "faggot", "fag", "f4g", 
+            "retard", "r3tard", "tard", "spastic", "spaz", "chink", "paki", "kyke", 
+            "dyke", "tranny",
+            // Impersonation & Testing Terms
+            "admin", "administrator", "moderator", "mod", "teacher", "headteacher", 
+            "principal", "test", "tester", "anonymous", "null", "undefined"
+        ];
+
+        function isNameInappropriate(inputName) {
+            if (!inputName || inputName.trim().length < 2) return true;
+
+            // Normalize leetspeak and symbols: Convert numbers/symbols to letters
+            let normalized = inputName.toLowerCase()
+                .replace(/0/g, 'o')
+                .replace(/1/g, 'i')
+                .replace(/3/g, 'e')
+                .replace(/4/g, 'a')
+                .replace(/5/g, 's')
+                .replace(/7/g, 't')
+                .replace(/8/g, 'b')
+                .replace(/@/g, 'a')
+                .replace(/\!/g, 'i')
+                .replace(/\$/g, 's');
+
+            // Strip out non-alphanumeric characters (spaces, dots, underscores, etc.)
+            let stripped = normalized.replace(/[^a-z0-9]/g, '');
+
+            // Check if stripped string contains any forbidden term
+            return BLOCKED_TERMS.some(term => {
+                const cleanTerm = term.toLowerCase().replace(/[^a-z0-9]/g, '');
+                return stripped.includes(cleanTerm);
+            });
+        }
+
         window.appData = {
             questions: [],
             scores: []
@@ -387,6 +429,12 @@
             const name = document.getElementById('student-name').value.trim();
             const year = document.getElementById('student-year').value;
             if (!name || !year) return;
+
+            // NAME PROFANITY & IMPERSONATION FILTER CHECK
+            if (isNameInappropriate(name)) {
+                showToast("Please enter a valid, appropriate name!", true);
+                return;
+            }
 
             if (!window.appData.questions || window.appData.questions.length === 0) {
                 showToast("No questions found in database!", true);
