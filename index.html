@@ -86,7 +86,16 @@
 
     <main class="flex-1 flex items-center justify-center p-4 py-8">
         <!-- SCREEN 1: WELCOME FORM -->
-        <section id="screen-welcome" class="w-full max-w-md mx-auto">
+        <section id="screen-welcome" class="w-full max-w-md mx-auto space-y-4">
+            <!-- ANNOUNCEMENT BUBBLE -->
+            <div class="glass-card rounded-2xl p-4 border border-amber-400/30 bg-amber-500/10 text-amber-200 text-xs font-semibold flex items-center gap-3.5 shadow-lg">
+                <div class="text-2xl shrink-0">🍫</div>
+                <div class="leading-relaxed">
+                    <span class="font-extrabold text-amber-400 block text-xs uppercase tracking-wider mb-0.5">Prize Announcement!</span>
+                    The person in 1st place at <strong class="text-white">15:50</strong> wins a <strong class="text-white">chocolate prize</strong>! Come find <strong class="text-white">Benji Harris by the Arch by 16:00</strong> to claim it!
+                </div>
+            </div>
+
             <div class="glass-card rounded-3xl p-6 sm:p-8 space-y-6 text-center">
                 <div class="space-y-2">
                     <h2 class="text-3xl sm:text-4xl font-black text-white tracking-tight leading-snug">
@@ -139,7 +148,7 @@
             <div class="glass-card rounded-2xl p-4 flex justify-between items-center">
                 <div class="flex items-center gap-3">
                     <span class="px-3 py-1 bg-amber-400/10 text-amber-400 text-xs font-bold rounded-lg border border-amber-400/30">
-                        Official Challenge
+                        PGS Languages Day
                     </span>
                     <span id="hud-progress" class="text-xs text-slate-400 font-semibold">Round 1/5</span>
                 </div>
@@ -205,6 +214,15 @@
 
         <!-- SCREEN 4: LEADERBOARD -->
         <section id="screen-leaderboard" class="hidden w-full max-w-2xl mx-auto space-y-4">
+            <!-- ANNOUNCEMENT BUBBLE ON LEADERBOARD -->
+            <div class="glass-card rounded-2xl p-4 border border-amber-400/30 bg-amber-500/10 text-amber-200 text-xs font-semibold flex items-center gap-3.5 shadow-lg">
+                <div class="text-2xl shrink-0">🎁</div>
+                <div class="leading-relaxed">
+                    <span class="font-extrabold text-amber-400 block text-xs uppercase tracking-wider mb-0.5">Leaderboard Rules & Prize</span>
+                    1st place at <strong class="text-white">15:50</strong> wins a <strong class="text-white">chocolate prize</strong>! Find <strong class="text-white">Benji Harris by the Arch by 16:00</strong> to collect it!
+                </div>
+            </div>
+
             <div class="glass-card rounded-3xl p-6 sm:p-8 space-y-6">
                 <div class="flex flex-wrap justify-between items-center gap-3 border-b border-white/10 pb-4">
                     <div>
@@ -350,16 +368,13 @@
 
         // COMPREHENSIVE BAD WORDS LIST FOR SCHOOL QUIZZES
         const BLOCKED_TERMS = [
-            // Profanity / Swear Words
             "fuck", "fuk", "fk", "shit", "sh1t", "sht", "bitch", "btch", "b1tch", 
             "ass", "asshole", "a55", "cunt", "cnt", "dick", "dik", "d1ck", "cock", 
             "pussy", "psy", "bastard", "wanker", "wnkr", "twat", "prick", "piss", 
             "bollocks", "bugger", "slut", "slt", "whore", "harlot",
-            // Slurs & Hate Speech
             "nigger", "nigga", "n1gger", "n1gga", "nigg", "faggot", "fag", "f4g", 
             "retard", "r3tard", "tard", "spastic", "spaz", "chink", "paki", "kyke", 
             "dyke", "tranny",
-            // Impersonation & Testing Terms
             "admin", "administrator", "moderator", "mod", "teacher", "headteacher", 
             "principal", "test", "tester", "anonymous", "null", "undefined"
         ];
@@ -367,7 +382,6 @@
         function isNameInappropriate(inputName) {
             if (!inputName || inputName.trim().length < 2) return true;
 
-            // Normalize leetspeak and symbols: Convert numbers/symbols to letters
             let normalized = inputName.toLowerCase()
                 .replace(/0/g, 'o')
                 .replace(/1/g, 'i')
@@ -380,10 +394,8 @@
                 .replace(/\!/g, 'i')
                 .replace(/\$/g, 's');
 
-            // Strip out non-alphanumeric characters (spaces, dots, underscores, etc.)
             let stripped = normalized.replace(/[^a-z0-9]/g, '');
 
-            // Check if stripped string contains any forbidden term
             return BLOCKED_TERMS.some(term => {
                 const cleanTerm = term.toLowerCase().replace(/[^a-z0-9]/g, '');
                 return stripped.includes(cleanTerm);
@@ -430,7 +442,6 @@
             const year = document.getElementById('student-year').value;
             if (!name || !year) return;
 
-            // NAME PROFANITY & IMPERSONATION FILTER CHECK
             if (isNameInappropriate(name)) {
                 showToast("Please enter a valid, appropriate name!", true);
                 return;
