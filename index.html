@@ -92,10 +92,21 @@
                         Guess the <span class="text-amber-400">Secret<br>Language</span>
                     </h2>
                     <p class="text-slate-400 text-xs sm:text-sm leading-relaxed max-w-xs mx-auto">
-                        Welcome to Languages Day 2026! In this game, your job is to figure out what the mystery language is. Youy will be given 5 hints, each hint more obvious than the last. Good Luck!
+                        Welcome to Languages Day 2026! In this game, your job is to figure out what the mystery language is. You will be given 5 hints, each hint more obvious than the last. Good Luck!
                     </p>
                 </div>
-                <form onsubmit="handleStartGame(event)" class="space-y-4 text-left pt-2">
+
+                <!-- Prize & Cumulative Rules Callout -->
+                <div class="bg-amber-400/10 border border-amber-400/30 rounded-2xl p-4 text-left space-y-1.5">
+                    <div class="text-xs font-black text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+                        <span>🍫 Chocolate Prize Available!</span>
+                    </div>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        This isn't a one-time quiz—you can play as many times as you like! Points accumulate on the leaderboard. Just make sure you enter your <strong>exact same name and year group</strong> every time so your score stacks.
+                    </p>
+                </div>
+
+                <form onsubmit="handleStartGame(event)" class="space-y-4 text-left pt-1">
                     <div>
                         <label for="student-name" class="block text-[11px] font-extrabold text-slate-400 uppercase tracking-wider mb-2">
                             STUDENT / TEACHER NAME *
@@ -136,10 +147,7 @@
         <section id="screen-game" class="hidden w-full max-w-xl mx-auto space-y-4">
             <div class="glass-card rounded-2xl p-4 flex justify-between items-center">
                 <div class="flex items-center gap-3">
-                    <span class="px-3 py-1 bg-amber-400/10 text-amber-400 text-xs font-bold rounded-lg border border-amber-400/30">
-                        Official Challenge
-                    </span>
-                    <span id="hud-progress" class="text-xs text-slate-400 font-semibold">Round 1/5</span>
+                    <span id="hud-progress" class="text-xs text-amber-400 font-extrabold uppercase tracking-wider">Round 1/5</span>
                 </div>
                 <div class="text-right">
                     <div class="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Current Score</div>
@@ -186,7 +194,7 @@
                     <p class="text-slate-400 text-xs">Your score has synced live to the school leaderboard.</p>
                 </div>
                 <div class="bg-slate-950/80 border border-white/10 rounded-2xl p-5 space-y-2">
-                    <div class="text-xs uppercase text-slate-400 tracking-wider font-extrabold">Final Score</div>
+                    <div class="text-xs uppercase text-slate-400 tracking-wider font-extrabold">Final Score This Game</div>
                     <div id="final-score-display" class="text-4xl font-black text-amber-400">0 pts</div>
                 </div>
                 <div class="flex gap-3">
@@ -471,10 +479,14 @@
                 showToast("No questions found in database!", true);
                 return;
             }
+            // Pick max 5 random questions for a 5-round game
+            const shuffled = [...window.appData.questions].sort(() => Math.random() - 0.5);
+            const gameRounds = shuffled.slice(0, 5);
+
             window.currentQuiz = {
                 studentName: name,
                 yearGroup: year,
-                rounds: [...window.appData.questions].sort(() => Math.random() - 0.5),
+                rounds: gameRounds,
                 currentRoundIdx: 0,
                 cluesRevealed: 1,
                 totalScore: 0
@@ -709,7 +721,6 @@
             const searchVal = (document.getElementById('admin-search-name')?.value || '').trim().toLowerCase();
             const yearFilter = document.getElementById('admin-filter-year')?.value || 'ALL';
 
-            // Group into cumulative entries
             const studentMap = {};
             window.appData.scores.forEach(s => {
                 if (!s.name || !s.year) return;
@@ -732,7 +743,6 @@
 
             let aggregatedList = Object.values(studentMap);
 
-            // Apply Filters
             if (searchVal) {
                 aggregatedList = aggregatedList.filter(item => item.name.toLowerCase().includes(searchVal));
             }
@@ -745,7 +755,6 @@
                 return;
             }
 
-            // Render Rows
             aggregatedList.sort((a, b) => b.totalScore - a.totalScore).forEach(s => {
                 const tr = document.createElement('tr');
                 tr.className = "border-b border-white/5 hover:bg-white/5 transition";
