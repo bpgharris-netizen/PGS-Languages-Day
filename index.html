@@ -95,7 +95,6 @@
                         Welcome to Languages Day 2026! In this game, your job is to figure out what the mystery language is. You will be given 5 hints, each hint more obvious than the last. Good Luck!
                     </p>
                 </div>
-
                 <!-- Prize & Cumulative Rules Callout -->
                 <div class="bg-amber-400/10 border border-amber-400/30 rounded-2xl p-4 text-left space-y-1.5">
                     <div class="text-xs font-black text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
@@ -105,7 +104,6 @@
                         This isn't a one time quiz, you can play as many times as you like! Points accumulate on the leaderboard. Just make sure you enter your <strong>exact same name and year group</strong> every time so your score stacks.
                     </p>
                 </div>
-
                 <form onsubmit="handleStartGame(event)" class="space-y-4 text-left pt-1">
                     <div>
                         <label for="student-name" class="block text-[11px] font-extrabold text-slate-400 uppercase tracking-wider mb-2">
@@ -306,7 +304,6 @@
                             </select>
                         </div>
                     </div>
-
                     <div class="max-h-60 overflow-y-auto border border-white/5 rounded-xl">
                         <table class="w-full text-left text-xs">
                             <thead>
@@ -486,20 +483,30 @@
             // Pick max 5 random questions for a 5-round game
             const shuffled = [...window.appData.questions].sort(() => Math.random() - 0.5);
             const gameRounds = shuffled.slice(0, 5);
-
             window.currentQuiz = {
                 studentName: name,
                 yearGroup: year,
                 rounds: gameRounds,
                 currentRoundIdx: 0,
                 cluesRevealed: 1,
-                totalScore: 0
+                totalScore: 0,
+                locked: false,
+                submitting: false
             };
             showScreen('screen-game');
             loadRound();
         }
+        function setRoundLocked(state) {
+            if (window.currentQuiz) {
+                window.currentQuiz.locked = state;
+            }
+            document.querySelectorAll('#game-card input, #game-card button').forEach(el => { el.disabled = state; });
+        }
         function loadRound() {
-            window.currentQuiz.locked = false;
+            setRoundLocked(false);
+            if (window.currentQuiz) {
+                window.currentQuiz.submitting = false;
+            }
             window.currentQuiz.cluesRevealed = 1;
             document.getElementById('hud-progress').innerText = `Round ${window.currentQuiz.currentRoundIdx + 1}/${window.currentQuiz.rounds.length}`;
             document.getElementById('hud-score').innerText = `${window.currentQuiz.totalScore} pts`;
@@ -551,20 +558,40 @@
         }
         function submitAnswer(e) {
             e.preventDefault();
-            if (window.currentQuiz.locked) return;
+            if (!window.currentQuiz || window.currentQuiz.locked || window.currentQuiz.submitting) return;
+            
+            window.currentQuiz.submitting = true;
             const guess = document.getElementById('guess-input').value.trim().toLowerCase();
             const round = window.currentQuiz.rounds[window.currentQuiz.currentRoundIdx];
             const actualAnswer = round.answer.toLowerCase();
-            if (!guess) return;
+            
+            if (!guess) {
+                window.currentQuiz.submitting = false;
+                return;
+            }
+            
+            const nowTs = Date.now();
+            if (nowTs - (window.currentQuiz.lastSubmitAt || 0) < 800) {
+                window.currentQuiz.submitting = false;
+                return;
+            }
+            window.currentQuiz.lastSubmitAt = nowTs;
+            
             const pointValues = [50, 40, 30, 20, 10];
             const earnedPoints = pointValues[window.currentQuiz.cluesRevealed - 1];
+            
             if (guess === actualAnswer) {
-                window.currentQuiz.locked = true;
-                window.currentQuiz.totalScore += earnedPoints;
+                const quiz = window.currentQuiz;
+                setRoundLocked(true);
+                if (!quiz.scoredRounds) quiz.scoredRounds = {};
+                if (!quiz.scoredRounds[quiz.currentRoundIdx]) {
+                    quiz.scoredRounds[quiz.currentRoundIdx] = true;
+                    quiz.totalScore += earnedPoints;
+                }
                 playAudioTone('correct');
                 showFeedback(`Correct! It was ${round.answer} (+${earnedPoints} pts)`, 'correct');
-                document.getElementById('hud-score').innerText = `${window.currentQuiz.totalScore} pts`;
-                setTimeout(nextRound, 1500);
+                document.getElementById('hud-score').innerText = `${quiz.totalScore} pts`;
+                setTimeout(() => { if (window.currentQuiz === quiz) nextRound(); }, 1500);
             } else {
                 playAudioTone('wrong');
                 document.getElementById('game-card').classList.add('shake');
@@ -576,15 +603,18 @@
                     showFeedback(`Incorrect guess. Keep trying, you have unlimited guesses on the last hint!`, 'wrong');
                 }
                 document.getElementById('guess-input').value = '';
+                window.currentQuiz.submitting = false;
             }
         }
         function giveUpRound() {
-            if (window.currentQuiz.locked) return;
-            window.currentQuiz.locked = true;
-            const round = window.currentQuiz.rounds[window.currentQuiz.currentRoundIdx];
+            if (window.currentQuiz.locked || window.currentQuiz.submitting) return;
+            window.currentQuiz.submitting = true;
+            const quiz = window.currentQuiz;
+            setRoundLocked(true);
+            const round = quiz.rounds[quiz.currentRoundIdx];
             playAudioTone('wrong');
             showFeedback(`Round Forfeited (0 pts). The answer was "${round.answer}".`, 'wrong');
-            setTimeout(nextRound, 2000);
+            setTimeout(() => { if (window.currentQuiz === quiz) nextRound(); }, 2000);
         }
         function showFeedback(msg, type) {
             const banner = document.getElementById('feedback-banner');
@@ -608,6 +638,8 @@
             }
         }
         async function finishQuiz() {
+            if (window.currentQuiz.finished) return;
+            window.currentQuiz.finished = true;
             try { confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); } catch(e){}
             document.getElementById('final-score-display').innerText = `${window.currentQuiz.totalScore} pts`;
             
@@ -728,22 +760,18 @@
         function renderAdminScores() {
             const tbody = document.getElementById('admin-scores-tbody');
             tbody.innerHTML = '';
-
             if (!window.appData.scores || window.appData.scores.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-500">No scores found.</td></tr>`;
                 return;
             }
-
             const searchVal = (document.getElementById('admin-search-name')?.value || '').trim().toLowerCase();
             const yearFilter = document.getElementById('admin-filter-year')?.value || 'ALL';
-
             const studentMap = {};
             window.appData.scores.forEach(s => {
                 if (!s.name || !s.year) return;
                 const cleanName = s.name.trim();
                 const cleanYear = s.year.trim();
                 const key = `${cleanName.toLowerCase()}_${cleanYear.toLowerCase()}`;
-
                 if (!studentMap[key]) {
                     studentMap[key] = {
                         name: cleanName,
@@ -756,21 +784,17 @@
                     studentMap[key].docIds.push(s.id);
                 }
             });
-
             let aggregatedList = Object.values(studentMap);
-
             if (searchVal) {
                 aggregatedList = aggregatedList.filter(item => item.name.toLowerCase().includes(searchVal));
             }
             if (yearFilter !== 'ALL') {
                 aggregatedList = aggregatedList.filter(item => item.year.toLowerCase() === yearFilter.toLowerCase());
             }
-
             if (aggregatedList.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-500">No matching records found.</td></tr>`;
                 return;
             }
-
             aggregatedList.sort((a, b) => b.totalScore - a.totalScore).forEach(s => {
                 const tr = document.createElement('tr');
                 tr.className = "border-b border-white/5 hover:bg-white/5 transition";
