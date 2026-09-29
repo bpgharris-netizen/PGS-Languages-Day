@@ -499,6 +499,7 @@
             loadRound();
         }
         function loadRound() {
+            window.currentQuiz.locked = false;
             window.currentQuiz.cluesRevealed = 1;
             document.getElementById('hud-progress').innerText = `Round ${window.currentQuiz.currentRoundIdx + 1}/${window.currentQuiz.rounds.length}`;
             document.getElementById('hud-score').innerText = `${window.currentQuiz.totalScore} pts`;
@@ -542,6 +543,7 @@
             }
         }
         function revealNextClue() {
+            if (window.currentQuiz.locked) return;
             if (window.currentQuiz.cluesRevealed < 5) {
                 window.currentQuiz.cluesRevealed++;
                 renderClues();
@@ -549,6 +551,7 @@
         }
         function submitAnswer(e) {
             e.preventDefault();
+            if (window.currentQuiz.locked) return;
             const guess = document.getElementById('guess-input').value.trim().toLowerCase();
             const round = window.currentQuiz.rounds[window.currentQuiz.currentRoundIdx];
             const actualAnswer = round.answer.toLowerCase();
@@ -556,6 +559,7 @@
             const pointValues = [50, 40, 30, 20, 10];
             const earnedPoints = pointValues[window.currentQuiz.cluesRevealed - 1];
             if (guess === actualAnswer) {
+                window.currentQuiz.locked = true;
                 window.currentQuiz.totalScore += earnedPoints;
                 playAudioTone('correct');
                 showFeedback(`Correct! It was ${round.answer} (+${earnedPoints} pts)`, 'correct');
@@ -575,6 +579,8 @@
             }
         }
         function giveUpRound() {
+            if (window.currentQuiz.locked) return;
+            window.currentQuiz.locked = true;
             const round = window.currentQuiz.rounds[window.currentQuiz.currentRoundIdx];
             playAudioTone('wrong');
             showFeedback(`Round Forfeited (0 pts). The answer was "${round.answer}".`, 'wrong');
