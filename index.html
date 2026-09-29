@@ -500,7 +500,7 @@
         }
         function loadRound() {
             window.currentQuiz.cluesRevealed = 1;
-            document.getElementById('hud-progress').innerText = `Round window.currentQuiz.currentRoundIdx+1/{window.currentQuiz.rounds.length}`;
+            document.getElementById('hud-progress').innerText = `Round ${window.currentQuiz.currentRoundIdx + 1}/${window.currentQuiz.rounds.length}`;
             document.getElementById('hud-score').innerText = `${window.currentQuiz.totalScore} pts`;
             document.getElementById('guess-input').value = '';
             document.getElementById('guess-input').focus();
@@ -522,7 +522,7 @@
                 if (isRevealed) {
                     clueBox.className = "p-3.5 rounded-2xl bg-slate-900/90 border border-amber-400/30 text-xs sm:text-sm text-slate-200 flex items-start gap-3 shadow-sm";
                     clueBox.innerHTML = `
-                        <span class="px-2 py-0.5 rounded bg-amber-400/20 text-amber-400 font-black text-[10px] shrink-0">HINT i+1({pointValues[i]} pts)</span>
+                        <span class="px-2 py-0.5 rounded bg-amber-400/20 text-amber-400 font-black text-[10px] shrink-0">HINT ${i+1} (${pointValues[i]} pts)</span>
                         <span class="font-medium leading-relaxed">${round.clues ? (round.clues[i] || 'Hint locked.') : 'Hint locked.'}</span>
                     `;
                 } else {
@@ -558,7 +558,7 @@
             if (guess === actualAnswer) {
                 window.currentQuiz.totalScore += earnedPoints;
                 playAudioTone('correct');
-                showFeedback(`Correct! It was round.answer(+{earnedPoints} pts)`, 'correct');
+                showFeedback(`Correct! It was ${round.answer} (+${earnedPoints} pts)`, 'correct');
                 document.getElementById('hud-score').innerText = `${window.currentQuiz.totalScore} pts`;
                 setTimeout(nextRound, 1500);
             } else {
@@ -768,7 +768,7 @@
                     <td class="p-2 text-slate-400">${escapeHtml(s.year)}</td>
                     <td class="p-2 font-black text-amber-400">${s.totalScore} pts</td>
                     <td class="p-2 text-right">
-                        <button onclick='deleteGroupScores(idsJson,"{escapeHtml(s.name)}")' class="px-2.5 py-1 bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ml-auto">
+                        <button onclick='deleteGroupScores(${idsJson},${escapeHtml(JSON.stringify(s.name)).replace(/'/g, "&#39;")})' class="px-2.5 py-1 bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ml-auto">
                             <i class="fa-solid fa-trash text-xs"></i> Delete
                         </button>
                     </td>
