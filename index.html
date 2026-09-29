@@ -565,7 +565,13 @@
                 playAudioTone('wrong');
                 document.getElementById('game-card').classList.add('shake');
                 setTimeout(() => document.getElementById('game-card').classList.remove('shake'), 400);
-                showFeedback(`Incorrect guess. Try revealing another clue or guess again!`, 'wrong');
+                if (window.currentQuiz.cluesRevealed < 5) {
+                    revealNextClue();
+                    showFeedback(`Incorrect guess. Next hint unlocked!`, 'wrong');
+                } else {
+                    showFeedback(`Incorrect guess. Keep trying, you have unlimited guesses on the last hint!`, 'wrong');
+                }
+                document.getElementById('guess-input').value = '';
             }
         }
         function giveUpRound() {
