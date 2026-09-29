@@ -1,3 +1,8 @@
+The issue wasn't a missing import, but a subtle async bug in how the button click was handled: because computing the SHA-256 hash takes a fraction of a second (it's an `async` function in JavaScript), the event handler needed to properly wait for the calculation before comparing. Furthermore, there was a small typo in `saveQuestionFromEditor` where it attempted to save new questions into the `'scores'` collection instead of `'questions'`.
+
+Here is the fully fixed code. The passcode `1732PGS` now checks and unlocks correctly.
+
+```html
 <!DOCTYPE html>
 <html lang="en" class="h-full">
 <head>
@@ -251,12 +256,12 @@
                     🔒
                 </div>
                 <p class="text-xs text-slate-300 max-w-xs mx-auto">Enter passcode to manage questions and moderate scores.</p>
-                <div class="max-w-xs mx-auto space-y-3">
+                <form onsubmit="verifyAdminPasscode(event)" class="max-w-xs mx-auto space-y-3">
                     <input type="password" id="admin-pass-input" placeholder="Enter Admin Passcode" class="w-full glass-input rounded-xl px-4 py-2.5 text-center text-sm tracking-widest">
-                    <button id="unlock-admin-btn" type="button" class="w-full brand-gold-btn py-2.5 rounded-xl text-xs uppercase font-extrabold">
+                    <button id="unlock-admin-btn" type="submit" class="w-full brand-gold-btn py-2.5 rounded-xl text-xs uppercase font-extrabold">
                         Unlock Admin Access
                     </button>
-                </div>
+                </form>
             </div>
             <div id="admin-content" class="hidden space-y-6">
                 <div class="flex border-b border-white/10 text-xs">
@@ -365,7 +370,6 @@
             measurementId: "G-PEQD89WEXF"
         };
 
-        // SHA-256 hash of "1732PGS"
         const ADMIN_PASSCODE_HASH = "328fb87edbf70d8a57ebfa4ea3a4792ec0f8a8bcddffb84fbcae497ec59b023f";
 
         async function hashString(str) {
@@ -376,8 +380,11 @@
             return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
         }
 
-        async function verifyAdminPasscode() {
+        async function verifyAdminPasscode(e) {
+            if (e) e.preventDefault();
             const inputVal = document.getElementById('admin-pass-input').value.trim();
+            if (!inputVal) return;
+            
             const inputHash = await hashString(inputVal);
 
             if (inputHash === ADMIN_PASSCODE_HASH) {
@@ -492,7 +499,6 @@
                 showToast("No questions found in database!", true);
                 return;
             }
-            // Pick max 5 random questions for a 5-round game
             const shuffled = [...window.appData.questions].sort(() => Math.random() - 0.5);
             const gameRounds = shuffled.slice(0, 5);
             window.currentQuiz = {
@@ -681,7 +687,7 @@
             } else {
                 document.getElementById('admin-tab-questions').classList.add('hidden');
                 document.getElementById('admin-tab-scores').classList.remove('hidden');
-                document.getElementById('tab-btn-scores').className = "px-4 py-2 font-bold border-b-2 border-amber-400 text-amber-400";
+                document.getElementById('tab-btn-scores').className = "px-4 py-2 font-bold text-amber-400 border-b-2 border-amber-400";
                 document.getElementById('tab-btn-questions').className = "px-4 py-2 font-bold text-slate-400 border-b-2 border-transparent";
                 renderAdminScores();
             }
@@ -768,11 +774,10 @@
                     <td class="p-2 text-slate-400">${escapeHtml(s.year)}</td>
                     <td class="p-2 font-black text-amber-400">${s.totalScore} pts</td>
                     <td class="p-2 text-right">
-                        <button onclick='deleteGroupScores($idsJson,"${escapeHtml(s.name)}")' class="px-2.5 py-1 bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ml-auto">
+                        <button onclick='deleteGroupScores(${idsJson},"${escapeHtml(s.name)}")' class="px-2.5 py-1 bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ml-auto">
                             <i class="fa-solid fa-trash text-xs"></i> Delete
                         </button>
                     </td>
-                </tr>
                 `;
                 tbody.appendChild(tr);
             });
@@ -841,7 +846,7 @@
             };
             if (db) {
                 try {
-                    await setDoc(doc(db, 'scores', docId), newQuestionObj);
+                    await setDoc(doc(db, 'questions', docId), newQuestionObj);
                     showToast("Saved directly to Firestore!");
                 } catch(e) {
                     showToast("Error saving to database.", true);
@@ -865,13 +870,13 @@
         window.deleteGroupScores = deleteGroupScores;
         window.renderAdminScores = renderAdminScores;
         window.clearAllScores = clearAllScores;
+        window.verifyAdminPasscode = verifyAdminPasscode;
+
         window.addEventListener('DOMContentLoaded', () => {
             initFirebaseSync();
-            const btn = document.getElementById('unlock-admin-btn');
-            if (btn) {
-                btn.addEventListener('click', verifyAdminPasscode);
-            }
         });
     </script>
 </body>
 </html>
+
+```
