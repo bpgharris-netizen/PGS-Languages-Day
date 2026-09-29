@@ -366,16 +366,17 @@
 
         const ADMIN_PASSCODE = "1732PGS";
 
-        // COMPREHENSIVE BAD WORDS LIST FOR SCHOOL QUIZZES
+        // COMPREHENSIVE BAD WORDS LIST 
         const BLOCKED_TERMS = [
             "fuck", "fuk", "fk", "shit", "sh1t", "sht", "bitch", "btch", "b1tch", 
-            "ass", "asshole", "a55", "cunt", "cnt", "dick", "dik", "d1ck", "cock", 
+            
+            "ass", "Negro", "asshole", "a55", "cunt", "cnt", "dick", "dik", "d1ck", "cock", 
             "pussy", "psy", "bastard", "wanker", "wnkr", "twat", "prick", "piss", 
             "bollocks", "bugger", "slut", "slt", "whore", "harlot",
             "nigger", "nigga", "n1gger", "n1gga", "nigg", "faggot", "fag", "f4g", 
             "retard", "r3tard", "tard", "spastic", "spaz", "chink", "paki", "kyke", 
-            "dyke", "tranny",
-            "admin", "administrator", "moderator", "mod", "teacher", "headteacher", 
+            "dyke", "tranny", "osama", "child","toes","Hitler", "Adolf", "facist", 
+            "admin", "administrator", "moderator", "mod", "teacher", 
             "principal", "test", "tester", "anonymous", "null", "undefined"
         ];
 
@@ -443,7 +444,7 @@
             if (!name || !year) return;
 
             if (isNameInappropriate(name)) {
-                showToast("Please enter a valid, appropriate name!", true);
+                showToast("Please enter an appropriate name", true);
                 return;
             }
 
