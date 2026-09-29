@@ -83,7 +83,6 @@
             </div>
         </div>
     </header>
-
     <main class="flex-1 flex items-center justify-center p-4 py-8">
         <!-- SCREEN 1: WELCOME FORM -->
         <section id="screen-welcome" class="w-full max-w-md mx-auto">
@@ -93,15 +92,21 @@
                         Guess the <span class="text-amber-400">Secret<br>Language</span>
                     </h2>
                     <p class="text-slate-400 text-xs sm:text-sm leading-relaxed max-w-xs mx-auto">
-                        5 clues per round. Reveal hints early for maximum points!
+                        Welcome to Languages Day 2026! In this game, your job is to figure out what the mystery language is. You will be given 5 hints, each hint more obvious than the last. Good Luck!
                     </p>
                 </div>
 
-                <div id="db-counter-banner" class="p-3 bg-amber-400/10 border border-amber-400/20 rounded-xl text-xs text-amber-300 font-bold">
-                    <i class="fa-solid fa-database mr-1"></i> Loaded <span id="q-count-badge">0</span> Database Questions
+                <!-- Prize & Cumulative Rules Callout -->
+                <div class="bg-amber-400/10 border border-amber-400/30 rounded-2xl p-4 text-left space-y-1.5">
+                    <div class="text-xs font-black text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+                        <span>🍫 Chocolate Prize Available!</span>
+                    </div>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        This isn't a one time quiz, you can play as many times as you like! Points accumulate on the leaderboard. Just make sure you enter your <strong>exact same name and year group</strong> every time so your score stacks.
+                    </p>
                 </div>
 
-                <form onsubmit="handleStartGame(event)" class="space-y-4 text-left pt-2">
+                <form onsubmit="handleStartGame(event)" class="space-y-4 text-left pt-1">
                     <div>
                         <label for="student-name" class="block text-[11px] font-extrabold text-slate-400 uppercase tracking-wider mb-2">
                             STUDENT / TEACHER NAME *
@@ -138,22 +143,17 @@
                 </form>
             </div>
         </section>
-
         <!-- SCREEN 2: GAMEPLAY -->
         <section id="screen-game" class="hidden w-full max-w-xl mx-auto space-y-4">
             <div class="glass-card rounded-2xl p-4 flex justify-between items-center">
                 <div class="flex items-center gap-3">
-                    <span class="px-3 py-1 bg-amber-400/10 text-amber-400 text-xs font-bold rounded-lg border border-amber-400/30">
-                        Official Challenge
-                    </span>
-                    <span id="hud-progress" class="text-xs text-slate-400 font-semibold">Round 1/5</span>
+                    <span id="hud-progress" class="text-xs text-amber-400 font-extrabold uppercase tracking-wider">Round 1/5</span>
                 </div>
                 <div class="text-right">
                     <div class="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Current Score</div>
                     <div id="hud-score" class="text-xl font-black text-amber-400">0 pts</div>
                 </div>
             </div>
-
             <div id="game-card" class="glass-card rounded-3xl p-6 sm:p-8 space-y-6">
                 <div class="flex items-center justify-between border-b border-white/5 pb-4">
                     <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">
@@ -183,7 +183,6 @@
                 <div id="feedback-banner" class="hidden p-3.5 rounded-xl text-center font-bold text-xs"></div>
             </div>
         </section>
-
         <!-- SCREEN 3: RESULT -->
         <section id="screen-result" class="hidden w-full max-w-md mx-auto text-center space-y-6">
             <div class="glass-card rounded-3xl p-8 space-y-6">
@@ -195,7 +194,7 @@
                     <p class="text-slate-400 text-xs">Your score has synced live to the school leaderboard.</p>
                 </div>
                 <div class="bg-slate-950/80 border border-white/10 rounded-2xl p-5 space-y-2">
-                    <div class="text-xs uppercase text-slate-400 tracking-wider font-extrabold">Final Score</div>
+                    <div class="text-xs uppercase text-slate-400 tracking-wider font-extrabold">Final Score This Game</div>
                     <div id="final-score-display" class="text-4xl font-black text-amber-400">0 pts</div>
                 </div>
                 <div class="flex gap-3">
@@ -208,7 +207,6 @@
                 </div>
             </div>
         </section>
-
         <!-- SCREEN 4: LEADERBOARD -->
         <section id="screen-leaderboard" class="hidden w-full max-w-2xl mx-auto space-y-4">
             <div class="glass-card rounded-3xl p-6 sm:p-8 space-y-6">
@@ -217,7 +215,7 @@
                         <h2 class="text-xl font-black text-white flex items-center gap-2">
                             🏆 Global School Leaderboard
                         </h2>
-                        <p class="text-xs text-slate-400">Live cumulative rankings across all school devices</p>
+                        <p class="text-xs text-slate-400">Live cumulative rankings across the School</p>
                     </div>
                     <button onclick="showScreen('screen-welcome')" class="brand-gold-btn px-3 py-1.5 rounded-xl text-xs font-bold">
                         Back
@@ -239,7 +237,6 @@
             </div>
         </section>
     </main>
-
     <!-- ADMIN MODAL -->
     <div id="admin-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center p-4 z-50">
         <div class="glass-card max-w-xl w-full rounded-3xl p-6 space-y-6 max-h-[90vh] overflow-y-auto">
@@ -258,7 +255,7 @@
                 <p class="text-xs text-slate-300 max-w-xs mx-auto">Enter passcode to manage questions and moderate scores.</p>
                 <div class="max-w-xs mx-auto space-y-3">
                     <input type="password" id="admin-pass-input" placeholder="Enter Admin Passcode" class="w-full glass-input rounded-xl px-4 py-2.5 text-center text-sm tracking-widest">
-                    <button onclick="verifyAdminPasscode()" class="w-full brand-gold-btn py-2.5 rounded-xl text-xs uppercase font-extrabold">
+                    <button id="unlock-admin-btn" type="button" class="w-full brand-gold-btn py-2.5 rounded-xl text-xs uppercase font-extrabold">
                         Unlock Admin Access
                     </button>
                 </div>
@@ -282,20 +279,42 @@
                     <div id="admin-questions-container" class="space-y-2"></div>
                 </div>
                 <div id="admin-tab-scores" class="hidden space-y-4">
-                    <div class="flex justify-between items-center">
-                        <span class="text-xs font-bold text-slate-300">All Saved Scores</span>
+                    <div class="flex justify-between items-center gap-2 flex-wrap">
+                        <span class="text-xs font-bold text-slate-300">Cumulative Student Scores</span>
                         <button onclick="clearAllScores()" class="px-3 py-1.5 bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 rounded-xl text-xs font-bold">
                             Reset All Scores
                         </button>
                     </div>
-                    <div class="max-h-60 overflow-y-auto">
+                    
+                    <!-- Search & Filter Controls -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 text-xs">🔍</span>
+                            <input type="text" id="admin-search-name" oninput="renderAdminScores()" placeholder="Search student name..." class="w-full glass-input rounded-xl pl-8 pr-3 py-2 text-xs">
+                        </div>
+                        <div>
+                            <select id="admin-filter-year" onchange="renderAdminScores()" class="w-full glass-input rounded-xl px-3 py-2 text-xs">
+                                <option value="ALL">All Year Groups / Roles</option>
+                                <option value="Year 7">Year 7</option>
+                                <option value="Year 8">Year 8</option>
+                                <option value="Year 9">Year 9</option>
+                                <option value="Year 10">Year 10</option>
+                                <option value="Year 11">Year 11</option>
+                                <option value="Year 12">Year 12</option>
+                                <option value="Year 13">Year 13</option>
+                                <option value="Staff">Staff</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="max-h-60 overflow-y-auto border border-white/5 rounded-xl">
                         <table class="w-full text-left text-xs">
                             <thead>
-                                <tr class="text-slate-400 border-b border-white/10 font-bold">
+                                <tr class="text-slate-400 border-b border-white/10 font-bold bg-slate-900/40">
                                     <th class="p-2">Name</th>
                                     <th class="p-2">Year</th>
-                                    <th class="p-2">Score</th>
-                                    <th class="p-2 text-right">Delete</th>
+                                    <th class="p-2">Total Score</th>
+                                    <th class="p-2 text-right">Delete All Entries</th>
                                 </tr>
                             </thead>
                             <tbody id="admin-scores-tbody"></tbody>
@@ -305,7 +324,6 @@
             </div>
         </div>
     </div>
-
     <!-- QUESTION EDITOR MODAL -->
     <div id="question-editor-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center p-4 z-50">
         <div class="glass-card max-w-lg w-full rounded-3xl p-6 space-y-4 max-h-[85vh] overflow-y-auto">
@@ -330,18 +348,15 @@
             </div>
         </div>
     </div>
-
     <!-- TOAST NOTIFICATION -->
     <div id="admin-toast" class="fixed top-5 right-5 z-50 hidden bg-slate-900/90 backdrop-blur-md border border-amber-400/40 text-white text-xs px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2">
         <i id="toast-icon" class="fa-solid fa-circle-info text-amber-400"></i>
         <span id="toast-message">Notification</span>
     </div>
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
         const firebaseConfig = {
             apiKey: "AIzaSyAh9t8mohM8biWaW2_3IbOuoZEIXIyQQkE",
             authDomain: "pgslanguagesday.firebaseapp.com",
@@ -351,34 +366,26 @@
             appId: "1:306068250159:web:c633603673b27546e170da",
             measurementId: "G-PEQD89WEXF"
         };
-
-        // Encrypted hash for passcode: 1732PGS
-        const ADMIN_HASH = "809bdc5cfd98393eef2507d39103848b59d9f583f707f5020c6db08c02c6d734";
-
-        async function hashString(str) {
-            const encoder = new TextEncoder();
-            const data = encoder.encode(str);
-            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        const ADMIN_PASSCODE = "1732PGS";
+        function verifyAdminPasscode() {
+            const inputVal = document.getElementById('admin-pass-input').value.trim();
+            if (inputVal === ADMIN_PASSCODE) {
+                document.getElementById('admin-gate').classList.add('hidden');
+                document.getElementById('admin-content').classList.remove('hidden');
+                renderAdminQuestions();
+                renderAdminScores();
+            } else {
+                showToast("Incorrect Passcode!", true);
+            }
         }
-
         window.appData = {
             questions: [],
             scores: []
         };
-
         window.currentQuiz = null;
         window.editingQuestionIndex = null;
         let db = null;
         let auth = null;
-
-        function updateUIQuestionCount() {
-            const count = window.appData.questions ? window.appData.questions.length : 0;
-            const badge = document.getElementById('q-count-badge');
-            if (badge) badge.innerText = count;
-        }
-
         async function initFirebaseSync() {
             try {
                 const app = initializeApp(firebaseConfig);
@@ -386,7 +393,6 @@
                 db = getFirestore(app);
                 
                 await signInAnonymously(auth);
-
                 const questionsCol = collection(db, 'questions');
                 onSnapshot(questionsCol, (snapshot) => {
                     const fetched = [];
@@ -394,25 +400,24 @@
                         fetched.push({ id: docSnap.id, ...docSnap.data() });
                     });
                     window.appData.questions = fetched;
-                    updateUIQuestionCount();
                     if (document.getElementById('admin-content') && !document.getElementById('admin-content').classList.contains('hidden')) {
                         renderAdminQuestions();
                     }
                 }, (err) => console.error("Firestore error loading questions:", err));
-
                 const scoresCol = collection(db, 'scores');
                 onSnapshot(scoresCol, (snapshot) => {
                     const cloudScores = [];
                     snapshot.forEach(docSnap => cloudScores.push({ id: docSnap.id, ...docSnap.data() }));
                     window.appData.scores = cloudScores;
                     renderLeaderboard();
+                    if (document.getElementById('admin-content') && !document.getElementById('admin-content').classList.contains('hidden')) {
+                        renderAdminScores();
+                    }
                 });
-
             } catch(e) {
                 console.error("Firebase init failed:", e);
             }
         }
-
         function showToast(message, isError = false) {
             const toast = document.getElementById('admin-toast');
             const msgEl = document.getElementById('toast-message');
@@ -430,7 +435,6 @@
             toast.classList.remove('hidden');
             setTimeout(() => toast.classList.add('hidden'), 3000);
         }
-
         function playAudioTone(type) {
             try {
                 const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -457,7 +461,6 @@
                 }
             } catch(e) {}
         }
-
         function showScreen(screenId) {
             ['screen-welcome', 'screen-game', 'screen-result', 'screen-leaderboard'].forEach(id => {
                 document.getElementById(id).classList.add('hidden');
@@ -467,22 +470,23 @@
                 renderLeaderboard();
             }
         }
-
         function handleStartGame(e) {
             e.preventDefault();
             const name = document.getElementById('student-name').value.trim();
             const year = document.getElementById('student-year').value;
             if (!name || !year) return;
-
             if (!window.appData.questions || window.appData.questions.length === 0) {
                 showToast("No questions found in database!", true);
                 return;
             }
+            // Pick max 5 random questions for a 5-round game
+            const shuffled = [...window.appData.questions].sort(() => Math.random() - 0.5);
+            const gameRounds = shuffled.slice(0, 5);
 
             window.currentQuiz = {
                 studentName: name,
                 yearGroup: year,
-                rounds: [...window.appData.questions].sort(() => Math.random() - 0.5),
+                rounds: gameRounds,
                 currentRoundIdx: 0,
                 cluesRevealed: 1,
                 totalScore: 0
@@ -490,17 +494,15 @@
             showScreen('screen-game');
             loadRound();
         }
-
         function loadRound() {
             window.currentQuiz.cluesRevealed = 1;
-            document.getElementById('hud-progress').innerText = `Round ${window.currentQuiz.currentRoundIdx + 1}/${window.currentQuiz.rounds.length}`;
+            document.getElementById('hud-progress').innerText = `Round window.currentQuiz.currentRoundIdx+1/{window.currentQuiz.rounds.length}`;
             document.getElementById('hud-score').innerText = `${window.currentQuiz.totalScore} pts`;
             document.getElementById('guess-input').value = '';
             document.getElementById('guess-input').focus();
             hideFeedback();
             renderClues();
         }
-
         function renderClues() {
             const round = window.currentQuiz.rounds[window.currentQuiz.currentRoundIdx];
             if (!round) return;
@@ -516,7 +518,7 @@
                 if (isRevealed) {
                     clueBox.className = "p-3.5 rounded-2xl bg-slate-900/90 border border-amber-400/30 text-xs sm:text-sm text-slate-200 flex items-start gap-3 shadow-sm";
                     clueBox.innerHTML = `
-                        <span class="px-2 py-0.5 rounded bg-amber-400/20 text-amber-400 font-black text-[10px] shrink-0">HINT ${i+1} (${pointValues[i]} pts)</span>
+                        <span class="px-2 py-0.5 rounded bg-amber-400/20 text-amber-400 font-black text-[10px] shrink-0">HINT i+1({pointValues[i]} pts)</span>
                         <span class="font-medium leading-relaxed">${round.clues ? (round.clues[i] || 'Hint locked.') : 'Hint locked.'}</span>
                     `;
                 } else {
@@ -535,28 +537,24 @@
                 revealBtn.classList.remove('hidden');
             }
         }
-
         function revealNextClue() {
             if (window.currentQuiz.cluesRevealed < 5) {
                 window.currentQuiz.cluesRevealed++;
                 renderClues();
             }
         }
-
         function submitAnswer(e) {
             e.preventDefault();
             const guess = document.getElementById('guess-input').value.trim().toLowerCase();
             const round = window.currentQuiz.rounds[window.currentQuiz.currentRoundIdx];
             const actualAnswer = round.answer.toLowerCase();
             if (!guess) return;
-
             const pointValues = [50, 40, 30, 20, 10];
             const earnedPoints = pointValues[window.currentQuiz.cluesRevealed - 1];
-
             if (guess === actualAnswer) {
                 window.currentQuiz.totalScore += earnedPoints;
                 playAudioTone('correct');
-                showFeedback(`Correct! It was ${round.answer} (+${earnedPoints} pts)`, 'correct');
+                showFeedback(`Correct! It was round.answer(+{earnedPoints} pts)`, 'correct');
                 document.getElementById('hud-score').innerText = `${window.currentQuiz.totalScore} pts`;
                 setTimeout(nextRound, 1500);
             } else {
@@ -566,14 +564,12 @@
                 showFeedback(`Incorrect guess. Try revealing another clue or guess again!`, 'wrong');
             }
         }
-
         function giveUpRound() {
             const round = window.currentQuiz.rounds[window.currentQuiz.currentRoundIdx];
             playAudioTone('wrong');
             showFeedback(`Round Forfeited (0 pts). The answer was "${round.answer}".`, 'wrong');
             setTimeout(nextRound, 2000);
         }
-
         function showFeedback(msg, type) {
             const banner = document.getElementById('feedback-banner');
             banner.innerText = msg;
@@ -584,11 +580,9 @@
                 banner.classList.add('bg-rose-500/20', 'text-rose-300');
             }
         }
-
         function hideFeedback() {
             document.getElementById('feedback-banner').classList.add('hidden');
         }
-
         function nextRound() {
             window.currentQuiz.currentRoundIdx++;
             if (window.currentQuiz.currentRoundIdx < window.currentQuiz.rounds.length) {
@@ -597,7 +591,6 @@
                 finishQuiz();
             }
         }
-
         async function finishQuiz() {
             try { confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); } catch(e){}
             document.getElementById('final-score-display').innerText = `${window.currentQuiz.totalScore} pts`;
@@ -609,7 +602,6 @@
                 score: window.currentQuiz.totalScore,
                 createdAt: Date.now()
             };
-
             if (db) {
                 try {
                     await setDoc(doc(db, 'scores', scoreEntry.id), scoreEntry);
@@ -617,7 +609,6 @@
             }
             showScreen('screen-result');
         }
-
         function renderLeaderboard() {
             const tbody = document.getElementById('leaderboard-table-body');
             tbody.innerHTML = '';
@@ -625,7 +616,6 @@
                 tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-500">No student scores submitted yet!</td></tr>`;
                 return;
             }
-
             const totalScores = {};
             window.appData.scores.forEach(s => {
                 if (!s.name || !s.year) return;
@@ -642,7 +632,6 @@
                     totalScores[key].score += Number(s.score) || 0;
                 }
             });
-
             const sorted = Object.values(totalScores).sort((a, b) => b.score - a.score);
             sorted.forEach((item, idx) => {
                 const tr = document.createElement('tr');
@@ -651,7 +640,6 @@
                 if (idx === 0) rankBadge = `👑`;
                 else if (idx === 1) rankBadge = `🥈`;
                 else if (idx === 2) rankBadge = `🥉`;
-
                 tr.innerHTML = `
                     <td class="p-3">${rankBadge}</td>
                     <td class="p-3 font-bold text-white">${escapeHtml(item.name)}</td>
@@ -661,35 +649,17 @@
                 tbody.appendChild(tr);
             });
         }
-
         function escapeHtml(str) {
             return (str || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
         }
-
         function openAdminModal() {
             document.getElementById('admin-modal').classList.remove('hidden');
             document.getElementById('admin-modal').classList.add('flex');
         }
-
         function closeAdminModal() {
             document.getElementById('admin-modal').classList.add('hidden');
             document.getElementById('admin-modal').classList.remove('flex');
         }
-
-        async function verifyAdminPasscode() {
-            const inputPass = document.getElementById('admin-pass-input').value;
-            const inputHash = await hashString(inputPass);
-
-            if (inputHash === ADMIN_HASH) {
-                document.getElementById('admin-gate').classList.add('hidden');
-                document.getElementById('admin-content').classList.remove('hidden');
-                renderAdminQuestions();
-                renderAdminScores();
-            } else {
-                showToast("Incorrect Passcode!", true);
-            }
-        }
-
         function switchAdminTab(tab) {
             if (tab === 'questions') {
                 document.getElementById('admin-tab-questions').classList.remove('hidden');
@@ -701,9 +671,9 @@
                 document.getElementById('admin-tab-scores').classList.remove('hidden');
                 document.getElementById('tab-btn-scores').className = "px-4 py-2 font-bold border-b-2 border-amber-400 text-amber-400";
                 document.getElementById('tab-btn-questions').className = "px-4 py-2 font-bold text-slate-400 border-b-2 border-transparent";
+                renderAdminScores();
             }
         }
-
         function renderAdminQuestions() {
             const container = document.getElementById('admin-questions-container');
             container.innerHTML = '';
@@ -712,7 +682,6 @@
                 container.innerHTML = `<div class="p-4 text-center text-xs text-slate-400">No questions loaded from Firestore.</div>`;
                 return;
             }
-
             window.appData.questions.forEach((q, idx) => {
                 const div = document.createElement('div');
                 div.className = "flex justify-between items-center p-3 rounded-2xl bg-slate-950 border border-white/10";
@@ -729,7 +698,6 @@
                 container.appendChild(div);
             });
         }
-
         async function deleteQuestion(idx) {
             const q = window.appData.questions[idx];
             if (q && q.id && db) {
@@ -741,36 +709,81 @@
                 }
             }
         }
-
         function renderAdminScores() {
             const tbody = document.getElementById('admin-scores-tbody');
             tbody.innerHTML = '';
-            window.appData.scores.forEach((s, idx) => {
+
+            if (!window.appData.scores || window.appData.scores.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-500">No scores found.</td></tr>`;
+                return;
+            }
+
+            const searchVal = (document.getElementById('admin-search-name')?.value || '').trim().toLowerCase();
+            const yearFilter = document.getElementById('admin-filter-year')?.value || 'ALL';
+
+            const studentMap = {};
+            window.appData.scores.forEach(s => {
+                if (!s.name || !s.year) return;
+                const cleanName = s.name.trim();
+                const cleanYear = s.year.trim();
+                const key = `${cleanName.toLowerCase()}_${cleanYear.toLowerCase()}`;
+
+                if (!studentMap[key]) {
+                    studentMap[key] = {
+                        name: cleanName,
+                        year: cleanYear,
+                        totalScore: Number(s.score) || 0,
+                        docIds: [s.id]
+                    };
+                } else {
+                    studentMap[key].totalScore += Number(s.score) || 0;
+                    studentMap[key].docIds.push(s.id);
+                }
+            });
+
+            let aggregatedList = Object.values(studentMap);
+
+            if (searchVal) {
+                aggregatedList = aggregatedList.filter(item => item.name.toLowerCase().includes(searchVal));
+            }
+            if (yearFilter !== 'ALL') {
+                aggregatedList = aggregatedList.filter(item => item.year.toLowerCase() === yearFilter.toLowerCase());
+            }
+
+            if (aggregatedList.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-500">No matching records found.</td></tr>`;
+                return;
+            }
+
+            aggregatedList.sort((a, b) => b.totalScore - a.totalScore).forEach(s => {
                 const tr = document.createElement('tr');
-                tr.className = "border-b border-white/5";
+                tr.className = "border-b border-white/5 hover:bg-white/5 transition";
+                const idsJson = escapeHtml(JSON.stringify(s.docIds));
                 tr.innerHTML = `
-                    <td class="p-2 text-white">${escapeHtml(s.name)}</td>
-                    <td class="p-2 text-slate-400">${s.year}</td>
-                    <td class="p-2 font-bold text-amber-400">${s.score}</td>
+                    <td class="p-2 text-white font-semibold">${escapeHtml(s.name)}</td>
+                    <td class="p-2 text-slate-400">${escapeHtml(s.year)}</td>
+                    <td class="p-2 font-black text-amber-400">${s.totalScore} pts</td>
                     <td class="p-2 text-right">
-                        <button onclick="deleteSingleScore('${s.id}')" class="text-rose-400 hover:text-rose-300">
-                            <i class="fa-solid fa-trash text-xs"></i>
+                        <button onclick='deleteGroupScores(idsJson,"{escapeHtml(s.name)}")' class="px-2.5 py-1 bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ml-auto">
+                            <i class="fa-solid fa-trash text-xs"></i> Delete
                         </button>
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
         }
-
-        async function deleteSingleScore(docId) {
-            if (db && docId) {
+        async function deleteGroupScores(docIds, name) {
+            if (db && docIds && docIds.length > 0) {
                 try {
-                    await deleteDoc(doc(db, 'scores', docId));
-                    showToast("Score record deleted.");
-                } catch(e){}
+                    for (const id of docIds) {
+                        if (id) await deleteDoc(doc(db, 'scores', id));
+                    }
+                    showToast(`Deleted all score entries for ${name}.`);
+                } catch(e) {
+                    showToast("Failed to delete score entries.", true);
+                }
             }
         }
-
         async function clearAllScores() {
             if (db && window.appData.scores) {
                 for (const s of window.appData.scores) {
@@ -779,7 +792,6 @@
                 showToast("All scores reset.");
             }
         }
-
         function openQuestionEditor(idx = null) {
             window.editingQuestionIndex = idx;
             if (idx !== null && window.appData.questions[idx]) {
@@ -799,12 +811,10 @@
             document.getElementById('question-editor-modal').classList.remove('hidden');
             document.getElementById('question-editor-modal').classList.add('flex');
         }
-
         function closeQuestionEditor() {
             document.getElementById('question-editor-modal').classList.add('hidden');
             document.getElementById('question-editor-modal').classList.remove('flex');
         }
-
         async function saveQuestionFromEditor() {
             const answer = document.getElementById('editor-answer').value.trim();
             if (!answer) {
@@ -816,17 +826,14 @@
                 const c = document.getElementById(`editor-clue-${i}`).value.trim();
                 clues.push(c || `Clue ${i}`);
             }
-
             const docId = (window.editingQuestionIndex !== null && window.appData.questions[window.editingQuestionIndex])
                 ? window.appData.questions[window.editingQuestionIndex].id
                 : 'q_' + Date.now();
-
             const newQuestionObj = { 
                 id: docId,
                 answer: answer, 
                 clues: clues 
             };
-
             if (db) {
                 try {
                     await setDoc(doc(db, 'questions', docId), newQuestionObj);
@@ -835,10 +842,8 @@
                     showToast("Error saving to database.", true);
                 }
             }
-
             closeQuestionEditor();
         }
-
         window.showScreen = showScreen;
         window.handleStartGame = handleStartGame;
         window.revealNextClue = revealNextClue;
@@ -846,18 +851,23 @@
         window.giveUpRound = giveUpRound;
         window.openAdminModal = openAdminModal;
         window.closeAdminModal = closeAdminModal;
-        window.verifyAdminPasscode = verifyAdminPasscode;
         window.switchAdminTab = switchAdminTab;
         window.openQuestionEditor = openQuestionEditor;
         window.closeQuestionEditor = closeQuestionEditor;
         window.saveQuestionFromEditor = saveQuestionFromEditor;
         window.deleteQuestion = deleteQuestion;
-        window.deleteSingleScore = deleteSingleScore;
+        window.deleteGroupScores = deleteGroupScores;
+        window.renderAdminScores = renderAdminScores;
         window.clearAllScores = clearAllScores;
-
-        window.addEventListener('load', () => {
+        window.addEventListener('DOMContentLoaded', () => {
             initFirebaseSync();
+            const btn = document.getElementById('unlock-admin-btn');
+            if (btn) {
+                btn.addEventListener('click', verifyAdminPasscode);
+            }
         });
     </script>
 </body>
 </html>
+
+
