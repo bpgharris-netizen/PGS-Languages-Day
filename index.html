@@ -251,12 +251,12 @@
                     🔒
                 </div>
                 <p class="text-xs text-slate-300 max-w-xs mx-auto">Enter passcode to manage questions and moderate scores.</p>
-                <div class="max-w-xs mx-auto space-y-3">
+                <form onsubmit="verifyAdminPasscode(event)" class="max-w-xs mx-auto space-y-3">
                     <input type="password" id="admin-pass-input" placeholder="Enter Admin Passcode" class="w-full glass-input rounded-xl px-4 py-2.5 text-center text-sm tracking-widest">
-                    <button id="unlock-admin-btn" type="button" class="w-full brand-gold-btn py-2.5 rounded-xl text-xs uppercase font-extrabold">
+                    <button id="unlock-admin-btn" type="submit" class="w-full brand-gold-btn py-2.5 rounded-xl text-xs uppercase font-extrabold">
                         Unlock Admin Access
                     </button>
-                </div>
+                </form>
             </div>
             <div id="admin-content" class="hidden space-y-6">
                 <div class="flex border-b border-white/10 text-xs">
@@ -354,6 +354,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        
         const firebaseConfig = {
             apiKey: "AIzaSyAh9t8mohM8biWaW2_3IbOuoZEIXIyQQkE",
             authDomain: "pgslanguagesday.firebaseapp.com",
@@ -363,14 +364,21 @@
             appId: "1:306068250159:web:c633603673b27546e170da",
             measurementId: "G-PEQD89WEXF"
         };
+
         const ADMIN_PASSCODE_HASH = "12d8a9df61a52fcbe46bdcd1e86dbfa66caeb5696d36e2d9213ef211e4f48efb";
+
         async function sha256Hex(text) {
-            const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
-            return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+            const data = new TextEncoder().encode(text);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
         }
-        async function verifyAdminPasscode() {
+
+        async function verifyAdminPasscode(event) {
+            if (event) event.preventDefault();
             const inputVal = document.getElementById('admin-pass-input').value.trim();
-            if (await sha256Hex(inputVal) === ADMIN_PASSCODE_HASH) {
+            const inputHash = await sha256Hex(inputVal);
+            if (inputHash === ADMIN_PASSCODE_HASH) {
                 document.getElementById('admin-gate').classList.add('hidden');
                 document.getElementById('admin-content').classList.remove('hidden');
                 renderAdminQuestions();
@@ -379,6 +387,7 @@
                 showToast("Incorrect Passcode!", true);
             }
         }
+
         window.appData = {
             questions: [],
             scores: []
@@ -387,6 +396,7 @@
         window.editingQuestionIndex = null;
         let db = null;
         let auth = null;
+
         async function initFirebaseSync() {
             try {
                 const app = initializeApp(firebaseConfig);
@@ -405,6 +415,7 @@
                         renderAdminQuestions();
                     }
                 }, (err) => console.error("Firestore error loading questions:", err));
+
                 const scoresCol = collection(db, 'scores');
                 onSnapshot(scoresCol, (snapshot) => {
                     const cloudScores = [];
@@ -419,6 +430,7 @@
                 console.error("Firebase init failed:", e);
             }
         }
+
         function showToast(message, isError = false) {
             const toast = document.getElementById('admin-toast');
             const msgEl = document.getElementById('toast-message');
@@ -436,6 +448,7 @@
             toast.classList.remove('hidden');
             setTimeout(() => toast.classList.add('hidden'), 3000);
         }
+
         function playAudioTone(type) {
             try {
                 const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -462,6 +475,7 @@
                 }
             } catch(e) {}
         }
+
         function showScreen(screenId) {
             ['screen-welcome', 'screen-game', 'screen-result', 'screen-leaderboard'].forEach(id => {
                 document.getElementById(id).classList.add('hidden');
@@ -471,6 +485,7 @@
                 renderLeaderboard();
             }
         }
+
         function handleStartGame(e) {
             e.preventDefault();
             const name = document.getElementById('student-name').value.trim();
@@ -480,7 +495,6 @@
                 showToast("No questions found in database!", true);
                 return;
             }
-            // Pick max 5 random questions for a 5-round game
             const shuffled = [...window.appData.questions].sort(() => Math.random() - 0.5);
             const gameRounds = shuffled.slice(0, 5);
             window.currentQuiz = {
@@ -494,10 +508,12 @@
             showScreen('screen-game');
             loadRound();
         }
+
         function setRoundLocked(state) {
             window.currentQuiz.locked = state;
             document.querySelectorAll('#game-card input, #game-card button').forEach(el => { el.disabled = state; });
         }
+
         function loadRound() {
             setRoundLocked(false);
             window.currentQuiz.cluesRevealed = 1;
@@ -508,6 +524,7 @@
             hideFeedback();
             renderClues();
         }
+
         function renderClues() {
             const round = window.currentQuiz.rounds[window.currentQuiz.currentRoundIdx];
             if (!round) return;
@@ -542,6 +559,7 @@
                 revealBtn.classList.remove('hidden');
             }
         }
+
         function revealNextClue() {
             if (window.currentQuiz.locked) return;
             if (window.currentQuiz.cluesRevealed < 5) {
@@ -549,6 +567,7 @@
                 renderClues();
             }
         }
+
         function submitAnswer(e) {
             e.preventDefault();
             if (window.currentQuiz.locked) return;
@@ -586,6 +605,7 @@
                 document.getElementById('guess-input').value = '';
             }
         }
+
         function giveUpRound() {
             if (window.currentQuiz.locked) return;
             const quiz = window.currentQuiz;
@@ -595,6 +615,7 @@
             showFeedback(`Round Forfeited (0 pts). The answer was "${round.answer}".`, 'wrong');
             setTimeout(() => { if (window.currentQuiz === quiz) nextRound(); }, 2000);
         }
+
         function showFeedback(msg, type) {
             const banner = document.getElementById('feedback-banner');
             banner.innerText = msg;
@@ -605,9 +626,11 @@
                 banner.classList.add('bg-rose-500/20', 'text-rose-300');
             }
         }
+
         function hideFeedback() {
             document.getElementById('feedback-banner').classList.add('hidden');
         }
+
         function nextRound() {
             window.currentQuiz.currentRoundIdx++;
             if (window.currentQuiz.currentRoundIdx < window.currentQuiz.rounds.length) {
@@ -616,6 +639,7 @@
                 finishQuiz();
             }
         }
+
         async function finishQuiz() {
             if (window.currentQuiz.finished) return;
             window.currentQuiz.finished = true;
@@ -636,6 +660,7 @@
             }
             showScreen('screen-result');
         }
+
         function renderLeaderboard() {
             const tbody = document.getElementById('leaderboard-table-body');
             tbody.innerHTML = '';
@@ -676,17 +701,21 @@
                 tbody.appendChild(tr);
             });
         }
+
         function escapeHtml(str) {
             return (str || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
         }
+
         function openAdminModal() {
             document.getElementById('admin-modal').classList.remove('hidden');
             document.getElementById('admin-modal').classList.add('flex');
         }
+
         function closeAdminModal() {
             document.getElementById('admin-modal').classList.add('hidden');
             document.getElementById('admin-modal').classList.remove('flex');
         }
+
         function switchAdminTab(tab) {
             if (tab === 'questions') {
                 document.getElementById('admin-tab-questions').classList.remove('hidden');
@@ -701,6 +730,7 @@
                 renderAdminScores();
             }
         }
+
         function renderAdminQuestions() {
             const container = document.getElementById('admin-questions-container');
             container.innerHTML = '';
@@ -725,6 +755,7 @@
                 container.appendChild(div);
             });
         }
+
         async function deleteQuestion(idx) {
             const q = window.appData.questions[idx];
             if (q && q.id && db) {
@@ -736,6 +767,7 @@
                 }
             }
         }
+
         function renderAdminScores() {
             const tbody = document.getElementById('admin-scores-tbody');
             tbody.innerHTML = '';
@@ -791,6 +823,7 @@
                 tbody.appendChild(tr);
             });
         }
+
         async function deleteGroupScores(docIds, name) {
             if (db && docIds && docIds.length > 0) {
                 try {
@@ -803,6 +836,7 @@
                 }
             }
         }
+
         async function clearAllScores() {
             if (db && window.appData.scores) {
                 for (const s of window.appData.scores) {
@@ -811,6 +845,7 @@
                 showToast("All scores reset.");
             }
         }
+
         function openQuestionEditor(idx = null) {
             window.editingQuestionIndex = idx;
             if (idx !== null && window.appData.questions[idx]) {
@@ -830,10 +865,12 @@
             document.getElementById('question-editor-modal').classList.remove('hidden');
             document.getElementById('question-editor-modal').classList.add('flex');
         }
+
         function closeQuestionEditor() {
             document.getElementById('question-editor-modal').classList.add('hidden');
             document.getElementById('question-editor-modal').classList.remove('flex');
         }
+
         async function saveQuestionFromEditor() {
             const answer = document.getElementById('editor-answer').value.trim();
             if (!answer) {
@@ -863,6 +900,7 @@
             }
             closeQuestionEditor();
         }
+
         window.showScreen = showScreen;
         window.handleStartGame = handleStartGame;
         window.revealNextClue = revealNextClue;
@@ -878,12 +916,10 @@
         window.deleteGroupScores = deleteGroupScores;
         window.renderAdminScores = renderAdminScores;
         window.clearAllScores = clearAllScores;
+        window.verifyAdminPasscode = verifyAdminPasscode;
+
         window.addEventListener('DOMContentLoaded', () => {
             initFirebaseSync();
-            const btn = document.getElementById('unlock-admin-btn');
-            if (btn) {
-                btn.addEventListener('click', verifyAdminPasscode);
-            }
         });
     </script>
 </body>
