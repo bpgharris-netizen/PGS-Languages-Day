@@ -363,7 +363,7 @@
             appId: "1:306068250159:web:c633603673b27546e170da",
             measurementId: "G-PEQD89WEXF"
         };
-        const ADMIN_PASSCODE_HASH = "fc13ee03b62fdf19510847abeb6785a8da328e27a25c741999001586ddd7ccb0";
+        const ADMIN_PASSCODE_HASH = "12d8a9df61a52fcbe46bdcd1e86dbfa66caeb5696d36e2d9213ef211e4f48efb";
         async function sha256Hex(text) {
             const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
             return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
@@ -489,24 +489,17 @@
                 rounds: gameRounds,
                 currentRoundIdx: 0,
                 cluesRevealed: 1,
-                totalScore: 0,
-                locked: false,
-                submitting: false
+                totalScore: 0
             };
             showScreen('screen-game');
             loadRound();
         }
         function setRoundLocked(state) {
-            if (window.currentQuiz) {
-                window.currentQuiz.locked = state;
-            }
+            window.currentQuiz.locked = state;
             document.querySelectorAll('#game-card input, #game-card button').forEach(el => { el.disabled = state; });
         }
         function loadRound() {
             setRoundLocked(false);
-            if (window.currentQuiz) {
-                window.currentQuiz.submitting = false;
-            }
             window.currentQuiz.cluesRevealed = 1;
             document.getElementById('hud-progress').innerText = `Round ${window.currentQuiz.currentRoundIdx + 1}/${window.currentQuiz.rounds.length}`;
             document.getElementById('hud-score').innerText = `${window.currentQuiz.totalScore} pts`;
@@ -530,13 +523,13 @@
                 if (isRevealed) {
                     clueBox.className = "p-3.5 rounded-2xl bg-slate-900/90 border border-amber-400/30 text-xs sm:text-sm text-slate-200 flex items-start gap-3 shadow-sm";
                     clueBox.innerHTML = `
-                        <span class="px-2 py-0.5 rounded bg-amber-400/20 text-amber-400 font-black text-[10px] shrink-0">HINT ${i+1} (${pointValues[i]} pts)</span>
+                        <span class="px-2 py-0.5 rounded bg-amber-400/20 text-amber-400 font-black text-[10px] shrink-0">HINT ${i + 1} (${pointValues[i]} pts)</span>
                         <span class="font-medium leading-relaxed">${round.clues ? (round.clues[i] || 'Hint locked.') : 'Hint locked.'}</span>
                     `;
                 } else {
                     clueBox.className = "p-3 rounded-2xl bg-slate-950/40 border border-white/5 text-xs text-slate-500 flex items-center justify-between font-medium";
                     clueBox.innerHTML = `
-                        <span>🔒 Hint ${i+1} Locked</span>
+                        <span>🔒 Hint ${i + 1} Locked</span>
                         <span class="text-[10px]">${pointValues[i]} pts</span>
                     `;
                 }
@@ -558,28 +551,16 @@
         }
         function submitAnswer(e) {
             e.preventDefault();
-            if (!window.currentQuiz || window.currentQuiz.locked || window.currentQuiz.submitting) return;
-            
-            window.currentQuiz.submitting = true;
+            if (window.currentQuiz.locked) return;
             const guess = document.getElementById('guess-input').value.trim().toLowerCase();
             const round = window.currentQuiz.rounds[window.currentQuiz.currentRoundIdx];
             const actualAnswer = round.answer.toLowerCase();
-            
-            if (!guess) {
-                window.currentQuiz.submitting = false;
-                return;
-            }
-            
+            if (!guess) return;
             const nowTs = Date.now();
-            if (nowTs - (window.currentQuiz.lastSubmitAt || 0) < 800) {
-                window.currentQuiz.submitting = false;
-                return;
-            }
+            if (nowTs - (window.currentQuiz.lastSubmitAt || 0) < 800) return;
             window.currentQuiz.lastSubmitAt = nowTs;
-            
             const pointValues = [50, 40, 30, 20, 10];
             const earnedPoints = pointValues[window.currentQuiz.cluesRevealed - 1];
-            
             if (guess === actualAnswer) {
                 const quiz = window.currentQuiz;
                 setRoundLocked(true);
@@ -603,12 +584,10 @@
                     showFeedback(`Incorrect guess. Keep trying, you have unlimited guesses on the last hint!`, 'wrong');
                 }
                 document.getElementById('guess-input').value = '';
-                window.currentQuiz.submitting = false;
             }
         }
         function giveUpRound() {
-            if (window.currentQuiz.locked || window.currentQuiz.submitting) return;
-            window.currentQuiz.submitting = true;
+            if (window.currentQuiz.locked) return;
             const quiz = window.currentQuiz;
             setRoundLocked(true);
             const round = quiz.rounds[quiz.currentRoundIdx];
@@ -717,7 +696,7 @@
             } else {
                 document.getElementById('admin-tab-questions').classList.add('hidden');
                 document.getElementById('admin-tab-scores').classList.remove('hidden');
-                document.getElementById('tab-btn-scores').className = "px-4 py-2 font-bold border-b-2 border-amber-400 text-amber-400";
+                document.getElementById('tab-btn-scores').className = "px-4 py-2 font-bold text-amber-400 border-b-2 border-amber-400";
                 document.getElementById('tab-btn-questions').className = "px-4 py-2 font-bold text-slate-400 border-b-2 border-transparent";
                 renderAdminScores();
             }
