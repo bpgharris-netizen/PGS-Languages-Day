@@ -95,7 +95,6 @@
                         Welcome to Languages Day 2026! In this game, your job is to figure out what the mystery language is. You will be given 5 hints, each hint more obvious than the last. Good Luck!
                     </p>
                 </div>
-
                 <!-- Prize & Cumulative Rules Callout -->
                 <div class="bg-amber-400/10 border border-amber-400/30 rounded-2xl p-4 text-left space-y-1.5">
                     <div class="text-xs font-black text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
@@ -105,7 +104,6 @@
                         This isn't a one time quiz, you can play as many times as you like! Points accumulate on the leaderboard. Just make sure you enter your <strong>exact same name and year group</strong> every time so your score stacks.
                     </p>
                 </div>
-
                 <form onsubmit="handleStartGame(event)" class="space-y-4 text-left pt-1">
                     <div>
                         <label for="student-name" class="block text-[11px] font-extrabold text-slate-400 uppercase tracking-wider mb-2">
@@ -306,7 +304,6 @@
                             </select>
                         </div>
                     </div>
-
                     <div class="max-h-60 overflow-y-auto border border-white/5 rounded-xl">
                         <table class="w-full text-left text-xs">
                             <thead>
@@ -357,6 +354,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        
         const firebaseConfig = {
             apiKey: "AIzaSyAh9t8mohM8biWaW2_3IbOuoZEIXIyQQkE",
             authDomain: "pgslanguagesday.firebaseapp.com",
@@ -366,10 +364,23 @@
             appId: "1:306068250159:web:c633603673b27546e170da",
             measurementId: "G-PEQD89WEXF"
         };
-        const ADMIN_PASSCODE = "1732PGS";
-        function verifyAdminPasscode() {
+
+        // SHA-256 hash of "1732PGS"
+        const ADMIN_PASSCODE_HASH = "328fb87edbf70d8a57ebfa4ea3a4792ec0f8a8bcddffb84fbcae497ec59b023f";
+
+        async function hashString(str) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(str);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        async function verifyAdminPasscode() {
             const inputVal = document.getElementById('admin-pass-input').value.trim();
-            if (inputVal === ADMIN_PASSCODE) {
+            const inputHash = await hashString(inputVal);
+
+            if (inputHash === ADMIN_PASSCODE_HASH) {
                 document.getElementById('admin-gate').classList.add('hidden');
                 document.getElementById('admin-content').classList.remove('hidden');
                 renderAdminQuestions();
@@ -378,6 +389,7 @@
                 showToast("Incorrect Passcode!", true);
             }
         }
+
         window.appData = {
             questions: [],
             scores: []
@@ -386,6 +398,7 @@
         window.editingQuestionIndex = null;
         let db = null;
         let auth = null;
+
         async function initFirebaseSync() {
             try {
                 const app = initializeApp(firebaseConfig);
@@ -482,7 +495,6 @@
             // Pick max 5 random questions for a 5-round game
             const shuffled = [...window.appData.questions].sort(() => Math.random() - 0.5);
             const gameRounds = shuffled.slice(0, 5);
-
             window.currentQuiz = {
                 studentName: name,
                 yearGroup: year,
@@ -496,7 +508,7 @@
         }
         function loadRound() {
             window.currentQuiz.cluesRevealed = 1;
-            document.getElementById('hud-progress').innerText = `Round window.currentQuiz.currentRoundIdx+1/{window.currentQuiz.rounds.length}`;
+            document.getElementById('hud-progress').innerText = `Round ${window.currentQuiz.currentRoundIdx + 1}/${window.currentQuiz.rounds.length}`;
             document.getElementById('hud-score').innerText = `${window.currentQuiz.totalScore} pts`;
             document.getElementById('guess-input').value = '';
             document.getElementById('guess-input').focus();
@@ -518,7 +530,7 @@
                 if (isRevealed) {
                     clueBox.className = "p-3.5 rounded-2xl bg-slate-900/90 border border-amber-400/30 text-xs sm:text-sm text-slate-200 flex items-start gap-3 shadow-sm";
                     clueBox.innerHTML = `
-                        <span class="px-2 py-0.5 rounded bg-amber-400/20 text-amber-400 font-black text-[10px] shrink-0">HINT i+1({pointValues[i]} pts)</span>
+                        <span class="px-2 py-0.5 rounded bg-amber-400/20 text-amber-400 font-black text-[10px] shrink-0">HINT ${i+1} (${pointValues[i]} pts)</span>
                         <span class="font-medium leading-relaxed">${round.clues ? (round.clues[i] || 'Hint locked.') : 'Hint locked.'}</span>
                     `;
                 } else {
@@ -554,7 +566,7 @@
             if (guess === actualAnswer) {
                 window.currentQuiz.totalScore += earnedPoints;
                 playAudioTone('correct');
-                showFeedback(`Correct! It was round.answer(+{earnedPoints} pts)`, 'correct');
+                showFeedback(`Correct! It was ${round.answer} (+${earnedPoints} pts)`, 'correct');
                 document.getElementById('hud-score').innerText = `${window.currentQuiz.totalScore} pts`;
                 setTimeout(nextRound, 1500);
             } else {
@@ -712,22 +724,18 @@
         function renderAdminScores() {
             const tbody = document.getElementById('admin-scores-tbody');
             tbody.innerHTML = '';
-
             if (!window.appData.scores || window.appData.scores.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-500">No scores found.</td></tr>`;
                 return;
             }
-
             const searchVal = (document.getElementById('admin-search-name')?.value || '').trim().toLowerCase();
             const yearFilter = document.getElementById('admin-filter-year')?.value || 'ALL';
-
             const studentMap = {};
             window.appData.scores.forEach(s => {
                 if (!s.name || !s.year) return;
                 const cleanName = s.name.trim();
                 const cleanYear = s.year.trim();
                 const key = `${cleanName.toLowerCase()}_${cleanYear.toLowerCase()}`;
-
                 if (!studentMap[key]) {
                     studentMap[key] = {
                         name: cleanName,
@@ -740,21 +748,17 @@
                     studentMap[key].docIds.push(s.id);
                 }
             });
-
             let aggregatedList = Object.values(studentMap);
-
             if (searchVal) {
                 aggregatedList = aggregatedList.filter(item => item.name.toLowerCase().includes(searchVal));
             }
             if (yearFilter !== 'ALL') {
                 aggregatedList = aggregatedList.filter(item => item.year.toLowerCase() === yearFilter.toLowerCase());
             }
-
             if (aggregatedList.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-500">No matching records found.</td></tr>`;
                 return;
             }
-
             aggregatedList.sort((a, b) => b.totalScore - a.totalScore).forEach(s => {
                 const tr = document.createElement('tr');
                 tr.className = "border-b border-white/5 hover:bg-white/5 transition";
@@ -764,10 +768,11 @@
                     <td class="p-2 text-slate-400">${escapeHtml(s.year)}</td>
                     <td class="p-2 font-black text-amber-400">${s.totalScore} pts</td>
                     <td class="p-2 text-right">
-                        <button onclick='deleteGroupScores(idsJson,"{escapeHtml(s.name)}")' class="px-2.5 py-1 bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ml-auto">
+                        <button onclick='deleteGroupScores($idsJson,"${escapeHtml(s.name)}")' class="px-2.5 py-1 bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ml-auto">
                             <i class="fa-solid fa-trash text-xs"></i> Delete
                         </button>
                     </td>
+                </tr>
                 `;
                 tbody.appendChild(tr);
             });
@@ -836,7 +841,7 @@
             };
             if (db) {
                 try {
-                    await setDoc(doc(db, 'questions', docId), newQuestionObj);
+                    await setDoc(doc(db, 'scores', docId), newQuestionObj);
                     showToast("Saved directly to Firestore!");
                 } catch(e) {
                     showToast("Error saving to database.", true);
@@ -844,6 +849,7 @@
             }
             closeQuestionEditor();
         }
+
         window.showScreen = showScreen;
         window.handleStartGame = handleStartGame;
         window.revealNextClue = revealNextClue;
@@ -869,5 +875,3 @@
     </script>
 </body>
 </html>
-
-
