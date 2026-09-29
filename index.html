@@ -364,7 +364,37 @@
             measurementId: "G-PEQD89WEXF"
         };
 
-        const ADMIN_PASSCODE = "";
+        // SHA-256 hash of the admin passcode (not the plaintext passcode itself).
+        // This only obscures the passcode from casual view-source; it is NOT a
+        // real security boundary on its own — see Firestore Security Rules note.
+        const ADMIN_PASSCODE_HASH = "fc13ee03b62fdf19510847abeb6785a8da328e27a25c741999001586ddd7ccb0";
+
+        async function sha256Hex(text) {
+            const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+            return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        const ADMIN_LOCKOUT_KEY = 'admin_lockout_until';
+        const ADMIN_ATTEMPTS_KEY = 'admin_failed_attempts';
+
+        function getLockoutRemainingMs() {
+            const until = parseInt(sessionStorage.getItem(ADMIN_LOCKOUT_KEY) || '0', 10);
+            return Math.max(0, until - Date.now());
+        }
+
+        function registerFailedAttempt() {
+            const attempts = (parseInt(sessionStorage.getItem(ADMIN_ATTEMPTS_KEY) || '0', 10)) + 1;
+            sessionStorage.setItem(ADMIN_ATTEMPTS_KEY, String(attempts));
+            if (attempts >= 5) {
+                const backoffMs = Math.min(30000 * Math.pow(2, attempts - 5), 5 * 60 * 1000);
+                sessionStorage.setItem(ADMIN_LOCKOUT_KEY, String(Date.now() + backoffMs));
+            }
+        }
+
+        function clearFailedAttempts() {
+            sessionStorage.removeItem(ADMIN_ATTEMPTS_KEY);
+            sessionStorage.removeItem(ADMIN_LOCKOUT_KEY);
+        }
 
         // COMPREHENSIVE BAD WORDS LIST 
         const BLOCKED_TERMS = [
@@ -415,14 +445,25 @@
         let isSubmitting = false;
         let hasSubmittedFinalScore = false;
 
-        window.verifyAdminPasscode = function() {
+        window.verifyAdminPasscode = async function() {
+            const remainingMs = getLockoutRemainingMs();
+            if (remainingMs > 0) {
+                showToast(`Too many attempts. Try again in ${Math.ceil(remainingMs / 1000)}s.`, true);
+                return;
+            }
+
             const inputVal = document.getElementById('admin-pass-input').value.trim();
-            if (inputVal === ADMIN_PASSCODE) {
+            const inputHash = await sha256Hex(inputVal);
+
+            if (inputHash === ADMIN_PASSCODE_HASH) {
+                clearFailedAttempts();
                 document.getElementById('admin-gate').classList.add('hidden');
                 document.getElementById('admin-content').classList.remove('hidden');
                 renderAdminQuestions();
                 renderAdminScores();
             } else {
+                registerFailedAttempt();
+                document.getElementById('admin-pass-input').value = '';
                 showToast("Incorrect Passcode!", true);
             }
         };
