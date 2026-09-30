@@ -101,7 +101,7 @@
                         <span>🍫 Chocolate Prize Available!</span>
                     </div>
                     <p class="text-xs text-slate-300 leading-relaxed">
-                        This isn't a one time quiz, you can play as many times as you like! Points accumulate on the leaderboard. The person in 1st place at 15:45 will be declared the winner, find Benji Harris (with an Australian flag) by the arch to claim your prize.
+                        This isn't a one time quiz, you can play as many times as you like! Points accumulate on the leaderboard. Just make sure you enter your <strong>exact same name and year group</strong> every time so your score stacks.
                     </p>
                 </div>
                 <form onsubmit="handleStartGame(event)" class="space-y-4 text-left pt-1">
@@ -211,7 +211,7 @@
                 <div class="flex flex-wrap justify-between items-center gap-3 border-b border-white/10 pb-4">
                     <div>
                         <h2 class="text-xl font-black text-white flex items-center gap-2">
-                            🏆 School Leaderboard
+                            🏆 Global School Leaderboard
                         </h2>
                         <p class="text-xs text-slate-400">Live cumulative rankings across the School</p>
                     </div>
@@ -292,7 +292,7 @@
                         </div>
                         <div>
                             <select id="admin-filter-year" onchange="renderAdminScores()" class="w-full glass-input rounded-xl px-3 py-2 text-xs">
-                                <option value="ALL">All Year Groups </option>
+                                <option value="ALL">All Year Groups</option>
                                 <option value="Year 7">Year 7</option>
                                 <option value="Year 8">Year 8</option>
                                 <option value="Year 9">Year 9</option>
@@ -555,7 +555,7 @@
                 window.currentQuiz.submitting = false;
             }
             window.currentQuiz.cluesRevealed = 1;
-            document.getElementById('hud-progress').innerText = `Round window.currentQuiz.currentRoundIdx+1/{window.currentQuiz.rounds.length}`;
+            document.getElementById('hud-progress').innerText = `Round ${window.currentQuiz.currentRoundIdx + 1}/${window.currentQuiz.rounds.length}`;
             document.getElementById('hud-score').innerText = `${window.currentQuiz.totalScore} pts`;
             document.getElementById('guess-input').value = '';
             document.getElementById('guess-input').focus();
@@ -577,13 +577,13 @@
                 if (isRevealed) {
                     clueBox.className = "p-3.5 rounded-2xl bg-slate-900/90 border border-amber-400/30 text-xs sm:text-sm text-slate-200 flex items-start gap-3 shadow-sm";
                     clueBox.innerHTML = `
-                        <span class="px-2 py-0.5 rounded bg-amber-400/20 text-amber-400 font-black text-[10px] shrink-0">HINT i+1({pointValues[i]} pts)</span>
+                        <span class="px-2 py-0.5 rounded bg-amber-400/20 text-amber-400 font-black text-[10px] shrink-0">HINT ${i + 1} (${pointValues[i]} pts)</span>
                         <span class="font-medium leading-relaxed">${round.clues ? (round.clues[i] || 'Hint locked.') : 'Hint locked.'}</span>
                     `;
                 } else {
                     clueBox.className = "p-3 rounded-2xl bg-slate-950/40 border border-white/5 text-xs text-slate-500 flex items-center justify-between font-medium";
                     clueBox.innerHTML = `
-                        <span>🔒 Hint ${i+1} Locked</span>
+                        <span>🔒 Hint ${i + 1} Locked</span>
                         <span class="text-[10px]">${pointValues[i]} pts</span>
                     `;
                 }
@@ -636,7 +636,7 @@
                     quiz.totalScore += earnedPoints;
                 }
                 playAudioTone('correct');
-                showFeedback(`Correct! It was round.answer(+{earnedPoints} pts)`, 'correct');
+                showFeedback(`Correct! It was ${round.answer} (+${earnedPoints} pts)`, 'correct');
                 document.getElementById('hud-score').innerText = `${quiz.totalScore} pts`;
                 setTimeout(() => { if (window.currentQuiz === quiz) nextRound(); }, 1500);
             } else {
@@ -851,7 +851,7 @@
                     <td class="p-2 text-slate-400">${escapeHtml(s.year)}</td>
                     <td class="p-2 font-black text-amber-400">${s.totalScore} pts</td>
                     <td class="p-2 text-right">
-                        <button onclick='deleteGroupScores(idsJson,{escapeHtml(JSON.stringify(s.name)).replace(/'/g, "&#39;")})' class="px-2.5 py-1 bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ml-auto">
+                        <button onclick='deleteGroupScores(${idsJson}, ${escapeHtml(JSON.stringify(s.name)).replace(/'/g, "&#39;")})' class="px-2.5 py-1 bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ml-auto">
                             <i class="fa-solid fa-trash text-xs"></i> Delete
                         </button>
                     </td>
@@ -956,5 +956,3 @@
     </script>
 </body>
 </html>
-
-
