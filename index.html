@@ -363,7 +363,7 @@
             appId: "1:306068250159:web:c633603673b27546e170da",
             measurementId: "G-PEQD89WEXF"
         };
-        const ADMIN_PASSCODE_HASH = "fc13ee03b62fdf19510847abeb6785a8da328e27a25c741999001586ddd7ccb0";
+        const ADMIN_PASSCODE_HASH = "f22222d5842209d64b23be11b5f2a4fb218301c3d1740066bd8465210f9b0787";
         async function sha256Hex(text) {
             const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
             return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
@@ -909,6 +909,3 @@
     </script>
 </body>
 </html>
-
-
-
