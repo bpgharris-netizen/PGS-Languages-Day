@@ -364,6 +364,43 @@
             measurementId: "G-PEQD89WEXF"
         };
         const ADMIN_PASSCODE_HASH = "9b8c4c9103cc0d554669da9ae62115fa96ba95d51cfa38e4956aded439a2c0b6";
+
+        // Advanced Name Validation & Content Moderation Filter
+        function validateStudentName(name) {
+            if (!name || typeof name !== 'string') return { valid: false, reason: "Please enter a valid name." };
+            const cleanStr = name.trim();
+            if (cleanStr.length < 2) return { valid: false, reason: "Name is too short." };
+            if (cleanStr.length > 35) return { valid: false, reason: "Name must be under 35 characters." };
+
+            // Allow Unicode letters, spaces, hyphens, and apostrophes (supports actual names like Renée, O'Connor, Smith-Jones)
+            const validNameRegex = /^[\p{L}\s'\-]+$/u;
+            if (!validNameRegex.test(cleanStr)) {
+                return { valid: false, reason: "Names should only contain letters, spaces, hyphens, or apostrophes." };
+            }
+
+            // Standardize normalization to catch l33tsp34k or hidden profanity tricks
+            let normalized = cleanStr.toLowerCase()
+                .replace(/0/g, 'o').replace(/1/g, 'i').replace(/3/g, 'e')
+                .replace(/4/g, 'a').replace(/5/g, 's').replace(/\$/g, 's')
+                .replace(/@/g, 'a').replace(/!/g, 'i').replace(/7/g, 't');
+
+            // Exact forbidden words / offensive phrases (matching with word boundaries to avoid Scunthorpe problem)
+            const forbiddenPatterns = [
+                /\b(fuck|fucker|fucking|fuk|fck|nigger|nigga|cunt|bitch|bastard|dick|cock|pussy|whore|slut|twat|wanker|prick|asshole|motherfucker)\b/i,
+                /\b(shit|shite|penis|vagina|retard|spastic|homo|fag|faggot|kike|chink|spic)\b/i,
+                /\b(hitler|nazi|stalin|terrorist|jihad|isis|porn|sex)\b/i,
+                /\b(admin|moderator|system|root|null|undefined)\b/i
+            ];
+
+            for (const pattern of forbiddenPatterns) {
+                if (pattern.test(normalized) || pattern.test(cleanStr)) {
+                    return { valid: false, reason: "Please enter a real, appropriate name." };
+                }
+            }
+
+            return { valid: true };
+        }
+
         function sha256Fallback(str) {
             const bytes = Array.from(new TextEncoder().encode(str));
             const primes = [];
@@ -433,7 +470,6 @@
         window.currentQuiz = null;
         window.editingQuestionIndex = null;
         let sessionPlayedIds = new Set();
-
         // Standard Fisher-Yates shuffle algorithm for unbiased random ordering
         function shuffleArray(array) {
             const arr = [...array];
@@ -443,7 +479,6 @@
             }
             return arr;
         }
-
         let db = null;
         let auth = null;
         async function initFirebaseSync() {
@@ -535,6 +570,14 @@
             const name = document.getElementById('student-name').value.trim();
             const year = document.getElementById('student-year').value;
             if (!name || !year) return;
+
+            // Run name through the content filter
+            const check = validateStudentName(name);
+            if (!check.valid) {
+                showToast(check.reason, true);
+                return;
+            }
+
             if (!window.appData.questions || window.appData.questions.length === 0) {
                 showToast("No questions found in database!", true);
                 return;
@@ -548,15 +591,12 @@
                 sessionPlayedIds.clear();
                 availableQuestions = [...window.appData.questions];
             }
-
             // Unbiased Fisher-Yates random shuffle
             const shuffled = shuffleArray(availableQuestions);
             const numRounds = Math.min(5, shuffled.length);
             const gameRounds = shuffled.slice(0, numRounds);
-
             // Record selected questions to prevent repetition in subsequent games
             gameRounds.forEach(q => sessionPlayedIds.add(q.id));
-
             window.currentQuiz = {
                 studentName: name,
                 yearGroup: year,
