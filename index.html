@@ -534,20 +534,24 @@
             const year = document.getElementById('student-year').value;
             if (!name || !year) return;
 
-            // Comprehensive word filter
+            // Strict profanity & inappropriate term list
             const forbiddenWords = [
+                "fuck", "shit", "bitch", "cunt", "ass", "asshole", "dick", "pussy", 
+                "cock", "prick", "whore", "slut", "bastard", "damn", "hell", "retard", 
+                "nigger", "faggot", "dyke", "tranny", "chink", "spic", "kyke", "wog", 
                 "hate", "ugly", "stupid", "idiot", "dumb", "loser", "jerk", "moron", 
                 "fool", "trash", "crap", "suck", "sucks", "shut up", "fat", "pig", 
-                "bastard", "bitch", "damn", "hell", "shit", "fuck", "ass", "asshole", 
-                "dick", "pussy", "cock", "cunt", "prick", "whore", "slut", "retard", 
-                "nigger", "faggot", "dyke", "tranny", "chink", "spic", "kyke", "wog", 
                 "kill", "die", "death", "murder", "nazi", "hitler", "racist", "terrorist",
                 "scum", "creep", "freak", "lame", "weirdo", "douche", "douchebag", "piss"
             ];
 
-            const nameLower = name.toLowerCase();
+            const nameLower = name.toLowerCase().trim();
+            // Clean out special punctuation for fuzzy pattern matching (e.g., f.u.c.k or f-u-c-k)
+            const cleanedName = nameLower.replace(/[^a-z0-9]/g, '');
+
             const containsForbidden = forbiddenWords.some(word => {
-                const regex = new RegExp(`\\b${word}\\b`, 'i');
+                if (nameLower.includes(word) || cleanedName.includes(word)) return true;
+                const regex = new RegExp(`(^|\\b|\\s)${word}($|\\b|\\s)`, 'i');
                 return regex.test(nameLower);
             });
 
