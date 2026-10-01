@@ -628,11 +628,113 @@
                 renderLeaderboard();
             }
         }
+        // ===== NAME FILTER =====
+        // Whole-word matches (checked against each word in the name)
+        const BLOCKED_WORDS = new Set([
+            // --- swearing / vulgar ---
+            "fuck","fucker","fuckers","fucking","fucked","fucks","fuk","fuking","fck","fcuk","fuq","fvck","fvk","phuck","motherfucker","mofo",
+            "shit","shits","shitty","shite","shitting","shitter","bullshit","crap","crappy","craps","damn","damned","dammit","goddamn","goddamned","hell","hellish",
+            "bastard","bastards","bitch","bitches","bitchy","biatch","bich","bollocks","bollock","bugger","bloody","blimey",
+            "arse","arses","ass","asses","asshole","assholes","asshat","jackass","dumbass","fatass",
+            "dick","dicks","dickhead","dickheads","cock","cocks","cockhead","prick","pricks","twat","twats","wanker","wankers","wank","wanking","tosser","tossers",
+            "knob","knobhead","bellend","minge","cunt","cunts","pussy","pussies","vagina","vag","penis","boob","boobs","tit","tits","titty","titties","balls","ballsack","nutsack","testicle","testicles",
+            "anus","anal","butthole","poop","poo","poos","pee","piss","pissed","pisser","turd","turds","fart","farts","fartface","jizz","cum","cumshot","semen","sperm","orgasm","masturbate","masturbation",
+            "blowjob","handjob","rimjob","dildo","boner","erection","horny","sex","sexy","sexual","sexting","porn","porno","pornhub","nude","nudes","naked","milf","bondage",
+            "slut","sluts","slutty","whore","whores","hoe","hoes","skank","skanky","thot","hooker","prostitute","pimp","escort",
+            "pedo","paedo","pedophile","paedophile","paedophilia","pedophilia","rapist","rape","raped","raping","molest","molester","incest","groomer",
+            "stfu","wtf","gtfo","omfg","ffs","fml","kys",
+            // --- slurs / hateful terms ---
+            "nigger","niggers","nigga","niggas","nigguh","nigg","negro","coon","coons","spic","spick","spics","wetback","beaner","chink","chinks","gook","gooks","paki","pakis","kike","kikes","kyke","yid","yids",
+            "towelhead","raghead","sandnigger","pikey","gyppo","gypo","retard","retarded","retards","spastic","spaz","spazz","mongoloid","cripple","cripples","midget","midgets",
+            "tranny","trannie","shemale","faggot","faggots","fag","fags","faggy","dyke","dykes","homo","homos","lesbo","poof","poofter","paki","coolie","jap","terrorist",
+            "nazi","nazis","hitler","heil","kkk","isis","swastika","fascist","genocide",
+            // --- hateful / negative / insulting (not always "bad" words) ---
+            "hate","hates","hated","hater","haters","hating","hatred","hateful","dislike","dislikes","disliked","despise","despised","loathe","loathes","detest","abhor",
+            "ugly","uglier","ugliest","stupid","stupidest","stupidity","dumb","dumber","dumbest","dummy","idiot","idiots","idiotic","moron","morons","moronic","imbecile","dunce","fool","fools","foolish","clown","clowns","bozo",
+            "loser","losers","lame","lamer","lamest","trash","trashy","garbage","rubbish","worthless","useless","pathetic","hopeless","disgusting","disgust","gross","nasty","vile","horrid","horrible","terrible","awful","dreadful","atrocious",
+            "worst","worse","suck","sucks","sucked","sucker","suckers","sucky","bad","boring","bore","annoying","annoy","irritating","obnoxious","rude","cruel","evil","bully","bullies","bullying",
+            "fat","fatty","fatso","chubby","obese","skinny","pig","pigs","piggy","maggot","cockroach","pest","vermin",
+            "freak","freaks","freakish","weirdo","weird","creep","creepy","psycho","psychopath","crazy","insane","mental","lunatic","maniac","sicko","pervert","perv","scum","scumbag","slob","jerk","jerks","douche","douchebag",
+            "dork","nerd","dweeb","wimp","coward","wuss","pansy","sissy","failure","failures","fail","failed","fails","flop","noob","noobs","liar","cheat","cheater","thief","snitch","toxic","cancer","aids","gross",
+            "die","dies","dying","dead","death","deadly","kill","kills","killed","killer","killers","killing","murder","murderer","murdered","suicide","suicidal","stab","stabbing","shoot","shooter","shooting","bomb","bomber","terror","terrorism",
+            "abuse","abuser","torture","slave","slavery","devil","satan","satanic","demon","demons","hellhole","curse","cursed","doom","hurt","hurts","punch","slap","attack","enemy","enemies","stink","stinks","stinky","smelly","smell","rotten","filthy","dirty","disgrace","shameful","tragic","miserable","depressed","hell","hates",
+            // --- other languages (Languages Day!) ---
+            "merde","putain","pute","salope","salaud","connard","connasse","encule","enculer","nique","niquer","batard","foutre","ordure","degueulasse","moche","deteste","haine",
+            "puta","puto","putas","mierda","cabron","cabrona","pendejo","pendeja","culero","joder","jodete","gilipollas","hijueputa","marica","maricon","verga","chingar","chingada","chinga","pinche","zorra","estupido","estupida","idiota","imbecil","tonto","tonta","feo","fea","odio","odiar","basura","perdedor",
+            "scheisse","scheiss","arschloch","arsch","wichser","hurensohn","fotze","schlampe","schwuchtel","depp","trottel","blod","dumm","hasslich","hass","hassen","doof","verlierer","spast",
+            "cazzo","vaffanculo","stronzo","stronza","merda","puttana","troia","coglione","minchia","fica","figa","brutto","odiare","cretino","idiota","vaffa","porco","schifo",
+            "caralho","foda","porra","buceta","viado","filhodaputa","feio","burro","lixo","odeio",
+            "kut","klootzak","hoer","kanker","tering","tyfus","godverdomme","lul","lelijk","haat","sukkel","eikel",
+            "blyat","blyad","suka","pizdec","pizda","khuy","gandon","mudak","debil","ublyudok",
+            "caonima","shabi","wangba","chutiya","madarchod","behenchod","bhenchod","gandu","harami","bhosdike",
+            "baka","kuso","chikusho","kimoi","urusai","bakayaro","sharmouta","sharmoota","kelb","himar"
+        ]);
+        // Strong evasion-proof fragments (checked inside the whole name with spaces/symbols removed)
+        const BLOCKED_FRAGMENTS = [
+            "fuck","phuck","nigger","nigga","bitch","whore","wanker","bastard","asshole","arsehole","dickhead","cocksuck","bullshit","shithead","motherfuck","faggot","retard","paedo","dumbass","jackass","blowjob","handjob","pussy","hitler",
+            "stupid","idiot","dislike","despise","hatred","worthless","pathetic","useless","garbage","disgusting",
+            "ihate","hateyou","hatey0u","shutup","fuckyou","killyou","killyourself","killmyself","yourugly","youstink","yousuck","youarestupid","gokill","godie","diedie"
+        ];
+        const LEET_MAP = { "0":"o","3":"e","4":"a","5":"s","7":"t","8":"b","@":"a","$":"s","!":"i","+":"t","|":"i","\u20ac":"e","\u00a3":"l" };
+        function filterNormalize(str, oneAs) {
+            let s = String(str || "").toLowerCase().replace(/\u00df/g, "ss");
+            s = s.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            s = s.replace(/[0345 78@$!+|\u20ac\u00a3]/g, ch => LEET_MAP[ch] || ch);
+            s = s.replace(/1/g, oneAs);
+            return s;
+        }
+        function collapseRuns3(t) { return t.replace(/(.)\1{2,}/g, "$1"); }
+        function collapseAll(t) { return t.replace(/(.)\1+/g, "$1"); }
+        const BLOCKED_COLLAPSED = new Set([...BLOCKED_WORDS].filter(w => w.length >= 4).map(collapseAll).filter(w => w.length >= 3));
+        const BLOCKED_FRAGMENTS_COLLAPSED = BLOCKED_FRAGMENTS.map(collapseAll);
+        function tokenIsBlocked(t) {
+            if (!t) return false;
+            if (BLOCKED_WORDS.has(t)) return true;
+            const c3 = collapseRuns3(t);
+            if (BLOCKED_WORDS.has(c3)) return true;
+            const ca = collapseAll(t);
+            if (t.length >= 4 && ca !== t && BLOCKED_COLLAPSED.has(ca)) return true;
+            return false;
+        }
+        function isNameBlocked(name) {
+            if (!name) return false;
+            for (const oneAs of ["i", "l"]) {
+                const v = filterNormalize(name, oneAs);
+                // 1) words split on anything that isn't a letter ("f*ck" -> f, ck)
+                const split = v.split(/[^a-z]+/).filter(Boolean);
+                // 2) words with symbols stripped inside them ("f*ck" -> fck)
+                const stripped = v.split(/\s+/).map(w => w.replace(/[^a-z]/g, "")).filter(Boolean);
+                // 3) runs of single letters joined ("f u c k" -> fuck)
+                const joined = [];
+                let run = "";
+                for (const w of split) {
+                    if (w.length === 1) { run += w; }
+                    else { if (run.length > 1) joined.push(run); run = ""; }
+                }
+                if (run.length > 1) joined.push(run);
+                for (const t of [...split, ...stripped, ...joined]) {
+                    if (tokenIsBlocked(t)) return true;
+                }
+                // 4) fragments inside the whole name with everything but letters removed
+                const squashed = v.replace(/[^a-z]/g, "");
+                const squashedCollapsed = collapseAll(squashed);
+                for (let i = 0; i < BLOCKED_FRAGMENTS.length; i++) {
+                    if (squashed.includes(BLOCKED_FRAGMENTS[i])) return true;
+                    if (squashedCollapsed.includes(BLOCKED_FRAGMENTS_COLLAPSED[i])) return true;
+                }
+            }
+            return false;
+        }
+        // ===== END NAME FILTER =====
         function handleStartGame(e) {
             e.preventDefault();
             const name = document.getElementById('student-name').value.trim();
             const year = document.getElementById('student-year').value;
             if (!name || !year) return;
+            if (isNameBlocked(name)) {
+                showToast("That name isn't allowed. Please enter your real name.", true);
+                return;
+            }
             if (!window.appData.questions || window.appData.questions.length === 0) {
                 showToast("No questions found in database!", true);
                 return;
@@ -836,6 +938,7 @@
             const totalScores = {};
             window.appData.scores.forEach(s => {
                 if (!s.name || !s.year) return;
+                if (isNameBlocked(s.name)) return;
                 const cleanName = s.name.trim();
                 const key = `${cleanName.toLowerCase()}_${s.year.trim().toLowerCase()}`;
                 
